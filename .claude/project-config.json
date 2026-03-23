@@ -1,0 +1,58 @@
+{
+  "project": "ai-native-scaffold",
+  "version": "1.0",
+  "_comment": "项目角色配置 - 用于 AI 原生开发方法论",
+  "roles": {
+    "fullstack": {
+      "name": "全栈工程师",
+      "description": "同时负责前端和后端开发",
+      "focus": ["src/frontend", "src/backend"],
+      "memory": "memory/roles/fullstack"
+    },
+    "frontend": {
+      "name": "前端工程师",
+      "description": "专注于前端开发",
+      "focus": ["src/frontend"],
+      "memory": "memory/roles/frontend"
+    },
+    "backend": {
+      "name": "后端工程师",
+      "description": "专注于后端开发",
+      "focus": ["src/backend"],
+      "memory": "memory/roles/backend"
+    },
+    "pm": {
+      "name": "产品经理",
+      "description": "产品规划与需求管理",
+      "focus": ["docs/01_product"],
+      "memory": "memory/roles/pm"
+    },
+    "qa": {
+      "name": "测试工程师",
+      "description": "质量保证与测试",
+      "focus": ["tests"],
+      "memory": "memory/roles/qa"
+    },
+    "devops": {
+      "name": "运维工程师",
+      "description": "部署与运维",
+      "focus": ["ops"],
+      "memory": "memory/roles/devops"
+    },
+    "architect": {
+      "name": "架构师",
+      "description": "系统架构设计",
+      "focus": ["docs/03_architecture"],
+      "memory": "memory/roles/architect"
+    }
+  },
+  "_usage": {
+    "description": "使用说明",
+    "step1": "在下方 currentRole 填写当前角色",
+    "step2": "AI 启动时会读取此配置",
+    "step3": "使用 /switch-role <role> 切换角色"
+  },
+  "currentRole": "fullstack",
+  "gitUser": "chenguangwei@unisound.com",
+  "team": "development"
+}
