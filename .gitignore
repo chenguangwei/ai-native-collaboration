@@ -61,3 +61,6 @@ uploads/
 tmp/
 temp/
 *.tmp
+
+# 本地 AI 配置覆盖（不提交）
+CLAUDE.local.md
