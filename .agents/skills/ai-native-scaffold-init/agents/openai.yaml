@@ -1,0 +1,7 @@
+interface:
+  display_name: "Ai Native Scaffold Init"
+  short_description: "ai-native-scaffold-init skill for AI-native development workflow"
+  brand_color: "#6366F1"
+  default_prompt: "Apply the ai-native-scaffold-init workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

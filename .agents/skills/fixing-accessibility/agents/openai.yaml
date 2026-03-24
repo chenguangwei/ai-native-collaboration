@@ -1,0 +1,7 @@
+interface:
+  display_name: "Fixing Accessibility"
+  short_description: "Audit and fix HTML accessibility issues including ARIA labels, keyboard navigation, focus management, color contrast, and form errors. Use when adding interactive controls, forms, dialogs, or reviewin"
+  brand_color: "#F59E0B"
+  default_prompt: "Apply the fixing-accessibility workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

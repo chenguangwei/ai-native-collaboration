@@ -1,0 +1,7 @@
+interface:
+  display_name: "Delight"
+  short_description: "Add moments of joy, personality, and unexpected touches that make interfaces memorable and enjoyable to use. Elevates functional to delightful."
+  brand_color: "#EC4899"
+  default_prompt: "Apply the delight workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

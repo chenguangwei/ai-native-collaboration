@@ -1,0 +1,7 @@
+interface:
+  display_name: "Writing Skills"
+  short_description: "Use when creating new skills, editing existing skills, or verifying skills work before deployment"
+  brand_color: "#64748B"
+  default_prompt: "Apply the writing-skills workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

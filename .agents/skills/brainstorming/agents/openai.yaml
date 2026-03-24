@@ -1,0 +1,7 @@
+interface:
+  display_name: "Brainstorming"
+  short_description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation."
+  brand_color: "#8B5CF6"
+  default_prompt: "Apply the brainstorming workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

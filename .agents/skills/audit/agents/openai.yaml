@@ -1,0 +1,7 @@
+interface:
+  display_name: "Audit"
+  short_description: "Perform comprehensive audit of interface quality across accessibility, performance, theming, and responsive design. Generates detailed report of issues with severity ratings and recommendations."
+  brand_color: "#EC4899"
+  default_prompt: "Apply the audit workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

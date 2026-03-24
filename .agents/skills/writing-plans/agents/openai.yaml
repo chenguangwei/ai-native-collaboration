@@ -1,0 +1,7 @@
+interface:
+  display_name: "Writing Plans"
+  short_description: "Use when you have a spec or requirements for a multi-step task, before touching code"
+  brand_color: "#3B82F6"
+  default_prompt: "Apply the writing-plans workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

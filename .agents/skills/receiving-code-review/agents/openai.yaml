@@ -1,0 +1,7 @@
+interface:
+  display_name: "Receiving Code Review"
+  short_description: "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative"
+  brand_color: "#F97316"
+  default_prompt: "Apply the receiving-code-review workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

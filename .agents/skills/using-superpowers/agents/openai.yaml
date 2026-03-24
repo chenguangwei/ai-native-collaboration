@@ -1,0 +1,7 @@
+interface:
+  display_name: "Using Superpowers"
+  short_description: "Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions"
+  brand_color: "#64748B"
+  default_prompt: "Apply the using-superpowers workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Critique"
+  short_description: "Evaluate design effectiveness from a UX perspective. Assesses visual hierarchy, information architecture, emotional resonance, and overall design quality with actionable feedback."
+  brand_color: "#EC4899"
+  default_prompt: "Apply the critique workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

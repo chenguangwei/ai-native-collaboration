@@ -1,0 +1,7 @@
+interface:
+  display_name: "Animate"
+  short_description: "Review a feature and enhance it with purposeful animations, micro-interactions, and motion effects that improve usability and delight."
+  brand_color: "#EC4899"
+  default_prompt: "Apply the animate workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

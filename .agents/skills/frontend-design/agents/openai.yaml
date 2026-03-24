@@ -1,0 +1,7 @@
+interface:
+  display_name: "Frontend Design"
+  short_description: "Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications. Generates crea"
+  brand_color: "#EC4899"
+  default_prompt: "Apply the frontend-design workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

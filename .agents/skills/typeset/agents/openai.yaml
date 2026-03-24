@@ -1,0 +1,7 @@
+interface:
+  display_name: "Typeset"
+  short_description: "Improve typography by fixing font choices, hierarchy, sizing, weight consistency, and readability. Makes text feel intentional and polished."
+  brand_color: "#EC4899"
+  default_prompt: "Apply the typeset workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

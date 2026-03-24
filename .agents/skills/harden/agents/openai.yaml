@@ -1,0 +1,7 @@
+interface:
+  display_name: "Harden"
+  short_description: "Improve interface resilience through better error handling, i18n support, text overflow handling, and edge case management. Makes interfaces robust and production-ready."
+  brand_color: "#EC4899"
+  default_prompt: "Apply the harden workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Bolder"
+  short_description: "Amplify safe or boring designs to make them more visually interesting and stimulating. Increases impact while maintaining usability."
+  brand_color: "#EC4899"
+  default_prompt: "Apply the bolder workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

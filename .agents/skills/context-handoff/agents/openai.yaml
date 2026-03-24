@@ -1,0 +1,7 @@
+interface:
+  display_name: "Context Handoff"
+  short_description: "context-handoff skill for AI-native development workflow"
+  brand_color: "#64748B"
+  default_prompt: "Apply the context-handoff workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

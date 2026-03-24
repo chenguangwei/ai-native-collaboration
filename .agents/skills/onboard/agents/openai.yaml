@@ -1,0 +1,7 @@
+interface:
+  display_name: "Onboard"
+  short_description: "Design or improve onboarding flows, empty states, and first-time user experiences. Helps users get started successfully and understand value quickly."
+  brand_color: "#EC4899"
+  default_prompt: "Apply the onboard workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

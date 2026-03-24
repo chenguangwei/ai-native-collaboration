@@ -1,0 +1,7 @@
+interface:
+  display_name: "Fixing Metadata"
+  short_description: ">"
+  brand_color: "#F59E0B"
+  default_prompt: "Apply the fixing-metadata workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

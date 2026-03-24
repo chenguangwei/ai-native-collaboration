@@ -1,0 +1,7 @@
+interface:
+  display_name: "Requesting Code Review"
+  short_description: "Use when completing tasks, implementing major features, or before merging to verify work meets requirements"
+  brand_color: "#F97316"
+  default_prompt: "Apply the requesting-code-review workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

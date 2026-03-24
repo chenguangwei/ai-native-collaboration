@@ -1,0 +1,7 @@
+interface:
+  display_name: "Fixing Motion Performance"
+  short_description: "Audit and fix animation performance issues including layout thrashing, compositor properties, scroll-linked motion, and blur effects. Use when animations stutter, transitions jank, or reviewing CSS/JS"
+  brand_color: "#F59E0B"
+  default_prompt: "Apply the fixing-motion-performance workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

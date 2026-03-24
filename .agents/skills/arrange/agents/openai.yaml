@@ -1,0 +1,7 @@
+interface:
+  display_name: "Arrange"
+  short_description: "Improve layout, spacing, and visual rhythm. Fixes monotonous grids, inconsistent spacing, and weak visual hierarchy to create intentional compositions."
+  brand_color: "#EC4899"
+  default_prompt: "Apply the arrange workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

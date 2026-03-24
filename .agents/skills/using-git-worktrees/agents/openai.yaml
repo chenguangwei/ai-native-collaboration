@@ -1,0 +1,7 @@
+interface:
+  display_name: "Using Git Worktrees"
+  short_description: "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verificat"
+  brand_color: "#14B8A6"
+  default_prompt: "Apply the using-git-worktrees workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

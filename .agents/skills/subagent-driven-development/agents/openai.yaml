@@ -1,0 +1,7 @@
+interface:
+  display_name: "Subagent Driven Development"
+  short_description: "Use when executing implementation plans with independent tasks in the current session"
+  brand_color: "#6366F1"
+  default_prompt: "Apply the subagent-driven-development workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

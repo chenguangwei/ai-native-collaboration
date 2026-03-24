@@ -1,0 +1,7 @@
+interface:
+  display_name: "Team Collaboration"
+  short_description: "team-collaboration skill for AI-native development workflow"
+  brand_color: "#64748B"
+  default_prompt: "Apply the team-collaboration workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

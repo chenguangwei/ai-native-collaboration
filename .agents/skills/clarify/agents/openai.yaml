@@ -1,0 +1,7 @@
+interface:
+  display_name: "Clarify"
+  short_description: "Improve unclear UX copy, error messages, microcopy, labels, and instructions. Makes interfaces easier to understand and use."
+  brand_color: "#EC4899"
+  default_prompt: "Apply the clarify workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Baseline Ui"
+  short_description: "Validates animation durations, enforces typography scale, checks component accessibility, and prevents layout anti-patterns in Tailwind CSS projects. Use when building UI components, reviewing CSS uti"
+  brand_color: "#EC4899"
+  default_prompt: "Apply the baseline-ui workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

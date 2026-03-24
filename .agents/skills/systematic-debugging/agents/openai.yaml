@@ -1,0 +1,7 @@
+interface:
+  display_name: "Systematic Debugging"
+  short_description: "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes"
+  brand_color: "#EF4444"
+  default_prompt: "Apply the systematic-debugging workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

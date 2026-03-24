@@ -1,0 +1,7 @@
+interface:
+  display_name: "Normalize"
+  short_description: "Normalize design to match your design system and ensure consistency"
+  brand_color: "#EC4899"
+  default_prompt: "Apply the normalize workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

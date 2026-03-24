@@ -1,0 +1,7 @@
+interface:
+  display_name: "Finishing A Development Branch"
+  short_description: "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup"
+  brand_color: "#10B981"
+  default_prompt: "Apply the finishing-a-development-branch workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

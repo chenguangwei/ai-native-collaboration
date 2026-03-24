@@ -1,0 +1,7 @@
+interface:
+  display_name: "Extract"
+  short_description: "Extract and consolidate reusable components, design tokens, and patterns into your design system. Identifies opportunities for systematic reuse and enriches your component library."
+  brand_color: "#EC4899"
+  default_prompt: "Apply the extract workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

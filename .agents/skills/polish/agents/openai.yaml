@@ -1,0 +1,7 @@
+interface:
+  display_name: "Polish"
+  short_description: "Final quality pass before shipping. Fixes alignment, spacing, consistency, and detail issues that separate good from great."
+  brand_color: "#EC4899"
+  default_prompt: "Apply the polish workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

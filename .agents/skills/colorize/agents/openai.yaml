@@ -1,0 +1,7 @@
+interface:
+  display_name: "Colorize"
+  short_description: "Add strategic color to features that are too monochromatic or lack visual interest. Makes interfaces more engaging and expressive."
+  brand_color: "#EC4899"
+  default_prompt: "Apply the colorize workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

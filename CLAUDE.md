@@ -125,15 +125,39 @@ paths:
 ## 项目结构
 
 ```
-├── /rules        # AI 的肌肉记忆 (全局始终加载)
-├── /commands     # 驾驭者的操纵杆 (单个 .md 文件，简单任务)
-├── /agents       # 后台专家 (在后台运行，只输出报告)
-├── /skills       # 标准化工具箱 (SKILL.md + 关联文件)
-├── /memory       # 跨会话状态同步中心
-├── /docs         # 全景知识库
-├── /src          # 代码开发区
-├── /tests        # 自动化防线
-└── /ops          # 基础设施
+├── .agents/
+│   └── skills/           # 统一 Skill 源（Claude Code + Codex 共用）
+│       ├── brainstorming/
+│       │   ├── SKILL.md
+│       │   └── agents/openai.yaml
+│       ├── systematic-debugging/
+│       ├── test-driven-development/
+│       ├── gstack*/      # 由 scripts/sync-agents-skills.sh 同步
+│       └── ...（72 个 skills）
+│
+├── .claude/
+│   ├── rules/            # AI 的肌肉记忆（全局始终加载）
+│   ├── commands/         # 驾驭者的操纵杆（单个 .md，简单任务）
+│   ├── agents/           # 后台专家（后台运行，只输出报告）
+│   └── skills/
+│       ├── gstack/       # gstack vendored（Claude Code 原生）
+│       ├── brainstorming → ../../.agents/skills/brainstorming
+│       └── ...（符号链接 → .agents/skills/）
+│
+├── .codex/               # Codex CLI 配置
+│   ├── AGENTS.md         # Codex 专属指令
+│   ├── config.toml       # 运行时配置（MCP、多 agent）
+│   └── agents/           # Codex 多 agent 角色定义
+│
+├── scripts/
+│   ├── sync-agents-skills.sh   # gstack升级后同步到.agents/skills/
+│   ├── replace-placeholders.sh
+│   └── lock.sh
+├── memory/               # 跨会话状态同步中心
+├── docs/                 # 全景知识库
+├── src/                  # 代码开发区
+├── tests/                # 自动化防线
+└── ops/                  # 基础设施
 ```
 
 ## 启动流程

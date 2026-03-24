@@ -1,0 +1,7 @@
+interface:
+  display_name: "Adapt"
+  short_description: "Adapt designs to work across different screen sizes, devices, contexts, or platforms. Ensures consistent experience across varied environments."
+  brand_color: "#EC4899"
+  default_prompt: "Apply the adapt workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true
