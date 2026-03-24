@@ -1,0 +1,7 @@
+interface:
+  display_name: "Browser QA"
+  short_description: "Automated visual testing — smoke tests, interaction tests, visual regression at 3 breakpoints, Core Web Vitals, accessibility audits."
+  brand_color: "#8B5CF6"
+  default_prompt: "Run browser QA workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: false

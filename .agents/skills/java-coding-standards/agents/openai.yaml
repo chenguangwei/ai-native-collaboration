@@ -1,0 +1,7 @@
+interface:
+  display_name: "Java Coding Standards"
+  short_description: "Java 17+ coding standards — naming, immutability (records), Optional patterns, streams, exceptions, project layout."
+  brand_color: "#F89820"
+  default_prompt: "Apply Java coding standards as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

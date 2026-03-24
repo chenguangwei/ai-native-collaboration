@@ -1,0 +1,7 @@
+interface:
+  display_name: "Spring Boot Patterns"
+  short_description: "Spring Boot architecture patterns — controller/service/repository layers, JPA, caching, async, rate limiting, observability."
+  brand_color: "#6DB33F"
+  default_prompt: "Apply Spring Boot architecture patterns as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

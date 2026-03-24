@@ -1,0 +1,7 @@
+interface:
+  display_name: "Agent Harness Construction"
+  short_description: "Design and optimize AI agent action spaces, tool definitions, observation formatting, error recovery contracts, context budgeting for higher completion rates."
+  brand_color: "#EC4899"
+  default_prompt: "Apply agent harness construction patterns as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,7 @@
+interface:
+  display_name: "TDD Workflow"
+  short_description: "Test-driven development workflow with concrete patterns — user journeys to tests, Playwright E2E, mocking (Supabase/Redis/OpenAI), 80%+ coverage config."
+  brand_color: "#F59E0B"
+  default_prompt: "Apply the TDD workflow as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

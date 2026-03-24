@@ -1,0 +1,7 @@
+interface:
+  display_name: "Backend Patterns"
+  short_description: "Backend architecture patterns — repository/service/middleware layers, N+1 prevention, Redis caching, transactions, JWT auth, RBAC, rate limiting."
+  brand_color: "#10B981"
+  default_prompt: "Apply backend architecture patterns as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

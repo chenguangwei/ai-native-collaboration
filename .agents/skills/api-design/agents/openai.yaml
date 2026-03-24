@@ -1,0 +1,7 @@
+interface:
+  display_name: "API Design"
+  short_description: "REST API design patterns for production APIs — resource naming, status codes, pagination, error responses, versioning, rate limiting."
+  brand_color: "#0EA5E9"
+  default_prompt: "Apply the API design patterns as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

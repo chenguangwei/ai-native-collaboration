@@ -1,0 +1,7 @@
+interface:
+  display_name: "Coding Standards"
+  short_description: "Universal coding standards for TypeScript/JavaScript/React — naming, immutability, error handling, async patterns, type safety, code smells."
+  brand_color: "#3B82F6"
+  default_prompt: "Apply coding standards as defined in SKILL.md"
+policy:
+  allow_implicit_invocation: true

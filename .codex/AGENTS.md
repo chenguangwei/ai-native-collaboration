@@ -44,6 +44,18 @@ Skills 从 `.agents/skills/` 自动加载。每个 skill 包含：
 | `requesting-code-review` | 提交 PR 前 |
 | `finishing-a-development-branch` | 开发分支收尾 |
 | `using-git-worktrees` | 需要隔离开发环境 |
+| `coding-standards` | TypeScript/JS/React 编码规范 |
+| `tdd-workflow` | TDD 具体代码模式与 mock 示例 |
+
+### 后端开发
+| Skill | 触发时机 |
+|-------|---------|
+| `springboot-patterns` | Spring Boot 架构与 API 设计 |
+| `java-coding-standards` | Java 17+ 编码规范 |
+| `backend-patterns` | Node.js 后端架构模式 |
+| `api-design` | REST API 设计规范 |
+| `agent-harness-construction` | AI Agent 工具设计与优化 |
+| `browser-qa` | 前端部署后自动化 QA |
 
 ### 前端开发
 | Skill | 触发时机 |
