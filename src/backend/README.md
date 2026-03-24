@@ -1,23 +1,17 @@
 # 后端服务
 
-此目录用于放置后端代码。
+选择技术栈后，此目录结构由 `scripts/replace-placeholders.sh` 自动生成。
 
-## 结构
+## 支持的技术栈
 
-```
-backend/
-├── controllers/  # 控制器
-├── middleware/    # 中间件
-├── models/       # 数据模型
-├── routes/       # 路由
-├── services/     # 业务逻辑
-└── utils/        # 工具函数
-```
+| 技术栈 | 初始化命令 | 模板文档 |
+|--------|------------|------|
+| Java 17 + Spring Boot 3 | `./scripts/replace-placeholders.sh <名称> <前端> java` | `templates/backend/java/README.md` |
+| Python 3.11 + FastAPI | `./scripts/replace-placeholders.sh <名称> <前端> python` | `templates/backend/python/README.md` |
 
-## 开始开发
+## 开发规范（所有技术栈通用）
 
-```bash
-cd backend
-npm install
-npm run dev
-```
+- 禁止字符串拼接 SQL，使用参数化查询
+- API 响应 Schema 放 `../shared/types/`，前后端共享
+- 配置项从环境变量读取（禁止硬编码密钥）
+- 单元测试覆盖所有业务逻辑层（Service / Use Case）
