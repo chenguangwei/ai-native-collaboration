@@ -25,6 +25,30 @@
 - 遵守 `/rules/anti-slop.md` 中的设计规范
 - 使用 `/rules/skill-triggers.md` 中的技能触发机制
 - 执行 `/rules/memory-flush.md` 中的记忆保存流程
+- 使用 `/rules/rules-path-filtering.md` 了解路径过滤规则
+
+### 路径过滤规则
+
+规则文件支持 **路径作用域**，允许规则只在特定目录生效：
+
+| 规则文件 | 作用域 |
+|---------|--------|
+| `behaviors.md` | 全局 |
+| `anti-slop.md` | 全局 |
+| `api-rules.md` | `src/api/**`, `src/handlers/**`, `src/server/**` |
+
+通过 YAML frontmatter 声明 paths，例如：
+
+```yaml
+---
+paths:
+  - "src/api/**"
+---
+
+# API 开发规范
+```
+
+这样只有编辑 `src/api/` 目录下的文件时才会加载该规则。
 
 ### 可用的命令
 
@@ -38,9 +62,13 @@
 
 ### 可用的 Agent
 
-- **pr-reviewer** - 代码规范审查
+- **frontend-reviewer** - 前端代码审查 (TypeScript/React)
+- **java-reviewer** - Java 后端审查 (SpringBoot)
+- **python-reviewer** - Python 后端审查 (FastAPI/Django)
 - **security-auditor** - 安全漏洞扫描
 - **performance-analyzer** - 性能瓶颈分析
+
+> Agents 在"后台"运行，只输出最终报告，避免刷屏。详见 `.claude/agents/README.md`
 
 ### gstack
 
@@ -55,15 +83,21 @@
 - `/design-consultation`
 - `/review`
 - `/ship`
+- `/land-and-deploy`
+- `/canary`
+- `/benchmark`
 - `/browse`
 - `/qa`
 - `/qa-only`
 - `/design-review`
 - `/setup-browser-cookies`
+- `/setup-deploy`
 - `/retro`
 - `/investigate`
 - `/document-release`
 - `/codex`
+- `/cso`
+- `/autoplan`
 - `/careful`
 - `/freeze`
 - `/guard`
@@ -76,9 +110,9 @@
 
 ```
 ├── /rules        # AI 的肌肉记忆 (全局始终加载)
-├── /commands     # 驾驭者的操纵杆 (Slash Commands)
-├── /agents       # 虚拟角色设定区
-├── /skills       # 标准化工具箱
+├── /commands     # 驾驭者的操纵杆 (单个 .md 文件，简单任务)
+├── /agents       # 后台专家 (在后台运行，只输出报告)
+├── /skills       # 标准化工具箱 (SKILL.md + 关联文件)
 ├── /memory       # 跨会话状态同步中心
 ├── /docs         # 全景知识库
 ├── /src          # 代码开发区

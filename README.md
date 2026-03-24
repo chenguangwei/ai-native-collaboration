@@ -42,6 +42,56 @@
     └── release-checklists.md
 ```
 
+## Commands vs Skills
+
+| 特性 | Commands | Skills |
+|------|----------|--------|
+| 复杂度 | 简单，一个文件 | 复杂，多个相关文件 |
+| 结构 | 单个 `.md` 文件 | `SKILL.md` + 关联文件 |
+| 适用场景 | 快速触发单一任务 | 需要详细指导的工作流 |
+| 示例 | `/review` 审查代码 | `/browse` 浏览器自动化 |
+
+### Commands - 轻量快捷
+
+**Commands 就是一个文件**，里面写了要干什么。
+
+当你输入 `/review` 时，Claude 读取 `commands/review.md`，按照文件里的步骤执行。
+
+### Skills - 复杂工作流
+
+**Skills 可以带一堆相关文件**。SKILL.md 文件里可以引用其他文件：
+
+```markdown
+# SKILL.md
+
+@DETAILED_GUIDE.md     # 去读旁边的详细规则
+@../utils/helper.ts    # 引用工具函数
+```
+
+这样 skill 就能用详细文件里的内容，适合复杂的工作流。
+
+### Agents - 后台专家
+
+**Agents 是让 Claude 启动一个"小助手"在后台干活**，只把结果告诉你。适合大规模分析、审查等会产生大量中间过程的任务。
+
+```
+.claude/agents/
+├── pr-reviewer.md          # PR 审查员
+├── security-auditor.md     # 安全审计员
+└── performance-analyzer.md # 性能分析师
+```
+
+Agent 文件包含 `tools` 和 `model` 字段，限制权限和选择模型：
+
+```yaml
+---
+name: pr-reviewer
+description: PR 审查员
+tools: [Read, Grep, Glob, Bash]
+model: sonnet
+---
+```
+
 ## 快速开始
 
 ### AI 交互
@@ -179,7 +229,8 @@ git sparse-checkout disable
 ## 文档索引
 
 - [规则手册](/rules/)
-- [命令参考](/commands/)
+- [命令参考](/commands/README.md)
+- [Agents 说明](/.claude/agents/README.md)
 - [API 文档](/docs/03_architecture/api_specs.md)
 - [数据库结构](/docs/03_architecture/db_schema.md)
 - [测试用例](/docs/04_qa/test_cases.md)
