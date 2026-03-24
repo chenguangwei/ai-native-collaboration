@@ -62,13 +62,29 @@ paths:
 
 ### 可用的 Agent
 
-- **frontend-reviewer** - 前端代码审查 (TypeScript/React)
+- **planner** - 复杂功能实现规划（分阶段计划、依赖分析）
+- **tdd-guide** - TDD 工作流指导（测试先行、覆盖率保障）
+- **build-error-resolver** - 构建错误快速修复（最小 diff）
+- **frontend-reviewer** - 前端代码审查 (TypeScript/React/Vue)
 - **java-reviewer** - Java 后端审查 (SpringBoot)
 - **python-reviewer** - Python 后端审查 (FastAPI/Django)
 - **security-auditor** - 安全漏洞扫描
 - **performance-analyzer** - 性能瓶颈分析
 
 > Agents 在"后台"运行，只输出最终报告，避免刷屏。详见 `.claude/agents/README.md`
+
+### codex
+
+使用 `/codex` 调用 Codex CLI（需先安装 `npm i -g @openai/codex`）。
+
+**三种模式：**
+- `/codex review` - 独立 diff 审查，pass/fail gate
+- `/codex challenge` - 对抗模式，尝试破坏你的代码
+- `ask codex <问题>` - 咨询模式，支持追问
+
+**多 Agent 配置位于** `.codex/` 目录（`config.toml` + `AGENTS.md` + `agents/`）。
+
+> 如果 codex 未安装：`npm install -g @openai/codex`
 
 ### gstack
 

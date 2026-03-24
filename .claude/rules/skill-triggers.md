@@ -7,33 +7,53 @@
 ### Level 1: 强制触发 (Always)
 这些技能在特定场景下必须触发，无需人类确认。
 
-| 场景 | 技能 | 说明 |
-|------|------|------|
+| 场景 | 技能/Agent | 说明 |
+|------|-----------|------|
 | 开始任何创意工作 | brainstorming | 创建功能、组件、功能修改 |
 | 遇到 Bug/错误 | systematic-debugging | 系统化排障 |
 | 完成实现前 | verification-before-completion | 验证通过后才能声称完成 |
 | 收到代码审查反馈 | receiving-code-review | 实现审查建议前 |
+| 构建/类型错误出现 | `build-error-resolver` agent | 快速修复，最小 diff |
 
 ### Level 2: 推荐触发 (Recommended)
 这些技能在匹配场景时推荐使用。
 
-| 场景 | 技能 | 说明 |
-|------|------|------|
-| 实现新功能/修复 | test-driven-development | TDD 方式开发 |
+| 场景 | 技能/Agent | 说明 |
+|------|-----------|------|
+| 复杂功能请求 | `planner` agent | 分阶段实现计划 |
+| 实现新功能/修复 | `tdd-guide` agent + test-driven-development | TDD 方式开发 |
 | 规划多步骤任务 | writing-plans | 创建实现计划 |
 | 需要隔离开发 | using-git-worktrees | 使用 git worktree |
 | 提交 PR 前 | requesting-code-review | 请求代码审查 |
 | 完成开发分支 | finishing-a-development-branch | 分支收尾工作 |
+| 刚写完/改完代码 | 对应 reviewer agent | 后台代码审查 |
 
 ### Level 3: 可选触发 (Optional)
 按需手动调用。
 
-| 场景 | 技能 | 说明 |
-|------|------|------|
+| 场景 | 技能/Agent | 说明 |
+|------|-----------|------|
+| 需要第二意见 | `/codex` | Codex CLI 独立审查 |
 | 创建新技能 | writing-skills | 创建或编辑技能 |
 | 构建前端界面 | frontend-design | 设计前端界面 |
 | 构建 API 应用 | claude-api | 使用 Claude API |
 | 优化 React 代码 | react-best-practices | React 性能优化 |
+| 架构决策 | `/plan-architect` | CTO 级推演 |
+
+## 即时 Agent 触发（无需用户提示）
+
+对以下场景立即启动对应 agent，**不需要**用户明确说"帮我用 xxx agent"：
+
+| 触发条件 | Agent | 并行 |
+|---------|-------|------|
+| 功能实现请求（3步以上） | `planner` | 否（先规划） |
+| Bug 修复 / 新功能 | `tdd-guide` | 可与 planner 并行 |
+| 构建报错 | `build-error-resolver` | 否（先修错） |
+| 前端代码改动 | `frontend-reviewer` | 是 |
+| Java 代码改动 | `java-reviewer` | 是 |
+| Python 代码改动 | `python-reviewer` | 是 |
+| 安全敏感代码 | `security-auditor` | 是 |
+| 多模块同时分析 | 并行启动多个 agent | 是（独立任务） |
 
 ---
 
@@ -80,12 +100,13 @@ const debugPatterns = [
 
 ```bash
 /plan-ceo        # 产品思维
-/plan-architect # 架构师思维
+/plan-architect  # 架构师思维
 /review          # 代码审查
 /qa              # 自动化测试
 /ship            # 发布检查
 /debug           # 排障模式
 /retro           # 复盘模式
+/codex           # Codex CLI 审查（第二意见）
 ```
 
 ### 技能调用

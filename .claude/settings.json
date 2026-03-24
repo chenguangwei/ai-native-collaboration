@@ -20,7 +20,17 @@
       "Bash(git diff:*)",
       "Bash(git tag:*)",
       "Bash(git rm:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(codex:*)",
+      "Bash(npx codex:*)",
+      "Bash(chmod:*)",
+      "Bash(find:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(touch:*)",
+      "Bash(rm:*)",
+      "Bash(bash:*)",
+      "Bash(sh:*)"
     ]
   }
 }

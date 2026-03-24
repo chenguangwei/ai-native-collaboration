@@ -1,0 +1,71 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+
+# AI-Native Scaffold — Codex CLI 配置
+#
+# 复制到 ~/.codex/config.toml 作为全局默认，或保留在项目根目录作为项目级配置。
+# 官方文档：https://developers.openai.com/codex/config-reference
+
+# 运行时设置
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "live"
+
+# 指令文件：优先读取 AGENTS.md 和 .codex/AGENTS.md
+# model_instructions_file = "/absolute/path/to/instructions.md"
+
+# MCP 服务器（按需启用）
+[mcp_servers.github]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-github"]
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@latest"]
+
+[mcp_servers.sequential-thinking]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+
+# 额外 MCP 服务器（需要时解注释）：
+# [mcp_servers.memory]
+# command = "npx"
+# args = ["-y", "@modelcontextprotocol/server-memory"]
+#
+# [mcp_servers.playwright]
+# command = "npx"
+# args = ["-y", "@playwright/mcp@latest", "--extension"]
+#
+# [mcp_servers.exa]
+# url = "https://mcp.exa.ai/mcp"
+
+[features]
+# 多 agent 支持（实验性，2026年3月起可用）
+multi_agent = true
+
+# Profiles — 切换命令: codex -p <name>
+[profiles.strict]
+approval_policy = "on-request"
+sandbox_mode = "read-only"
+web_search = "cached"
+
+[profiles.yolo]
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+web_search = "live"
+
+# 多 Agent 配置
+[agents]
+max_threads = 4
+max_depth = 1
+
+[agents.explorer]
+description = "只读代码探索 agent，在提出变更前收集证据。"
+config_file = "agents/explorer.toml"
+
+[agents.reviewer]
+description = "代码审查 agent，专注于正确性、安全性和缺失测试。"
+config_file = "agents/reviewer.toml"
+
+[agents.docs_researcher]
+description = "文档研究 agent，验证 API 行为、框架用法和发行说明。"
+config_file = "agents/docs-researcher.toml"
