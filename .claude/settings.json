@@ -1,15 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cp -Rf ~/.claude/skills/gstack /Users/chenguangwei/Documents/workspace/med-ai-native-project-demo/.claude/skills/gstack)",
-      "Bash(rm -rf /Users/chenguangwei/Documents/workspace/med-ai-native-project-demo/.claude/skills/gstack/.git)",
-      "Bash(mkdir -p /Users/chenguangwei/Documents/workspace/med-ai-native-project-demo/.claude/skills)",
-      "Bash(cp -Rf ~/.claude/skills/gstack /Users/chenguangwei/Documents/workspace/med-ai-native-project-demo/.claude/skills/)",
       "Bash(./setup)",
-      "Read(//Users/chenguangwei/.claude/skills/**)",
-      "Read(//Users/chenguangwei/.claude/plugins/cache/claude-plugins-official/superpowers/**)",
-      "Read(//Users/chenguangwei/.claude/**)",
-      "Read(//private/tmp/ui-skills-temp/**)",
       "Bash(date:*)",
       "Bash(echo:*)",
       "Bash(cat:*)",
@@ -27,14 +19,8 @@
       "Bash(git log:*)",
       "Bash(git diff:*)",
       "Bash(git tag:*)",
-      "Read(//Users/chenguangwei/Documents/workspace/claude-code-workflow/agents/**)",
-      "Bash(cp -Rf ~/.claude/skills/gstack .claude/skills/gstack)",
-      "Bash(rm -rf .claude/skills/gstack/.git)"
-    ],
-    "additionalDirectories": [
-      "/Users/chenguangwei/Documents/workspace/med-ai-native-project-demo",
-      "/Users/chenguangwei/.claude",
-      "/Users/chenguangwei/Documents/workspace/med-ai-native-project-demo/.claude/agents"
+      "Bash(git rm:*)",
+      "Bash(git push:*)"
     ]
   }
 }
