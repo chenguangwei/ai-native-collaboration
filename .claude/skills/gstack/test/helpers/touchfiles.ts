@@ -83,6 +83,11 @@ export const E2E_TOUCHFILES: Record<string, string[]> = {
   // Global discover
   'global-discover':   ['bin/gstack-global-discover.ts', 'test/global-discover.test.ts'],
 
+  // CSO
+  'cso-full-audit':   ['cso/**'],
+  'cso-diff-mode':    ['cso/**'],
+  'cso-infra-scope':  ['cso/**'],
+
   // Document-release
   'document-release': ['document-release/**'],
 
@@ -195,6 +200,7 @@ export const GLOBAL_TOUCHFILES = [
   'scripts/gen-skill-docs.ts',
   'test/helpers/touchfiles.ts',
   'browse/test/test-server.ts',
+  'lib/worktree.ts',
 ];
 
 // --- Base branch detection ---
