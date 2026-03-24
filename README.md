@@ -19,10 +19,15 @@
 ├── README.md              # 🧑‍💻 项目导航图
 ├── .gitignore             # Git 忽略配置
 │
-├── /rules                 # 📜 核心准则 (Layer 0)
-├── /commands              # ⚡ Slash Commands (Layer 0)
-├── /agents                # 🎭 虚拟角色 (Layer 0)
-├── /custom-skills                # 🛠️ 技能工具箱 (Layer 0)
+├── .claude/
+│   ├── rules/             # 📜 核心准则 (Layer 0)
+│   ├── commands/          # ⚡ Slash Commands (Layer 0)
+│   ├── agents/            # 🎭 专属 Agent (Layer 0)
+│   └── skills/            # 🛠️ 技能工具箱 (Layer 0，含 gstack + 自定义)
+│
+├── scripts/               # 🔧 工具脚本（初始化、任务锁）
+├── templates/             # 📋 技术栈模板（frontend/backend）
+├── SCAFFOLD_VERSION       # 脚手架版本号
 │
 ├── /memory                # 💾 记忆体 (Layer 1)
 ├── /docs                  # 📖 知识库 (Layer 2)
