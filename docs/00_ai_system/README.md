@@ -1,0 +1,18 @@
+# AI 系统文档
+
+> AI 原生开发方法论的核心参考资料
+
+## 本目录内容
+
+| 文档 | 说明 |
+|------|------|
+| [routing-matrix.md](routing-matrix.md) | 模型分发路由图 — 何种任务用 Claude、何种用 o3-mini/DeepSeek |
+| [subtree-guide.md](subtree-guide.md) | git subtree 接入手册 — 新项目引入脚手架的完整步骤 |
+| [scaffolding-checkpoint.md](scaffolding-checkpoint.md) | 架构防过度设计检查清单（YAGNI 原则） |
+
+## 关联入口
+
+- [Skills 速查索引](../06_skills/SKILLS_INDEX.md) — 80 个技能按岗位分类
+- [Commands 命令集](../../.claude/commands/README.md) — 8 个轻量命令
+- [Agents 说明](../../.claude/agents/README.md) — 后台专家 Agent 列表
+- [CLAUDE.md](../../CLAUDE.md) — AI 行为规范总入口
