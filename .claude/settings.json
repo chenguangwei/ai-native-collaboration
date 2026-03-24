@@ -27,11 +27,14 @@
       "Bash(git log:*)",
       "Bash(git diff:*)",
       "Bash(git tag:*)",
-      "Read(//Users/chenguangwei/Documents/workspace/claude-code-workflow/agents/**)"
+      "Read(//Users/chenguangwei/Documents/workspace/claude-code-workflow/agents/**)",
+      "Bash(cp -Rf ~/.claude/skills/gstack .claude/skills/gstack)",
+      "Bash(rm -rf .claude/skills/gstack/.git)"
     ],
     "additionalDirectories": [
       "/Users/chenguangwei/Documents/workspace/med-ai-native-project-demo",
-      "/Users/chenguangwei/.claude"
+      "/Users/chenguangwei/.claude",
+      "/Users/chenguangwei/Documents/workspace/med-ai-native-project-demo/.claude/agents"
     ]
   }
 }
