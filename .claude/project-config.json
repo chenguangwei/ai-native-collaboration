@@ -6,43 +6,58 @@
     "fullstack": {
       "name": "全栈工程师",
       "description": "同时负责前端和后端开发",
-      "focus": ["src/frontend", "src/backend"],
+      "focus": [
+        "src/frontend",
+        "src/backend"
+      ],
       "memory": "memory/roles/fullstack"
     },
     "frontend": {
       "name": "前端工程师",
       "description": "专注于前端开发",
-      "focus": ["src/frontend"],
+      "focus": [
+        "src/frontend"
+      ],
       "memory": "memory/roles/frontend"
     },
     "backend": {
       "name": "后端工程师",
       "description": "专注于后端开发",
-      "focus": ["src/backend"],
+      "focus": [
+        "src/backend"
+      ],
       "memory": "memory/roles/backend"
     },
     "pm": {
       "name": "产品经理",
       "description": "产品规划与需求管理",
-      "focus": ["docs/01_product"],
+      "focus": [
+        "docs/01_product"
+      ],
       "memory": "memory/roles/pm"
     },
     "qa": {
       "name": "测试工程师",
       "description": "质量保证与测试",
-      "focus": ["tests"],
+      "focus": [
+        "tests"
+      ],
       "memory": "memory/roles/qa"
     },
     "devops": {
       "name": "运维工程师",
       "description": "部署与运维",
-      "focus": ["ops"],
+      "focus": [
+        "ops"
+      ],
       "memory": "memory/roles/devops"
     },
     "architect": {
       "name": "架构师",
       "description": "系统架构设计",
-      "focus": ["docs/03_architecture"],
+      "focus": [
+        "docs/03_architecture"
+      ],
       "memory": "memory/roles/architect"
     }
   },
@@ -54,5 +69,6 @@
   },
   "currentRole": "fullstack",
   "gitUser": "chenguangwei@unisound.com",
-  "team": "development"
+  "team": "development",
+  "scaffoldVersion": "2.0.0"
 }

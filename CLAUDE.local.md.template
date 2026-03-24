@@ -1,0 +1,30 @@
+<!--
+  本文件用于本地/个人配置覆盖，不提交到 Git。
+  复制此文件并重命名为 CLAUDE.local.md 使用：
+  cp CLAUDE.local.md.template CLAUDE.local.md
+-->
+
+# 本地配置覆盖
+
+> 此文件覆盖 CLAUDE.md 中的全局配置，仅本机生效。
+
+## 个人角色覆盖
+
+如果你的角色与 project-config.json 中的 currentRole 不同，在此临时声明：
+
+```
+当前角色: frontend
+```
+
+## 本地工具配置
+
+```bash
+# 本地数据库连接（不提交）
+# DB_URL=postgresql://localhost:5432/mydb_dev
+```
+
+## 个人习惯覆盖
+
+在此写个人对 AI 行为的偏好调整，例如：
+- 响应语言偏好
+- 关闭某个 skill 的自动触发
