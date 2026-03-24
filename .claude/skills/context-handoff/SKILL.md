@@ -10,43 +10,39 @@
 
 ## 工作流程
 
-### 1. 读取记忆文件
+### 1. 读取配置，确认当前角色
 
 ```bash
-# 读取今日任务
-cat memory/today.md
-
-# 读取活跃任务
-cat memory/active-tasks.json
-
-# 读取 conductor 锁
-cat memory/conductor-tasks.json
+ROLE=$(python3 -c "import json; print(json.load(open('.claude/project-config.json'))['currentRole'])")
+GIT_USER=$(git config user.email)
+echo "当前角色: $ROLE，操作者: $GIT_USER"
 ```
 
-### 2. 分析上下文状态
+### 2. 读取角色日志和任务状态
 
-检查以下文件获取当前进度：
+```bash
+# 角色今日工作
+cat memory/roles/$ROLE/today.md 2>/dev/null || echo "（今日暂无日志）"
 
-| 文件 | 内容 | 优先级 |
-|------|------|--------|
-| `memory/today.md` | 今日工作日志 | 高 |
-| `memory/active-tasks.json` | 跨会话任务 | 高 |
-| `.claude/tasks/` | 当前任务列表 | 中 |
+# 跨角色任务注册表
+cat memory/.index/active-tasks.json 2>/dev/null || echo "（暂无活跃任务）"
 
-### 3. 恢复上下文
+# 任务锁状态
+ls memory/lock/*.lock 2>/dev/null && cat memory/lock/*.lock || echo "（无任务锁）"
+```
+
+### 3. 输出上下文恢复摘要
 
 在对话开始时输出：
 
 ```
-📋 上下文恢复
+📋 上下文恢复 [角色: {ROLE}]
 
-上次工作: [任务描述]
-中断位置: [文件:行号或步骤]
-待完成任务:
-- [ ] 任务 1
-- [ ] 任务 2
+上次工作: [从 today.md 提取]
+活跃任务: [从 active-tasks.json 提取]
+锁状态: [从 lock/*.lock 提取]
 
-继续中...
+是否继续上次工作，还是开始新任务？
 ```
 
 ### 4. 同步锁状态
@@ -69,10 +65,9 @@ cat memory/conductor-tasks.json | jq '.locks[] | select(.status=="active")'
 
 ```
 memory/
-├── today.md              # 今日日志
-├── active-tasks.json     # 活跃任务
-├── conductor-tasks.json  # 任务锁
-└── projects.md          # 项目大盘
+├── roles/{role}/today.md         # 角色今日日志（规范路径）
+├── .index/active-tasks.json      # 跨角色任务注册表
+└── lock/conductor-tasks.json     # 任务协调记录
 ```
 
 ## 注意事项
