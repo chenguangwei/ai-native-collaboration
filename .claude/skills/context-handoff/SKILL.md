@@ -73,6 +73,6 @@ memory/
 ## 注意事项
 
 - 每次会话开始时自动触发
-- 优先读取 `memory/today.md`
+- 优先读取 `memory/roles/{role}/today.md`
 - 确保不重复已完成的工作
 - 检查任务锁避免冲突
