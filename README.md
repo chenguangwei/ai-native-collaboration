@@ -195,17 +195,26 @@ bash .scaffold/scripts/replace-placeholders.sh "项目名称" "next" "java"
 > 不同岗位只拉取自己关注的目录，不影响 push/merge
 
 ```bash
-# 后端工程师
-git sparse-checkout set src/backend src/shared docs/03_architecture docs/05_ops memory
+# 全栈工程师
+git sparse-checkout set src docs memory
 
 # 前端工程师
 git sparse-checkout set src/frontend src/shared docs/02_design docs/04_qa memory
 
+# 后端工程师
+git sparse-checkout set src/backend src/shared docs/03_architecture docs/05_ops memory
+
 # 产品经理
 git sparse-checkout set docs/01_product docs/02_design memory
 
+# 测试工程师
+git sparse-checkout set tests docs/04_qa docs/03_architecture memory
+
 # 运维工程师
 git sparse-checkout set ops docs/05_ops memory
+
+# 架构师
+git sparse-checkout set docs/03_architecture docs/01_product src memory
 ```
 
 ---
