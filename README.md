@@ -221,17 +221,26 @@ git sparse-checkout set docs/03_architecture docs/01_product src memory
 
 ## 文档索引
 
+### AI 系统
+
 | 文档 | 说明 |
 |------|------|
+| [Skills 速查索引](docs/06_skills/SKILLS_INDEX.md) | 80 个技能按岗位分类，含触发方式与来源 |
+| [Commands 命令集](.claude/commands/README.md) | 8 个轻量命令列表与用法 |
+| [Agents 说明](.claude/agents/README.md) | Agent 列表与使用方式 |
+| [角色技能配置](docs/06_skills/roles/ROLE_SETUP.md) | 各角色工具与工作焦点 |
 | [AI 系统文档](docs/00_ai_system/) | 路由矩阵、subtree 接入手册 |
+
+### 产品与研发
+
+| 文档 | 说明 |
+|------|------|
 | [产品文档](docs/01_product/) | PRD、业务规则 |
 | [设计规范](docs/02_design/) | 设计系统、UI 资产 |
 | [架构设计](docs/03_architecture/) | API 规范、数据库设计、系统流程 |
 | [测试用例](docs/04_qa/) | 测试计划、审计日志 |
 | [运维手册](docs/05_ops/) | 部署环境、Runbook |
-| [角色技能配置](docs/06_skills/roles/ROLE_SETUP.md) | 各角色工具与工作焦点 |
 | [操作手册](docs/07_handbooks/) | 各角色详细操作指南 |
-| [Agents 说明](.claude/agents/README.md) | Agent 列表与使用方式 |
 
 ---
 

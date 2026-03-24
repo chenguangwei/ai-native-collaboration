@@ -1,71 +1,91 @@
 # ⚡ Commands 命令集合
 
-> 快速触发的轻量级任务
+> 轻量级任务触发器 — 输入 `/命令名` 即可执行
 
-## Commands vs Skills
+## Commands vs Skills vs Agents
 
-| 特性 | Commands | Skills |
-|------|----------|--------|
-| 复杂度 | 简单，一个文件 | 复杂，多个相关文件 |
-| 结构 | 单个 `.md` 文件 | `SKILL.md` + 关联文件 |
-| 适用场景 | 快速触发单一任务 | 需要详细指导的工作流 |
-| 示例 | `/review` 审查代码 | `/browse` 浏览器自动化 |
+| 特性 | Commands | Skills | Agents |
+|------|----------|--------|--------|
+| 复杂度 | 简单，单文件 | 复杂，多文件工作流 | 独立子任务 |
+| 结构 | 单个 `.md` 文件 | `SKILL.md` + 关联文件 | `.md` + YAML frontmatter |
+| 运行方式 | 主对话内执行 | 主对话内执行 | **后台独立运行** |
+| 适用场景 | 快速触发单一任务 | 需要详细指导的工作流 | 大规模分析、审查 |
 
-### Commands - 轻量快捷
+---
 
-**Commands 就是一个文件**，里面写了要干什么。
+## 可用命令
 
-```
-commands/
-├── review.md    # 触发代码审查
-├── debug.md    # 触发调试模式
-└── qa.md       # 触发测试
-```
+| 命令 | 文件 | 用途 |
+|------|------|------|
+| `/plan-ceo` | `plan-ceo.md` | 唤醒产品思维，输出高优 PRD |
+| `/plan-architect` | `plan-architect.md` | 唤醒架构师思维，CTO 级技术推演 |
+| `/review` | `review.md` | 代码审查 |
+| `/qa` | `qa.md` | 触发自动化测试 |
+| `/ship` | `ship.md` | 发版前检查清单 |
+| `/debug` | `debug.md` | 启动结构化排障 |
+| `/retro` | `retro.md` | 生成迭代复盘报告 |
+| `/switch-role` | `switch-role.md` | 切换工作角色（fullstack/frontend/backend/pm/qa/devops/architect）|
 
-当你输入 `/review` 时，Claude 读取 `commands/review.md`，按照文件里的步骤执行。
+---
 
-### Skills - 复杂工作流
-
-**Skills 可以带一堆相关文件**。SKILL.md 文件里可以引用其他文件：
-
-```markdown
-# SKILL.md
-
-@DETAILED_GUIDE.md     <!-- 去读旁边的详细规则 -->
-@../utils/helper.ts    <!-- 引用工具函数 -->
-
-## 执行步骤
-1. 读取 DETAILED_GUIDE.md
-2. 按照规则执行...
-```
-
-这样 skill 就能用那个详细文件里的内容，适合复杂的工作流。
-
-## 快速开始
+## 快速使用
 
 ```bash
-# 触发命令
-/review     # 代码审查
-/debug      # 调试模式
-/qa         # 自动化测试
-/ship       # 发布检查
-/retro      # 复盘报告
+# 产品规划
+/plan-ceo        # 输出高优 PRD
+
+# 技术架构
+/plan-architect  # CTO 级推演
+
+# 开发质量
+/review          # 代码审查
+/qa              # 自动化测试
+
+# 发布流程
+/ship            # 发版检查
+
+# 排障
+/debug           # 结构化排障
+
+# 复盘
+/retro           # 迭代复盘
+
+# 角色切换
+/switch-role     # 切换开发角色
 ```
+
+---
 
 ## 创建新命令
 
-在 `commands/` 目录下创建 `.md` 文件：
+在此目录下创建 `.md` 文件，文件名即为命令名：
 
 ```markdown
-# /my-command - 命令名称
+# /my-command — 命令描述
 
-> 简短描述
+> 简短说明
 
 ## 执行步骤
 
-1. 第一步做什么
-2. 第二步做什么
-3. 输出什么结果
+1. 第一步...
+2. 第二步...
+3. 输出结果...
 ```
 
-文件名即为命令名：`my-command.md` → `/my-command`
+`my-command.md` → 输入 `/my-command` 即可触发。
+
+---
+
+## 与 Skills 的区别
+
+Commands 适合**快速单次触发**，Skills 适合**复杂多步骤工作流**：
+
+```
+Commands (此目录):
+  /debug → 快速启动排障模式
+
+Skills (.claude/skills/ 或 .agents/skills/):
+  /systematic-debugging → 详细的 5 步排障方法论 + 工具调用规范
+```
+
+更多技能参见 [Skills 速查索引](../../docs/06_skills/SKILLS_INDEX.md)。
