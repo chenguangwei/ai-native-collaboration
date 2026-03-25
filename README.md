@@ -143,22 +143,42 @@ model: sonnet
 
 ## 快速开始
 
-### 新项目接入脚手架（git subtree）
+### 方式一（推荐）：让 Claude Code 自动完成接入
 
-```bash
-# 1. 添加脚手架为远端
-git remote add scaffold <your-scaffold-repo-url>
+打开你的项目，启动 Claude Code，把下面这段话发给它，CC 会自动执行所有步骤：
 
-# 2. 引入脚手架
-git subtree add --prefix=.scaffold scaffold main --squash
+```
+我需要把 AI Native 脚手架接入当前项目。
 
-# 3. 初始化（选择技术栈）
-bash .scaffold/scripts/replace-placeholders.sh "项目名称" "next" "java"
-#   frontend: react | vue | next
-#   backend:  java | python
+脚手架 GitLab 地址：http://gitlab-iot.yunzhisheng.cn/med-ai/med-ai-native-project-demo.git
+当前项目是 Java Spring Boot 后端项目，我的角色是 backend，gitUser 是 xxx@email.com
+
+请帮我：
+1. 把脚手架以 git subtree 方式引入到 .scaffold/ 目录（remote 名称用 scaffold）
+2. 把 CLAUDE.md、.claude/、.agents/、docs/、memory/ 复制到项目根目录
+3. 更新 .claude/project-config.json，设置 project、currentRole、gitUser
+4. 初始化 memory/roles/backend/today.md 工作日志
+5. 告诉我后续如何更新脚手架
+
+注意：不要改动现有 src/ 代码和 pom.xml。
 ```
 
-详见 [git subtree 接入手册](docs/00_ai_system/subtree-guide.md)
+CC 会逐步执行并在每个关键操作前说明做什么，你确认后它继续。全程大约 2 分钟。
+
+> **如果脚手架 `main` 分支尚未包含 `.claude/` 和 `.agents/`**（本地有但未推送），可在对话中补充：
+> ```
+> 注意：脚手架 GitLab 上还没有 .claude/ 和 .agents/，
+> 这两个目录在本地路径 /path/to/med-ai-native-project-demo，
+> 请从本地复制。
+> ```
+
+---
+
+### 方式二（手动）：已有项目接入脚手架（git subtree）
+
+详见 [手动接入操作手册](docs/00_ai_system/scaffold-integration-manual.md)（以 `app_insurance_cloud` Java 项目为实际案例，包含 6 个步骤、结构变化说明和后续更新方式）。
+
+---
 
 ### AI 交互命令
 
