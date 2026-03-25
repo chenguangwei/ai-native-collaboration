@@ -19,12 +19,12 @@
 ```bash
 cd your-project
 
-git remote add scaffold http://gitlab-iot.yunzhisheng.cn/med-ai/med-ai-native-project-demo.git
+git remote add scaffold https://github.com/chenguangwei/ai-native-collaboration.git
 
 # 验证
 git remote -v
-# scaffold  http://gitlab-iot.yunzhisheng.cn/med-ai/med-ai-native-project-demo.git (fetch)
-# scaffold  http://gitlab-iot.yunzhisheng.cn/med-ai/med-ai-native-project-demo.git (push)
+# scaffold  https://github.com/chenguangwei/ai-native-collaboration.git (fetch)
+# scaffold  https://github.com/chenguangwei/ai-native-collaboration.git (push)
 ```
 
 ### 步骤 2：通过 git subtree 拉取脚手架到 `.scaffold/` 目录

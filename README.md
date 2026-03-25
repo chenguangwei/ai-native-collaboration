@@ -150,7 +150,7 @@ model: sonnet
 ```
 我需要把 AI Native 脚手架接入当前项目。
 
-脚手架 GitLab 地址：http://gitlab-iot.yunzhisheng.cn/med-ai/med-ai-native-project-demo.git
+脚手架 GitHub 地址：https://github.com/chenguangwei/ai-native-collaboration.git
 当前项目是 Java Spring Boot 后端项目，我的角色是 backend，gitUser 是 xxx@email.com
 
 请帮我：
