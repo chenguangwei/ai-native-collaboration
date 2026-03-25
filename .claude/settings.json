@@ -30,7 +30,8 @@
       "Bash(touch:*)",
       "Bash(rm:*)",
       "Bash(bash:*)",
-      "Bash(sh:*)"
+      "Bash(sh:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }
