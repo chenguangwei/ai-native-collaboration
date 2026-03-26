@@ -272,7 +272,7 @@ git sparse-checkout set docs/03_architecture docs/01_product src memory
 | [Agents 说明](.claude/agents/README.md) | Agent 列表与使用方式 |
 | [角色技能配置](docs/06_skills/roles/ROLE_SETUP.md) | 各角色工具与工作焦点 |
 | [AI 系统文档](docs/00_ai_system/) | 路由矩阵、subtree 接入手册 |
-| [Claude Code 40 个最佳实践](docs/00_ai_system/claude-code-40-best-practices.md) | 从配置到多 Agent，40 个提升工作流效率的技巧 |
+| [Claude Code 40 个使用技巧](docs/00_ai_system/claude-code-40-best-practices.md) | 从配置到多 Agent，40 个提升工作流效率的技巧 |
 
 ### 产品与研发
 
