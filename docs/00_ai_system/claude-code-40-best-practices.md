@@ -222,11 +222,7 @@ cat error.log | claude "分析这个错误，给出修复方案"
 
 或者直接把 CI 日志、Stack Trace 粘进去，加一句「修掉它」。抽象描述会丢失细节，原始数据给出精准结果。
 
-### 3.4 复杂内容先过 Notion 再粘给 Claude
-
-带超链接的网页内容（GitHub issue、文档页）直接复制到 Claude 会丢失链接。先粘到 Notion，Notion 会保留格式和超链接，再从 Notion 复制给 Claude。
-
-### 3.5 Plan Mode：架构级改动前必用
+### 3.4 Plan Mode：架构级改动前必用
 
 `Shift+Tab` 进入 Plan Mode。
 
