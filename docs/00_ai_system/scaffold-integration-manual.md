@@ -19,12 +19,12 @@
 ```bash
 cd your-project
 
-git remote add scaffold http://gitlab-iot.yunzhisheng.cn/med-ai/med-ai-native-project-demo.git
+git remote add scaffold http://gitlab-iot.yunzhisheng.cn/med-ai/med-ai-native-collaboration.git
 
 # 验证
 git remote -v
-# scaffold  http://gitlab-iot.yunzhisheng.cn/med-ai/med-ai-native-project-demo.git (fetch)
-# scaffold  http://gitlab-iot.yunzhisheng.cn/med-ai/med-ai-native-project-demo.git (push)
+# scaffold  http://gitlab-iot.yunzhisheng.cn/med-ai/med-ai-native-collaboration.git (fetch)
+# scaffold  http://gitlab-iot.yunzhisheng.cn/med-ai/med-ai-native-collaboration.git (push)
 ```
 
 ### 步骤 2：通过 git subtree 拉取脚手架到 `.scaffold/` 目录
@@ -62,8 +62,8 @@ cp -r .scaffold/.agents ./.agents
 > **app_insurance_cloud 实际情况**：GitLab `main` 分支当时尚未包含 `.claude/` 和 `.agents/`，
 > 所以这两个目录是从本地脚手架目录直接复制的：
 > ```bash
-> cp -r /path/to/med-ai-native-project-demo/.claude ./.claude
-> cp -r /path/to/med-ai-native-project-demo/.agents ./.agents
+> cp -r /path/to/med-ai-native-collaboration/.claude ./.claude
+> cp -r /path/to/med-ai-native-collaboration/.agents ./.agents
 > ```
 > 后续脚手架推送到 GitLab 后，通过 `git subtree pull` 即可自动同步，无需再手动复制。
 
