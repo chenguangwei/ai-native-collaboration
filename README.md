@@ -147,6 +147,7 @@ model: sonnet
 
 打开你的项目，启动 Claude Code，把下面这段话发给它，CC 会自动执行所有步骤：
 
+**后端项目接入示例：**
 ```
 我需要把 AI Native 脚手架接入当前项目。
 
@@ -161,6 +162,27 @@ model: sonnet
 5. 告诉我后续如何更新脚手架
 
 注意：不要改动现有 src/ 代码和 pom.xml。
+```
+
+**全栈项目接入示例：**
+```
+我需要把 AI Native 脚手架接入当前项目。
+
+脚手架 GitLab 地址：http://gitlab-iot.yunzhisheng.cn/med-ai/med-ai-native-project-demo.git
+当前项目是前后端分离的全栈项目：
+- 前端：React 18 + TypeScript + Next.js 14（src/frontend/）
+- 后端：Python 3.11 + FastAPI（src/backend/）
+- 数据库：PostgreSQL + Redis
+我的角色是 fullstack，gitUser 是 xxx@email.com
+
+请帮我：
+1. 把脚手架以 git subtree 方式引入到 .scaffold/ 目录（remote 名称用 scaffold）
+2. 把 CLAUDE.md、.claude/、.agents/、docs/、memory/ 复制到项目根目录
+3. 更新 .claude/project-config.json，设置 project="my-app"、currentRole="fullstack"、gitUser
+4. 初始化 memory/roles/fullstack/today.md 工作日志
+5. 告诉我后续如何更新脚手架
+
+注意：不要改动现有 src/ 代码、pom.xml、requirements.txt。
 ```
 
 CC 会逐步执行并在每个关键操作前说明做什么，你确认后它继续。全程大约 2 分钟。
@@ -250,6 +272,7 @@ git sparse-checkout set docs/03_architecture docs/01_product src memory
 | [Agents 说明](.claude/agents/README.md) | Agent 列表与使用方式 |
 | [角色技能配置](docs/06_skills/roles/ROLE_SETUP.md) | 各角色工具与工作焦点 |
 | [AI 系统文档](docs/00_ai_system/) | 路由矩阵、subtree 接入手册 |
+| [Claude Code 40 个最佳实践](docs/00_ai_system/claude-code-40-best-practices.md) | 从配置到多 Agent，40 个提升工作流效率的技巧 |
 
 ### 产品与研发
 
