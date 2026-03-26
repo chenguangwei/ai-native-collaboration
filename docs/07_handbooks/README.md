@@ -6,12 +6,20 @@
 
 ## 手册目录
 
+### 全流程视角（推荐先读）
+
+| 手册 | 描述 |
+|------|------|
+| [handbook-product-workflow.md](handbook-product-workflow.md) | 产品全流程手册：产品→研发→测试→运维完整交付链路 |
+
+### 角色专项手册
+
 | 角色 | 手册 | 描述 |
 |------|------|------|
-| 全栈 | [handbook-fullstack.md](handbook-fullstack.md) | 全栈工程师完整工作流程 |
+| 产品 | [handbook-pm.md](handbook-pm.md) | 产品经理工作指南 |
 | 前端 | [handbook-frontend.md](handbook-frontend.md) | 前端工程师开发指南 |
 | 后端 | [handbook-backend.md](handbook-backend.md) | 后端工程师开发指南 |
-| 产品 | [handbook-pm.md](handbook-pm.md) | 产品经理工作指南 |
+| 全栈 | [handbook-fullstack.md](handbook-fullstack.md) | 全栈工程师完整工作流程 |
 | QA | [handbook-qa.md](handbook-qa.md) | 测试工程师工作指南 |
 | 运维 | [handbook-devops.md](handbook-devops.md) | 运维工程师部署指南 |
 

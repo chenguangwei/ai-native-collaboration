@@ -267,7 +267,7 @@ git sparse-checkout set docs/03_architecture docs/01_product src memory
 
 | 文档 | 说明 |
 |------|------|
-| [Skills 速查索引](docs/06_skills/SKILLS_INDEX.md) | 80 个技能按岗位分类，含触发方式与来源 |
+| [各岗位工作流Skills 速查索引](docs/06_skills/SKILLS_INDEX.md) | 80 个技能按岗位分类，含触发方式与来源 |
 | [Commands 命令集](.claude/commands/README.md) | 8 个轻量命令列表与用法 |
 | [Agents 说明](.claude/agents/README.md) | Agent 列表与使用方式 |
 | [角色技能配置](docs/06_skills/roles/ROLE_SETUP.md) | 各角色工具与工作焦点 |
@@ -283,7 +283,8 @@ git sparse-checkout set docs/03_architecture docs/01_product src memory
 | [架构设计](docs/03_architecture/) | API 规范、数据库设计、系统流程 |
 | [测试用例](docs/04_qa/) | 测试计划、审计日志 |
 | [运维手册](docs/05_ops/) | 部署环境、Runbook |
-| [操作手册](docs/07_handbooks/) | 各角色详细操作指南 |
+| [产品全流程操作手册](docs/07_handbooks/handbook-product-workflow.md) | 产品→研发→测试→运维完整交付链路与协作规范 |
+| [各角色操作手册](docs/07_handbooks/) | 产品/前端/后端/QA/运维各角色详细操作指南 |
 
 ---
 
