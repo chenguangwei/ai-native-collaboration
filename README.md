@@ -235,6 +235,7 @@ skill 会自动完成完整升级流程：
 
 ### AI 交互命令
 
+**脚手架内置命令：**
 ```bash
 /plan-ceo          # 唤醒产品思维，输出高优 PRD
 /plan-architect    # 唤醒架构师思维，进行技术设计
@@ -245,9 +246,25 @@ skill 会自动完成完整升级流程：
 /retro             # 生成复盘报告
 /switch-role       # 切换工作角色
 /scaffold-upgrade  # 升级 AI Native 脚手架到最新版本
-/deep-interview    # Socratic 需求澄清，数学化歧义评分
-/learner           # 提取项目级调试知识为可复用 skill
-/ai-slop-cleaner   # 清除 AI 生成的代码味道（deslop）
+/omc-upgrade       # 升级 oh-my-claudecode 插件
+```
+
+**OMC 扩展命令**（需安装 [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)）：
+```bash
+/oh-my-claudecode:deep-interview   # Socratic 需求澄清，歧义 <20% 才执行
+/oh-my-claudecode:ralph            # PRD 驱动的持续执行，不完成不停止
+/oh-my-claudecode:ultrawork        # 并行执行引擎（Haiku/Sonnet/Opus 分层路由）
+/oh-my-claudecode:autopilot        # idea → 规格 → 实现 → QA 全自动流水线
+/oh-my-claudecode:ai-slop-cleaner  # 行为安全优先的 AI 代码味清理（deslop）
+/oh-my-claudecode:learner          # 提取项目级调试知识为可复用 skill
+/oh-my-claudecode:ultraqa          # QA 循环直到全部测试通过
+/oh-my-claudecode:ralplan          # Planner→Architect→Critic 共识规划
+```
+
+安装 OMC（一次性，全局生效）：
+```
+/plugin marketplace add https://github.com/Yeachan-Heo/oh-my-claudecode
+/plugin install oh-my-claudecode
 ```
 
 ### 多角色配置

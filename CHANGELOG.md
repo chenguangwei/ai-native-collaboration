@@ -4,10 +4,16 @@
 
 ## [2.1.0] - 2026-03-27
 
-### Added（来自 oh-my-claudecode 优秀实践集成）
-- `/deep-interview` skill：Socratic 需求澄清，数学化歧义评分门控（灵感来自 OMC deep-interview）
-- `/learner` skill：从调试会话提取可复用项目级知识
-- `/ai-slop-cleaner` skill：行为安全优先的 AI 代码味道清理工作流
+### Added
+- `oh-my-claudecode` 作为全局 plugin 依赖，直接复用其原版能力（无需 vendor）
+  - `deep-interview`：Socratic 需求澄清，数学化歧义评分
+  - `ralph`：PRD 驱动的持续执行循环
+  - `ultrawork`：并行执行引擎（Haiku/Sonnet/Opus 分层）
+  - `autopilot`：idea → 全自动流水线
+  - `ai-slop-cleaner`：行为安全优先的 AI 代码味清理
+  - `learner`：项目级调试知识提取
+  - `ultraqa` / `ralplan`：QA 循环 + 共识规划
+- `/omc-upgrade` skill：一键升级 OMC 插件
 - `analyst` agent：需求分析师（模糊需求 → 结构化规格）
 - `critic` agent：批判性审查员（挑战方案、发现盲点）
 - Git commit trailers 规范（`Constraint:`/`Rejected:`/`Directive:` 等）
