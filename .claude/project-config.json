@@ -1,65 +1,8 @@
 {
   "project": "ai-native-scaffold",
   "version": "2.0",
-  "_comment": "项目角色配置 - 支持 AI-Native 和传统两套体系。focus 路径指接入方项目的目录",
-  "roles": {
-    "_comment_roles": "AI-Native 角色（推荐）",
-    "delivery-engineer": {
-      "name": "交付工程师",
-      "description": "端到端交付产品特性（含部署上线），不区分前后端语言栈",
-      "focus": [
-        "src/frontend",
-        "src/backend",
-        "src/shared",
-        "ops"
-      ],
-      "memory": "memory/roles/delivery-engineer"
-    },
-    "ai-engineer": {
-      "name": "AI 工程师",
-      "description": "Agent 编排、LLM 集成、AI 流水线",
-      "focus": [
-        "src",
-        ".claude/agents",
-        ".agents/skills"
-      ],
-      "memory": "memory/roles/ai-engineer"
-    },
-    "quality-engineer": {
-      "name": "质量工程师",
-      "description": "全栈测试 + 安全 + 可靠性 + 可观测性",
-      "focus": [
-        "tests"
-      ],
-      "memory": "memory/roles/quality-engineer"
-    },
-    "product-owner": {
-      "name": "产品负责人",
-      "description": "需求策略、PRD、用户研究",
-      "focus": [
-        "docs/01_product"
-      ],
-      "memory": "memory/roles/product-owner"
-    },
-    "_comment_legacy": "传统角色别名（过渡期兼容，映射到 AI-Native 角色）",
-    "fullstack": { "_aliasOf": "delivery-engineer" },
-    "frontend": { "_aliasOf": "delivery-engineer" },
-    "backend": { "_aliasOf": "delivery-engineer" },
-    "pm": { "_aliasOf": "product-owner" },
-    "qa": { "_aliasOf": "quality-engineer" },
-    "devops": { "_aliasOf": "delivery-engineer" },
-    "architect": { "_aliasOf": "ai-engineer" }
-  },
-  "_usage": {
-    "description": "使用说明",
-    "step1": "在下方 currentRole 填写当前角色（推荐使用 AI-Native 角色名）",
-    "step2": "AI 启动时会读取此配置",
-    "step3": "使用 /switch-role <role> 切换角色",
-    "ai_native_roles": "delivery-engineer | ai-engineer | quality-engineer | product-owner",
-    "legacy_roles": "fullstack | frontend | backend | pm | qa | devops | architect（自动映射到 AI-Native 角色）"
-  },
-  "currentRole": "delivery-engineer",
   "gitUser": "chenguangwei@unisound.com",
   "team": "development",
-  "scaffoldVersion": "2.0.0"
+  "scaffoldVersion": "2.0.0",
+  "_comment": "项目基础配置 - 记录脚手架核心元数据。注：已彻底弃用原先的 currentRole 及静态角色目录隔离方案。现有的多角色无缝流转通过读写 memory/active-task.md 及调用 /switch-role 进行动态挂载即可。"
 }
