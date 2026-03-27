@@ -1,9 +1,9 @@
 ---
 name: omc-upgrade
-version: 1.1.0
+version: 2.0.0
 description: |
-  安装或升级 oh-my-claudecode (OMC) 到最新版本，并链接 skills 到全局。
-  触发词：升级 omc、update omc、omc upgrade、安装 omc
+  升级内置的 oh-my-claudecode (OMC) 到最新版本，并同步 skills。
+  触发词：升级 omc、update omc、omc upgrade、omc-upgrade
 allowed-tools:
   - Bash
   - AskUserQuestion
@@ -11,11 +11,11 @@ allowed-tools:
 
 # /omc-upgrade
 
-安装或升级 oh-my-claudecode，让 `/deep-interview`、`/ralph` 等技能全局可用。
+升级脚手架内置的 oh-my-claudecode 到最新版本。OMC 已作为 vendored 依赖内置于 `.claude/skills/omc/`，无需全局安装。
 
-## OMC Skills 列表
+## OMC 内置 Skills
 
-安装后可直接使用（无需前缀）：
+安装脚手架后即可直接使用（无需前缀）：
 
 | 技能 | 用途 |
 |------|------|
@@ -32,30 +32,22 @@ allowed-tools:
 
 ## 执行步骤
 
-### Step 1: 检测 OMC 本地路径
+### Step 1: 定位内置 OMC 目录
 
 ```bash
-# 按优先级查找 OMC
-OMC_PATH=""
-# 1. 全局 git clone 路径（推荐）
-[ -d "$HOME/.claude/omc" ] && OMC_PATH="$HOME/.claude/omc"
-# 2. 项目工作区（如有本地 repo）
-[ -z "$OMC_PATH" ] && [ -d "$HOME/Documents/workspace/oh-my-claudecode" ] && OMC_PATH="$HOME/Documents/workspace/oh-my-claudecode"
-# 3. 已通过 plugin 安装
-[ -z "$OMC_PATH" ] && OMC_PATH=$(ls -d ~/.claude/plugins/cache/*/oh-my-claudecode/* 2>/dev/null | head -1)
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+OMC_PATH="$ROOT/.claude/skills/omc"
+
+if [ ! -d "$OMC_PATH" ]; then
+  echo "ERROR: 内置 OMC 不存在: $OMC_PATH"
+  echo "请确认脚手架已正确接入（.claude/skills/omc/ 应存在）"
+  exit 1
+fi
 
 echo "OMC_PATH=$OMC_PATH"
 ```
 
-**如果 `OMC_PATH` 为空**（未安装），执行安装：
-
-```bash
-git clone --depth 1 https://github.com/Yeachan-Heo/oh-my-claudecode.git ~/.claude/omc
-OMC_PATH="$HOME/.claude/omc"
-echo "Installed to $OMC_PATH"
-```
-
-### Step 2: 如果已安装，拉取最新版本
+### Step 2: 拉取最新版本
 
 ```bash
 if [ -d "$OMC_PATH/.git" ]; then
@@ -65,30 +57,40 @@ if [ -d "$OMC_PATH/.git" ]; then
   NEW_SHA=$(git rev-parse --short HEAD)
   echo "OLD=$OLD_SHA NEW=$NEW_SHA"
   [ "$OLD_SHA" = "$NEW_SHA" ] && echo "ALREADY_LATEST" || echo "UPDATED"
+else
+  echo "WARN: OMC 目录非 git 仓库，执行重新克隆..."
+  TEMP_DIR=$(mktemp -d)
+  git clone --depth 1 https://github.com/Yeachan-Heo/oh-my-claudecode.git "$TEMP_DIR"
+  rm -rf "$OMC_PATH"
+  mv "$TEMP_DIR" "$OMC_PATH"
+  NEW_SHA=$(cd "$OMC_PATH" && git rev-parse --short HEAD)
+  echo "REINSTALLED: $NEW_SHA"
 fi
 ```
 
-### Step 3: 链接 skills 到 ~/.claude/skills/
+### Step 3: 重建 .claude/skills/ 下的符号链接
 
 ```bash
-OMC_SKILLS="$OMC_PATH/skills"
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+OMC_SKILLS="$ROOT/.claude/skills/omc/skills"
 SKILLS="deep-interview learner ai-slop-cleaner ralph ultrawork autopilot ultraqa ralplan"
 
 for skill in $SKILLS; do
-  ln -sf "$OMC_SKILLS/$skill" ~/.claude/skills/$skill
-  echo "linked: $skill → $OMC_SKILLS/$skill"
+  if [ -d "$OMC_SKILLS/$skill" ]; then
+    ln -sfn "omc/skills/$skill" "$ROOT/.claude/skills/$skill"
+    echo "linked: $skill → omc/skills/$skill"
+  fi
 done
 ```
 
-### Step 4: 链接 agents 到 ~/.claude/agents/（如存在）
+### Step 4: 同步到 .agents/skills/（Codex 兼容）
 
 ```bash
-if [ -d "$OMC_PATH/agents" ]; then
-  for agent in executor architect critic analyst explore code-reviewer; do
-    [ -f "$OMC_PATH/agents/$agent.md" ] && \
-      cp "$OMC_PATH/agents/$agent.md" ~/.claude/agents/omc-$agent.md && \
-      echo "agent: omc-$agent"
-  done
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+if [ -f "$ROOT/scripts/sync-omc-skills.sh" ]; then
+  bash "$ROOT/scripts/sync-omc-skills.sh"
+else
+  echo "SKIP: sync-omc-skills.sh 不存在，跳过 .agents/ 同步"
 fi
 ```
 
@@ -96,12 +98,13 @@ fi
 
 报告结果：
 ```
-✅ OMC 已就绪
+✅ OMC 已升级
 
-版本：{NEW_SHA 或 already latest}
-Skills 已链接到 ~/.claude/skills/：
+版本：{NEW_SHA}
+内置路径：.claude/skills/omc/
+Skills 已链接：
   /deep-interview  /ralph  /ultrawork  /autopilot
   /ai-slop-cleaner  /learner  /ultraqa  /ralplan
 
-现在可以直接使用，例如：/deep-interview "我想做一个..."
+OMC 为内置组件，无需全局安装 plugin。
 ```

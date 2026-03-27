@@ -1,0 +1,1 @@
+../skills/omc/agents/architect.md

@@ -128,28 +128,22 @@ paths:
 
 ### oh-my-claudecode (OMC)
 
-OMC 是全局 plugin，**安装一次即可在所有项目使用**。未安装时运行 `/omc-upgrade` 会提示安装步骤。
+OMC 已**内置**于脚手架（`.claude/skills/omc/`），无需单独安装 plugin，接入脚手架即可直接使用。
 
-**安装（一次性）：**
-```
-/plugin marketplace add https://github.com/Yeachan-Heo/oh-my-claudecode
-/plugin install oh-my-claudecode
-```
-
-**核心技能（通过 `/oh-my-claudecode:` 前缀调用）：**
+**核心技能（直接调用，无需前缀）：**
 
 | 技能 | 触发词 | 用途 |
 |------|--------|------|
-| `deep-interview` | "deep interview", "需求不清楚" | Socratic 需求澄清，歧义 <20% 才执行 |
-| `ralph` | "ralph", "不要停", "必须完成" | PRD 驱动的持续执行循环 |
-| `ultrawork` | "ulw", "并行执行" | 并行执行引擎（Haiku/Sonnet/Opus 分层） |
-| `autopilot` | "autopilot", "全自动" | idea → 规格 → 实现 → QA 全自动流水线 |
-| `ai-slop-cleaner` | "deslop", "anti-slop" | 行为安全优先的 AI 代码味清理 |
-| `learner` | "提取经验", "保存解法" | 从调试会话提取项目级可复用知识 |
-| `ultraqa` | "ultraqa" | QA 循环直到全部测试通过 |
-| `ralplan` | "ralplan" | Planner→Architect→Critic 共识规划 |
+| `/deep-interview` | "deep interview", "需求不清楚" | Socratic 需求澄清，歧义 <20% 才执行 |
+| `/ralph` | "ralph", "不要停", "必须完成" | PRD 驱动的持续执行循环 |
+| `/ultrawork` | "ulw", "并行执行" | 并行执行引擎（Haiku/Sonnet/Opus 分层） |
+| `/autopilot` | "autopilot", "全自动" | idea → 规格 → 实现 → QA 全自动流水线 |
+| `/ai-slop-cleaner` | "deslop", "anti-slop" | 行为安全优先的 AI 代码味清理 |
+| `/learner` | "提取经验", "保存解法" | 从调试会话提取项目级可复用知识 |
+| `/ultraqa` | "ultraqa" | QA 循环直到全部测试通过 |
+| `/ralplan` | "ralplan" | Planner→Architect→Critic 共识规划 |
 
-**更新：**`/omc-upgrade`
+**更新：**`/omc-upgrade`（从 GitHub 拉取最新版到内置目录）
 
 ## 项目结构
 
