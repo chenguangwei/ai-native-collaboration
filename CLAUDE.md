@@ -37,7 +37,9 @@
 }
 ```
 
-合法的 `currentRole` 值：`delivery-engineer` · `ai-engineer` · `quality-engineer` · `product-owner`
+合法的 `currentRole` 值：
+- AI-Native：`delivery-engineer` · `ai-engineer` · `quality-engineer` · `product-owner`
+- 传统体系：`frontend` · `backend` · `qa` · `devops` · `product-manager`
 
 > 角色详情与传统岗位映射，详见 `docs/00_ai_system/roles/`
 

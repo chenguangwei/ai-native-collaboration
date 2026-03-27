@@ -34,7 +34,7 @@
 - **[traditional/SKILLS_INDEX.md](traditional/SKILLS_INDEX.md)** — 技能按传统岗位分类
 - **[traditional/ROLE_SETUP.md](traditional/ROLE_SETUP.md)** — 传统岗位 → currentRole 映射
 
-3 个角色值：`product-owner` · `delivery-engineer` · `quality-engineer`
+5 个角色值：`product-manager` · `frontend` · `backend` · `qa` · `devops`
 
 
 ---
