@@ -17,13 +17,11 @@
 
 ## 传统岗位 → currentRole 映射
 
-| 你的岗位 | currentRole 值 | 说明 |
-|---------|---------------|------|
-| 产品经理 | `product-owner` | 需求策略、PRD |
-| 前端工程师 | `delivery-engineer` | UI、交互、前端逻辑 |
-| 后端工程师 | `delivery-engineer` | API、服务、数据层 |
-| 测试工程师 | `quality-engineer` | 测试、安全、质量保障 |
-| 运维工程师 | `delivery-engineer` | 基础设施、部署、监控 |
+| currentRole | 对应传统岗位 | 说明 |
+|-------------|------------|------|
+| `product-owner` | 产品经理 | 需求策略、PRD |
+| `delivery-engineer` | 前端工程师、后端工程师、运维工程师 | 端到端交付（UI / API / 基础设施） |
+| `quality-engineer` | 测试工程师 | 测试、安全、质量保障 |
 
 > **为什么前端和后端都用 `delivery-engineer`？**
 > Claude Code 本身不区分语言栈，同一套技能对前端（React/TS）和后端（Java/Python/Go）均适用。你自己知道自己在做什么就够了。
