@@ -29,12 +29,18 @@
 
 ## 传统体系（过渡期）
 
-> 保留现有分工，人人配备 AI 工具，协作方式不变
+> 保留现有分工，人人配备 AI 工具，映射到 AI-Native 角色值
 
-- **[traditional/SKILLS_INDEX.md](traditional/SKILLS_INDEX.md)** — 技能按产品/研发/测试/运维分类
-- **[traditional/ROLE_SETUP.md](traditional/ROLE_SETUP.md)** — 传统岗位配置
+- **[traditional/SKILLS_INDEX.md](traditional/SKILLS_INDEX.md)** — 技能按传统岗位分类
+- **[traditional/ROLE_SETUP.md](traditional/ROLE_SETUP.md)** — 传统岗位 → currentRole 映射
 
-4 个岗位分组：`产品` · `研发（前端+后端）` · `测试` · `运维`
+| 传统岗位 | currentRole |
+|---------|-------------|
+| 产品经理 | `product-owner` |
+| 前端工程师 | `delivery-engineer` |
+| 后端工程师 | `delivery-engineer` |
+| 测试工程师 | `quality-engineer` |
+| 运维工程师 | `delivery-engineer` |
 
 ---
 
@@ -50,7 +56,7 @@
 | 完成前验证 | `/verification-before-completion` |
 | 代码审查 | `/review` |
 | 发布检查 | `/ship` |
-| 安装 OMC | `/omc-upgrade` |
+| 更新 OMC | `/omc-upgrade` |
 
 ---
 

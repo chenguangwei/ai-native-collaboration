@@ -37,14 +37,9 @@
 }
 ```
 
-| 角色 | 描述 |
-|------|------|
-| `delivery-engineer` | 交付工程师（端到端交付，含部署上线） |
-| `ai-engineer` | AI 工程师（Agent 编排、LLM 集成） |
-| `quality-engineer` | 质量工程师（测试+安全+可靠性） |
-| `product-owner` | 产品负责人（需求策略、PRD） |
+合法的 `currentRole` 值：`delivery-engineer` · `ai-engineer` · `quality-engineer` · `product-owner`
 
-> 传统岗位（前端/后端/测试/运维）映射到上述角色，详见 `docs/00_ai_system/roles/`
+> 角色详情与传统岗位映射，详见 `docs/00_ai_system/roles/`
 
 ---
 
