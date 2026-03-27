@@ -34,13 +34,8 @@
 - **[traditional/SKILLS_INDEX.md](traditional/SKILLS_INDEX.md)** — 技能按传统岗位分类
 - **[traditional/ROLE_SETUP.md](traditional/ROLE_SETUP.md)** — 传统岗位 → currentRole 映射
 
-| 传统岗位 | currentRole |
-|---------|-------------|
-| 产品经理 | `product-owner` |
-| 前端工程师 | `delivery-engineer` |
-| 后端工程师 | `delivery-engineer` |
-| 测试工程师 | `quality-engineer` |
-| 运维工程师 | `delivery-engineer` |
+3 个角色值：`product-owner` · `delivery-engineer` · `quality-engineer`
+
 
 ---
 
