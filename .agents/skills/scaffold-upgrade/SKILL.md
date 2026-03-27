@@ -129,6 +129,11 @@ tests/                          # 测试用例
 CLAUDE.local.md                 # 本地覆盖的 CLAUDE.md
 ```
 
+**不分发（脚手架仓库专用）**：
+```
+CLAUDE.scaffold.md              # 脚手架开发者指南，不复制到业务项目
+```
+
 **直接覆盖（脚手架拥有）**：
 ```bash
 # 同步规则文件
@@ -140,9 +145,9 @@ cp -r .scaffold/.claude/agents/ .claude/agents/
 # 同步命令（保护项目自定义命令）
 rsync -av --exclude='*.local.md' .scaffold/.claude/commands/ .claude/commands/
 
-# 同步 Skills（跳过 gstack，它有独立升级流程）
-rsync -av --exclude='gstack' .scaffold/.agents/skills/ .agents/skills/
-rsync -av --exclude='gstack' .scaffold/.claude/skills/ .claude/skills/
+# 同步 Skills（跳过 gstack 和 omc，它们有独立升级流程）
+rsync -av --exclude='gstack' --exclude='omc' .scaffold/.agents/skills/ .agents/skills/
+rsync -av --exclude='gstack' --exclude='omc' .scaffold/.claude/skills/ .claude/skills/
 
 # 同步脚本
 cp -r .scaffold/scripts/ ./scripts/
@@ -215,10 +220,11 @@ echo "SCAFFOLD_NEW_HASH=$SCAFFOLD_NEW_HASH"
 | `.claude/rules/` | 覆盖 | 脚手架拥有，项目不应直接修改 |
 | `.claude/agents/` | 覆盖 | 脚手架拥有 |
 | `.claude/commands/` | 合并（跳过 *.local.md） | 允许项目添加自定义命令 |
-| `.agents/skills/` | 覆盖（跳过 gstack） | gstack 有独立升级流程 |
-| `.claude/skills/` | 覆盖（跳过 gstack） | 同上 |
+| `.agents/skills/` | 覆盖（跳过 gstack/omc） | gstack、omc 有独立升级流程 |
+| `.claude/skills/` | 覆盖（跳过 gstack/omc） | 同上 |
 | `scripts/` | 覆盖 | 脚手架工具脚本 |
 | `CLAUDE.md` | 智能检测 | 可能被项目自定义 |
+| `CLAUDE.scaffold.md` | 不分发 | 脚手架仓库专用，不复制到业务项目 |
 | `.claude/project-config.json` | 永不覆盖 | 项目专属配置 |
 | `memory/` | 永不覆盖 | AI 运行时状态 |
 | `src/` | 永不覆盖 | 业务代码 |

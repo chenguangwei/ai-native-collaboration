@@ -60,7 +60,7 @@ paths:
 - `/debug` - 启动结构化排障
 - `/retro` - 生成复盘报告
 - `/scaffold-upgrade` - 升级 AI Native 脚手架到最新版本
-- `/omc-upgrade` - 升级 oh-my-claudecode 插件
+- `/omc-upgrade` - 升级 oh-my-claudecode 到最新版本
 
 ### 可用的 Agent
 
@@ -76,19 +76,6 @@ paths:
 - **critic** - 批判性审查员（挑战方案、发现盲点）
 
 > Agents 在"后台"运行，只输出最终报告，避免刷屏。详见 `.claude/agents/README.md`
-
-### codex
-
-使用 `/codex` 调用 Codex CLI（需先安装 `npm i -g @openai/codex`）。
-
-**三种模式：**
-- `/codex review` - 独立 diff 审查，pass/fail gate
-- `/codex challenge` - 对抗模式，尝试破坏你的代码
-- `ask codex <问题>` - 咨询模式，支持追问
-
-**多 Agent 配置位于** `.codex/` 目录（`config.toml` + `AGENTS.md` + `agents/`）。
-
-> 如果 codex 未安装：`npm install -g @openai/codex`
 
 ### gstack
 
@@ -144,41 +131,6 @@ OMC 已**内置**于脚手架（`.claude/skills/omc/`），无需单独安装 pl
 | `/ralplan` | "ralplan" | Planner→Architect→Critic 共识规划 |
 
 **更新：**`/omc-upgrade`（从 GitHub 拉取最新版到内置目录）
-
-## 项目结构
-
-```
-├── .agents/
-│   └── skills/           # 统一 Skill 源（Claude Code + Codex 共用）
-│       ├── brainstorming/
-│       │   ├── SKILL.md
-│       │   └── agents/openai.yaml
-│       ├── systematic-debugging/
-│       ├── test-driven-development/
-│       ├── gstack*/      # 由 scripts/sync-agents-skills.sh 同步
-│       └── ...（72 个 skills）
-│
-├── .claude/
-│   ├── rules/            # AI 的肌肉记忆（全局始终加载）
-│   ├── commands/         # 驾驭者的操纵杆（单个 .md，简单任务）
-│   ├── agents/           # 后台专家（后台运行，只输出报告）
-│   └── skills/
-│       ├── gstack/       # gstack vendored（Claude Code 原生）
-│       ├── brainstorming → ../../.agents/skills/brainstorming
-│       └── ...（符号链接 → .agents/skills/）
-│
-├── .codex/               # Codex CLI 配置
-│   ├── AGENTS.md         # Codex 专属指令
-│   ├── config.toml       # 运行时配置（MCP、多 agent）
-│   └── agents/           # Codex 多 agent 角色定义
-│
-├── scripts/
-│   ├── sync-agents-skills.sh   # gstack升级后同步到.agents/skills/
-│   ├── replace-placeholders.sh
-│   └── lock.sh
-├── memory/               # 跨会话状态同步中心
-└── docs/                 # 全景知识库
-```
 
 ## 启动流程
 
