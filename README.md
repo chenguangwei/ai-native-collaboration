@@ -245,6 +245,9 @@ skill 会自动完成完整升级流程：
 /retro             # 生成复盘报告
 /switch-role       # 切换工作角色
 /scaffold-upgrade  # 升级 AI Native 脚手架到最新版本
+/deep-interview    # Socratic 需求澄清，数学化歧义评分
+/learner           # 提取项目级调试知识为可复用 skill
+/ai-slop-cleaner   # 清除 AI 生成的代码味道（deslop）
 ```
 
 ### 多角色配置

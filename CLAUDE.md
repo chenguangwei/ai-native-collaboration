@@ -60,6 +60,9 @@ paths:
 - `/debug` - 启动结构化排障
 - `/retro` - 生成复盘报告
 - `/scaffold-upgrade` - 升级 AI Native 脚手架到最新版本
+- `/deep-interview` - Socratic 需求澄清，歧义度降到 20% 以下再执行
+- `/learner` - 从当前会话提取可复用的项目级调试知识
+- `/ai-slop-cleaner` - 系统化清除 AI 生成的代码味道（deslop）
 
 ### 可用的 Agent
 
@@ -71,6 +74,8 @@ paths:
 - **python-reviewer** - Python 后端审查 (FastAPI/Django)
 - **security-auditor** - 安全漏洞扫描
 - **performance-analyzer** - 性能瓶颈分析
+- **analyst** - 需求分析师（将模糊需求转化为结构化规格）
+- **critic** - 批判性审查员（挑战方案、发现盲点）
 
 > Agents 在"后台"运行，只输出最终报告，避免刷屏。详见 `.claude/agents/README.md`
 

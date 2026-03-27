@@ -2,6 +2,22 @@
 
 所有版本变更记录遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [2.1.0] - 2026-03-27
+
+### Added（来自 oh-my-claudecode 优秀实践集成）
+- `/deep-interview` skill：Socratic 需求澄清，数学化歧义评分门控（灵感来自 OMC deep-interview）
+- `/learner` skill：从调试会话提取可复用项目级知识
+- `/ai-slop-cleaner` skill：行为安全优先的 AI 代码味道清理工作流
+- `analyst` agent：需求分析师（模糊需求 → 结构化规格）
+- `critic` agent：批判性审查员（挑战方案、发现盲点）
+- Git commit trailers 规范（`Constraint:`/`Rejected:`/`Directive:` 等）
+- 模型分层路由规则（Haiku/Sonnet/Opus 三档明确指引）
+
+### Changed
+- `behaviors.md`：新增第 9 章（Git Trailers）、第 10 章（模型分层路由）
+- `skill-triggers.md`：新增 deep-interview / learner / ai-slop-cleaner / critic 触发规则
+- `CLAUDE.md`：新增 3 个命令 + 2 个 Agent 说明
+
 ---
 
 ## [2.0.0] - 2026-03-24

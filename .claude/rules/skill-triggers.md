@@ -14,6 +14,7 @@
 | 完成实现前 | verification-before-completion | 验证通过后才能声称完成 |
 | 收到代码审查反馈 | receiving-code-review | 实现审查建议前 |
 | 构建/类型错误出现 | `build-error-resolver` agent | 快速修复，最小 diff |
+| 任务模糊、需求不清楚 | deep-interview | 歧义度降到 20% 再开始执行 |
 
 ### Level 2: 推荐触发 (Recommended)
 这些技能在匹配场景时推荐使用。
@@ -27,6 +28,8 @@
 | 提交 PR 前 | requesting-code-review | 请求代码审查 |
 | 完成开发分支 | finishing-a-development-branch | 分支收尾工作 |
 | 刚写完/改完代码 | 对应 reviewer agent | 后台代码审查 |
+| 解决了复杂 Bug / 发现隐藏陷阱 | learner | 提取可复用知识 |
+| 实现完成但代码感觉"很AI" | ai-slop-cleaner | 清理代码味道 |
 
 ### Level 3: 可选触发 (Optional)
 按需手动调用。
@@ -54,6 +57,8 @@
 | Python 代码改动 | `python-reviewer` | 是 |
 | 安全敏感代码 | `security-auditor` | 是 |
 | 多模块同时分析 | 并行启动多个 agent | 是（独立任务） |
+| 需求模糊无法直接分解 | analyst | 否（先分析） |
+| 重大技术方案决策 | critic | 是 |
 
 ---
 

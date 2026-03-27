@@ -192,3 +192,87 @@ update(original, field, value)  // 返回含修改的新副本
 - 高级工程师视角
 - 安全专家视角
 - 一致性审查
+
+---
+
+## 9. Git Commit Trailers（决策上下文）
+
+### 原则
+在 commit message 中用 trailers 保留决策上下文，让未来维护者理解**为什么**，而不只是**做了什么**。
+
+### 格式
+```
+<类型>: <简短描述>
+
+<可选说明>
+
+Constraint: <限制了本次决策的约束>
+Rejected: <被否定的替代方案> | <否定原因>
+Directive: <给未来修改者的警告或指令>
+Confidence: high | medium | low
+Scope-risk: narrow | moderate | broad
+Not-tested: <未被测试覆盖的边界情况>
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+```
+
+### 示例
+```
+fix(auth): 修复长操作中会话静默断开的问题
+
+Auth 服务在 token 过期时返回不一致的状态码，
+因此拦截器捕获所有 4xx 并触发内联刷新。
+
+Constraint: Auth 服务不支持 token 内省
+Constraint: 不能在非过期路径上增加延迟
+Rejected: 将 token TTL 延长到 24h | 违反安全策略
+Rejected: 定时器后台刷新 | 与并发请求存在竞态条件
+Confidence: high
+Scope-risk: narrow
+Directive: 错误处理故意覆盖所有 4xx — 不要在验证上游行为前收窄范围
+Not-tested: Auth 服务冷启动延迟 >500ms 的情况
+```
+
+### 使用规则
+- **必须包含**：Constraint（如有重要约束）、Rejected（如考虑过替代方案）
+- **可选包含**：Directive、Confidence、Scope-risk、Not-tested
+- **简单 commit 可跳过**（拼写修正、格式调整、明显的单行修复）
+
+---
+
+## 10. 模型分层路由（Model Tier Routing）
+
+### 原则
+根据任务复杂度选择合适的模型，在质量和成本之间取得平衡。
+
+### 三档路由
+
+| 等级 | 模型 | 适用场景 |
+|------|------|---------|
+| LOW（轻量） | Haiku | 简单查找、状态检查、格式化、小改动 |
+| MEDIUM（标准） | Sonnet | 标准实现、代码审查、单模块重构 |
+| HIGH（深度） | Opus | 架构设计、复杂 Bug、安全分析、多系统影响评估 |
+
+### 适用示例
+
+**Haiku**（快速响应）：
+- "这个函数返回什么类型？"
+- "列出所有 TODO 注释"
+- "添加缺失的 import"
+
+**Sonnet**（日常工作）：
+- "为这个模块添加错误处理"
+- "重构这个 Controller 的方法命名"
+- "写这个功能的单元测试"
+
+**Opus**（深度推理）：
+- "分析这个并发 Bug 的根因"
+- "评估引入 Redis 缓存的架构影响"
+- "审查这段支付代码的安全风险"
+
+### 在 Agent 调用时声明
+```
+Task(subagent_type="...", model="haiku", prompt="...")  // 简单任务
+Task(subagent_type="...", model="sonnet", prompt="...") // 标准任务
+Task(subagent_type="...", model="opus", prompt="...")   // 复杂任务
+```
