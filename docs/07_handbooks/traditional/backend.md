@@ -12,7 +12,7 @@
 
 ```json
 {
-  "currentRole": "backend",
+  "currentRole": "product-engineer",
   "gitUser": "your@email.com",
   "team": "backend-team"
 }
