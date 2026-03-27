@@ -71,28 +71,6 @@ else
   echo "   ⚠️  未找到 python3，请手动更新 .claude/project-config.json"
 fi
 
-# Step 5: 初始化 memory 日志
-ROLE=$(python3 -c "import json; print(json.load(open('.claude/project-config.json'))['currentRole'])" 2>/dev/null || echo "fullstack")
-TODAY=$(date +%Y-%m-%d)
-ROLE_LOG="memory/roles/$ROLE/today.md"
-
-mkdir -p "memory/roles/$ROLE"
-if [ ! -f "$ROLE_LOG" ]; then
-  cat > "$ROLE_LOG" <<LOGEOF
-# 📅 $TODAY $ROLE 工作日志
-
-## 今日目标
-- [ ] 项目初始化完成
-
-## 今日完成
-（会话结束时更新）
-
-## 明日待办
-（会话结束时更新）
-LOGEOF
-  echo "   ✅ 初始化角色日志: $ROLE_LOG"
-fi
-
 echo ""
 echo "✅ 项目初始化完成！"
 echo ""
@@ -102,5 +80,5 @@ echo "后端技术栈: $BACKEND"
 echo ""
 echo "下一步："
 echo "  1. git init && git add -A && git commit -m 'feat: 初始化项目 $PROJECT_NAME'"
-echo "  2. 编辑 .claude/project-config.json 配置团队角色和 gitUser"
+echo "  2. 【重要】更新 memory/active-task.md 写下第一批执行 Checklist"
 echo "  3. 启动 Claude Code，运行 /plan-ceo 开始规划"

@@ -178,11 +178,11 @@ You MUST complete each phase before proceeding to the next.
    - MUST have before fixing
    - Use the `superpowers:test-driven-development` skill for writing proper failing tests
 
-2. **Implement Single Fix**
-   - Address the root cause identified
+2. **Implement Single Fix (Minimum Diff)**
+   - Address the root cause identified with the SMALLEST possible code change
    - ONE change at a time
-   - No "while I'm here" improvements
-   - No bundled refactoring
+   - Absolutely NO architectural changes or "while I'm here" improvements
+   - No bundled refactoring - goal is to make the test/build pass with surgical precision
 
 3. **Verify Fix**
    - Test passes now?

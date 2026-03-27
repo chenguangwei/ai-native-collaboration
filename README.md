@@ -31,25 +31,22 @@
 ├── scripts/               # 🔧 脚手架工具脚本
 │   ├── replace-placeholders.sh   # 新项目初始化
 │   ├── sync-agents-skills.sh     # gstack 升级同步
-│   ├── sync-omc-skills.sh        # OMC 升级同步
-│   └── lock.sh                   # 多 AI 并发任务锁
+│   └── sync-omc-skills.sh        # OMC 升级同步
 │
-├── memory/                # 💾 跨会话记忆体 (Layer 1)
-│   ├── .index/            # 团队概览 + 任务注册表
-│   ├── roles/             # 按角色存储的工作日志
-│   ├── persons/           # 按人员存储的工作日志
-│   ├── shared/            # 共享文档（复盘、审计）
-│   └── lock/              # 任务锁文件
+├── memory/                # 🧠 跨会话记忆体 (RAM/动态上下文)
+│   ├── active-task.md     # 当前进行中的核心大纲与拆解任务树
+│   ├── handoff.md         # 跨会话交接信、进度阻碍与状态留存
+│   └── project-facts.md   # 本项目隐藏的踩坑经验与反省铁律
 │
-└── docs/                  # 📖 知识库 (Layer 2)
-    ├── 00_ai_system/      # AI 系统文档 + 角色配置
-    │   └── roles/         # AI-Native / 传统体系角色定义
+└── docs/                  # 📖 固化知识库 (ROM/长时记忆)
+    ├── 00_AI_NATIVE_SOP.md# 👑 核心操作大纲 (SOP 必读教程)
+    ├── 00_ai_system/      # AI 系统与命令设计规范
     ├── 01_product/        # 产品文档（PRD、业务规则）
     ├── 02_design/         # 设计规范（设计系统、UI 资产）
     ├── 03_architecture/   # 架构设计（API、数据库、流程）
     ├── 04_qa/             # 测试用例 + 审计日志
     ├── 05_ops/            # 运维手册（部署、Runbook）
-    └── 06_handbooks/      # 各角色操作手册
+    └── 06_handbooks/      # 各角色操作手册与技能查询索引
 ```
 
 ---
@@ -144,9 +141,8 @@ model: sonnet
 请帮我：
 1. 把脚手架以 git subtree 方式引入到 .scaffold/ 目录（remote 名称用 scaffold）
 2. 把 CLAUDE.md、.claude/、.agents/、docs/、memory/ 复制到项目根目录
-3. 更新 .claude/project-config.json，设置 project、currentRole、gitUser
-4. 初始化 memory/roles/delivery-engineer/today.md 工作日志
-5. 告诉我后续如何更新脚手架
+3. 更新 .claude/project-config.json，初始化基本项目环境参数
+4. 告诉我后续如何更新脚手架
 
 注意：不要改动现有 src/ 代码和 pom.xml。
 ```
@@ -165,9 +161,8 @@ model: sonnet
 请帮我：
 1. 把脚手架以 git subtree 方式引入到 .scaffold/ 目录（remote 名称用 scaffold）
 2. 把 CLAUDE.md、.claude/、.agents/、docs/、memory/ 复制到项目根目录
-3. 更新 .claude/project-config.json，设置 project="my-app"、currentRole="delivery-engineer"、gitUser
-4. 初始化 memory/roles/delivery-engineer/today.md 工作日志
-5. 告诉我后续如何更新脚手架
+3. 更新 .claude/project-config.json，初始化基本项目环境参数
+4. 告诉我后续如何更新脚手架
 
 注意：不要改动现有 src/ 代码、pom.xml、requirements.txt。
 ```
@@ -248,16 +243,9 @@ skill 会自动完成完整升级流程：
 /ralplan          # Planner→Architect→Critic 共识规划
 ```
 
-### 多角色配置
+### 多元角色融合与切换
 
-编辑 `.claude/project-config.json` 设置当前角色：
-
-```json
-{
-  "currentRole": "delivery-engineer",
-  "gitUser": "your@email.com"
-}
-```
+摒弃死板的 JSON 文件角色锁，系统采用高自由度的动态机甲加载方案：你可以直接通过撰写 `memory/active-task.md` 来让 AI **隐式流转角色**；或者在对话中显式执行 `/switch-role [角色名]` 进行强制状态锚定。
 
 #### AI-Native 体系 🚀（推荐）
 
@@ -270,8 +258,7 @@ skill 会自动完成完整升级流程：
 | AI 工程师 | `ai-engineer` | Agent 编排、LLM 集成、AI 流水线 |
 | 质量工程师 | `quality-engineer` | 全栈测试 + 安全 + 可靠性 + 可观测性 |
 
-
-详见 [AI-Native 角色配置说明](docs/00_ai_system/roles/ai-native/ROLE_SETUP.md)
+详见 👉 [全局操作总纲 SOP](docs/00_AI_NATIVE_SOP.md) (基建协同铁律)
 
 #### 传统体系 👥（过渡期）
 
@@ -284,8 +271,7 @@ skill 会自动完成完整升级流程：
 | 后端工程师 | `delivery-engineer` | API、服务、数据层 |
 | 测试工程师 | `quality-engineer` | 测试、安全、质量保障 |
 | 运维工程师 | `delivery-engineer` | 基础设施、部署、监控 |
-
-详见 [传统角色配置说明](docs/00_ai_system/roles/traditional/ROLE_SETUP.md) | [传统体系操作手册](docs/06_handbooks/traditional/README.md)
+详见 [传统体系操作大全](docs/06_handbooks/traditional/README.md) | [全局操作总纲 SOP](docs/00_AI_NATIVE_SOP.md)
 
 ---
 
@@ -336,11 +322,10 @@ git sparse-checkout set ops docs/05_ops memory
 
 | 文档 | 说明 |
 |------|------|
-| [Skills 速查索引](docs/00_ai_system/roles/ai-native/SKILLS_INDEX.md) | 88 个技能按岗位分类，含触发方式与来源 |
-| [Commands 命令集](.claude/commands/README.md) | 8 个轻量命令列表与用法 |
-| [Agents 说明](.claude/agents/README.md) | Agent 列表与使用方式 |
-| [AI-Native 角色配置](docs/00_ai_system/roles/ai-native/ROLE_SETUP.md) | AI-Native 岗位配置与决策树 |
-| [传统角色配置](docs/00_ai_system/roles/traditional/ROLE_SETUP.md) | 传统岗位映射与过渡指南 |
+| [全局操作总纲 SOP(必读)](docs/00_AI_NATIVE_SOP.md) | 最核心的协作规范：ROM/RAM 分区及过渡期剧本指引 |
+| [Skills 速查索引](docs/06_handbooks/ai-native/SKILLS_INDEX.md) | 88 个强悍技能按 4 大职业分类，含触发方式 |
+| [Commands 命令集](.claude/commands/README.md) | 轻量且高频的核心执行命令 |
+| [Agents 说明](.claude/agents/README.md) | 后台分析师/测试员/监控卫士列表 |
 | [AI 系统文档](docs/00_ai_system/) | 路由矩阵、subtree 接入手册 |
 | [Claude Code 使用技巧：从入门到精通](docs/00_ai_system/claude-code-40-best-practices.md) | 从配置到多 Agent，40+ 个提升工作流效率的技巧 |
 

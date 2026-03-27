@@ -141,7 +141,7 @@ paths:
 | `behaviors.md` | 全局 |
 | `anti-slop.md` | 全局 |
 | `skill-triggers.md` | 全局 |
-| `memory-flush.md` | 全局 |
+| `memory-sync.md` | 全局 |
 | `api-rules.md` | `src/api/**`, `src/handlers/**`, `src/server/**` |
 | `component-rules.md` | `src/components/**`, `src/ui/**`, `src/widgets/**` |
 

@@ -1,93 +1,70 @@
-# 💾 Memory 目录说明
+# 💾 AI 协同记忆库 (Memory)
 
-> 多角色协作的记忆管理系统
+> 这个目录被设计为 AI Agent 的**短期/中期工作内存 (RAM)**。
 
-## 目录结构
+我们强烈建议：**人类不要在这里耗费精力维护，这里的文档专属于 AI 之间的自主读写、交接与状态维系。**
 
-```
+人类应该去维护项目目录 `docs/` 下的架构设计、API 规范及需求等长期稳态资产 (ROM)。
+
+---
+
+## 目录结构与使用法则
+
+本目录采用极简的扁平 Markdown 结构，通过 AI Agent 在退出或遇到瓶颈时的自动写入触发器来保证不发生遗忘和上下文塌陷。
+
+```text
 memory/
-├── .index/                    # 索引目录（跨角色共享）
-│   ├── today-overview.md      # 今日全局概览
-│   ├── active-tasks.json      # 跨角色任务注册表
-│   └── roles/                 # 角色状态索引
-│       ├── backend.json
-│       ├── frontend.json
-│       ├── pm.json
-│       ├── qa.json
-│       ├── devops.json
-│       └── architect.json
-│
-├── roles/                     # 按角色存储
-│   ├── backend/              # 后端工程师
-│   ├── frontend/             # 前端工程师
-│   ├── pm/                   # 产品经理
-│   ├── qa/                   # QA 测试
-│   ├── devops/               # 运维工程师
-│   └── architect/             # 架构师
-│
-├── persons/                   # 按人员存储（基于 git user）
-│
-├── shared/                    # 共享文档
-│   ├── projects.md
-│   ├── goals.md
-│   ├── retrospectives/
-│   └── audit-logs/
-│
-└── lock/                      # 任务锁
-    └── conductor-tasks.json
+├── active-task.md      # 【主线进展】当前活跃 Feature/Bug 的拆解执行 Checklist 🌲
+├── handoff.md          # 【会话交接】当前未完成事务的状态日志、阻塞点及给下一任的留言 📝
+└── project-facts.md    # 【避坑准则】通过长期迭代从代码中提炼出的隐蔽项目设定与边界条件 🧠
 ```
 
-## 快速开始
+### 1. `active-task.md`
+- 存放当前的主线任务，使用 `[ ]` 和 `[x]` 的清单结构。
+- AI 完成小任务时可独立进来 check 掉进展。
 
-### 1. 配置角色
+### 2. `handoff.md`
+- 永远是覆盖式更新或仅保留最近 2-3 个节点记录。
+- 切勿把它当流水账堆到几百行（详尽的历史查阅请通过 `git log` 和 `/retro` 获得）。
+- 重点写明：“刚刚改了什么、哪儿坏了、下一步该修哪”。
 
-在 `.claude/settings.json` 中添加：
+### 3. `project-facts.md`
+- 记录那些人类可能忘了写在 `docs/` 里，但 AI 做任务时屡次跌倒爬起来才摸清的脾气。
+- 如："本项目强制要求使用 snake_case 而不是 camelCase 请求参数"。
 
-```json
-{
-  "role": "backend",
-  "git-user": "your@email.com",
-  "team": "feature-team"
-}
-```
+---
 
-### 2. 查看今日工作
+## 🤖 核心操作流指南 (SOP)
 
-```bash
-# 查看团队概览
-cat memory/.index/today-overview.md
+这套记忆系统的最佳实践是 **顺滑的上下文接力**。以下是经典的工作流示例：
 
-# 查看自己角色的工作
-cat memory/roles/backend/today.md
+### 场景一：认领或启动新任务
+1. AI 接到了人类命令：“开发一个商品查询接口”。
+2. AI 首先查阅 `memory/active-task.md`，追加拆解出的 Checklist：
+   ```markdown
+   ## 商品查询接口 (进行中)
+   - [ ] 设计数据库表
+   - [ ] 编写 API 接口逻辑
+   - [ ] 补充查询逻辑单测
+   ```
+3. AI 扫视一眼 `memory/project-facts.md`，发现里面写着：“所有新接口必须继承 `BaseController`”。好，记在心里开始写代码。
 
-# 按人员查看
-PERSON=$(git config user.email | tr '@' '_')
-cat memory/persons/$PERSON/today.md
-```
+### 场景二：会话中断、卡点或提交代码（触发 `memory-sync`）
+1. AI 刚刚写完数据库表设计，但发现需要用户提供商品分类的字典表数据。此时 AI **准备暂缓工作并询问人类**。
+2. 触发必须动作：打开 `memory/handoff.md`，覆盖写入最新状态：
+   ```markdown
+   **时间**: 2026-03-27_10:00
+   - **刚刚干了什么**: 完成了商品查询接口的数据库 Schema 设计。
+   - **剩下的坑 / Blocker**: 缺少商品分类的字典枚举数据，阻塞了 Enum 的定义！
+   - **下一步 (Next Steps)**: 等待人类回复字典数据，拿到后立刻去实现 API 接口逻辑。
+   ```
+3. 在 `active-task.md` 里，把数据库那一行打勾：`- [x] 设计数据库表`。
+4. 回复人类：“我卡住了，请提供字典数据，我已经记录到 handoff 供下一轮查询。”
 
-### 3. 任务锁
+### 场景三：全新的 AI 或另一个团队角色接手
+1. 过了一小时，人类回复了字典数据。但刚才负责写代码的 AI 已经断线（开启了一个全新的 session）。
+2. 新的 AI 醒来，查阅 `memory/handoff.md`。
+3. 新 AI 立刻明白：“哦！上一任写完了表设计，卡在了字典。现在人类给了字典，我应该马上接着 `下一步 (Next Steps)` 去写 API 逻辑。”
+4. **无需从头推理，上下文秒级恢复。**
 
-修改共享文件前检查锁：
-
-```bash
-cat memory/lock/conductor-tasks.json | jq '.locks[] | select(.status=="active")'
-```
-
-## 角色 Memory 模板
-
-每个角色在 `memory/roles/{role}/` 下有：
-
-- `today.md` - 今日工作日志
-- `YYYY-MM-DD.md` - 历史记录
-- `tasks/locked/` - 被锁定的任务
-
-## 协作规则
-
-1. **读取优先** - 修改前先读取最新状态
-2. **加锁执行** - 修改共享文件前加锁
-3. **及时释放** - 操作完成后立即释放锁
-4. **同步写入** - 同时更新 roles/ 和 persons/ 目录
-
-## 详见
-
-- [记忆保存机制](../rules/memory-flush.md)
+详见规则设定：`.claude/rules/memory-sync.md`

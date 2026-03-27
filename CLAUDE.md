@@ -16,7 +16,7 @@
 - 遵循 `.claude/rules/behaviors.md` 核心准则
 - 遵守 `.claude/rules/anti-slop.md` 设计规范
 - 使用 `.claude/rules/skill-triggers.md` 技能触发
-- 执行 `.claude/rules/memory-flush.md` 记忆保存
+- 响应 `.claude/rules/memory-sync.md` 执行短时记忆交接
 
 ## 能力索引
 
@@ -26,22 +26,14 @@
 | Agents | `.claude/agents/` |
 | Skills | `.claude/skills/` |
 
-## 角色体系
+## 角色与上下文记忆
 
-启动时读取 `.claude/project-config.json` 识别角色，加载对应的 `memory/roles/{role}/today.md` 日志。
+本脚手架提倡 AI 工程的“重状态化”。不依赖繁重的角色目录映射，而是让所有 AI 会话强制共用根目录下的 `memory/`。
+当执行重大节点或下班中断前，必须强制性将当前任务和卡点写入 `memory/handoff.md`（极简交接单结构详见 README）。
 
-```json
-{
-  "currentRole": "delivery-engineer",
-  "gitUser": "your@email.com"
-}
-```
-
-合法的 `currentRole` 值：
-- AI-Native：`delivery-engineer` · `ai-engineer` · `quality-engineer` · `product-owner`
-- 传统体系：`frontend` · `backend` · `qa` · `devops` · `product-manager`
-
-> 角色详情与传统岗位映射，详见 `docs/00_ai_system/roles/`
+> **协作哲学**: 
+> - 长期稳态约定去 `docs/` 看。
+> - 本轮会话接下来该干啥，去 `memory/active-task.md` 和 `memory/handoff.md` 里看并 Check 掉。
 
 ---
 

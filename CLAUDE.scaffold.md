@@ -33,8 +33,7 @@
 ├── scripts/
 │   ├── sync-agents-skills.sh   # gstack 升级后同步到 .agents/skills/
 │   ├── sync-omc-skills.sh      # OMC 升级后同步到 .agents/skills/
-│   ├── replace-placeholders.sh # 新项目初始化占位符替换
-│   └── lock.sh                 # 多 AI 并发任务锁
+│   └── replace-placeholders.sh # 新项目初始化占位符替换
 │
 ├── memory/               # 跨会话状态同步中心
 ├── docs/                 # 全景知识库

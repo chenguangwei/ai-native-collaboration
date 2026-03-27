@@ -50,9 +50,11 @@
 
 ## 通用参考
 
-- [Skills 索引](../00_ai_system/roles/README.md) — 88 个技能分类速查
-- [AI 系统文档](../00_ai_system/) — Claude Code 使用指南
-- [记忆保存机制](../../.claude/rules/memory-flush.md) — 跨会话状态同步
+- [AI-Native 技能速查表](ai-native/SKILLS_INDEX.md) — 按 4 大 AI 原生岗位分类的 88 个技能
+- [传统全栈/研发技能速查表](traditional/SKILLS_INDEX.md) — 适合旧有研发分工直接选用的技能大全 
+- [AI-Native 操作大纲 SOP](../00_AI_NATIVE_SOP.md) — 全局团队架构协作规范 
+- [AI 系统文档](../00_ai_system/) — Claude Code 技巧指南
+- [RAM 记忆机制（内存流转）](../../.claude/rules/memory-sync.md) — 跨会话的任务同步规定（必读）
 
 ---
 

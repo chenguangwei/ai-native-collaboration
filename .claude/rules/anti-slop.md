@@ -1,195 +1,29 @@
-# 🚫 反 AI 味规范
-
-> 严禁模板化、拒绝无意义的代码与设计
-> **作用域**: 全局 (所有目录)
-
-## 1. 设计规范
-
-### 禁止的 UI 模式
-- ❌ 默认 Bootstrap 样式
-- ❌ 渐变色滥用 (blue-to-purple gradient)
-- ❌ 彩虹色系
-- ❌ 扁平化图标滥用
-- ❌ 默认动画效果
-
-### 推荐做法
-- ✅ 使用 Tailwind CSS 或自定义设计系统
-- ✅ 选择统一的品牌色板
-- ✅ 适度的微交互
-- ✅ 简洁的线条图标
-
-### 字体规范
-```
-推荐字体组合:
-- 中文: Noto Sans SC, Source Han Sans
-- 英文: Inter, SF Pro Display
-- 代码: JetBrains Mono, Fira Code
-```
-
+---
+paths:
+  - "**/*"
 ---
 
-## 2. 代码规范
+# 🚫 反 AI 味规范 (Anti-Slop Guideline)
 
-### 禁止无意义注释
-```javascript
-// ❌ 禁止这样的注释:
-// 将 count 加 1
-count++;
+> **极简、达意、拒绝敷衍**。全局文件作用域约束体系。
 
-// 计算数组总和
-const sum = arr.reduce((a, b) => a + b, 0);
-```
+## 1. 审美与 UI 设计（拒绝 AI 特有的刻板印象）
+- ❌ **坚决杜绝**默认的彩虹渐变（如常见的 `blue-to-purple`）、过度泛滥的玻璃拟态（Glassmorphism）、大面积单调无味的默认 Tailwind 蓝色按钮族。
+- ✅ **推荐做法**：使用符合设计系统的收敛色板（最多保留两到三种品牌主色段），界面必须有充足且一致的留白（Whitespace），微交互力求克制并具有目的性。
 
-### 推荐做法
-```javascript
-// ✅ 好的注释:
-// 处理边界情况: 空数组返回 0，避免 reduce 报错
-const sum = arr.length ? arr.reduce((a, b) => a + b, 0) : 0;
+## 2. 编码与结构（抵制模版化冗余）
+- ❌ **禁止使用**无脑的“翻译式”注释：如在 `count++` 上方写 `// 变量加一`。
+- ❌ **禁止生造**过度泛化的空洞命名：绝对禁止并鄙视像 `processData()`, `doSomething()`, `handleStuff()` 这样毫无指向意义的命名。
+- ❌ **绝不仅为了抽象而抽象**：严禁无端制造如 `BaseAbstractFactoryManager` 并附带几十种毫无卵用的 Interface 层。
+- ✅ **推荐代码习惯**：
+  - 注释应当集中于**为什么 (Why) 这个逻辑如此奇怪 / 为什么不得不这么写这种边界情况**，而非**代码在做什么 (What)**。因为阅读者看得懂源码。
+  - 函数命名精确表达业务意图（如 `parseUserInputAndNormalize()`）。
+  - 项目根目录追求“所见即所得”，避免 5 级以上的恐怖空目录嵌套。
 
-// 状态机转换: pending -> fulfilled
-count++;
-```
-
-### 函数命名
-```javascript
-// ❌ 禁止:
-function handleClick() { ... }
-function processData() { ... }
-function doSomething() { ... }
-
-// ✅ 推荐:
-function submitForm() { ... }
-function parseUserInput() { ... }
-function validateEmail() { ... }
-```
+## 3. 文档书写（去废话与客套）
+- ❌ **禁止包含** "这个功能非常棒/高效/快速"，"接下来让我们了解..." 这种无用的 AI 生成式填充废话。
+- ✅ **核心精神**：直接陈述技术事实和输入输出。用极其简洁有条理的 Markdown 表格、枚举来解释参数和示例返回值。
 
 ---
-
-## 3. 组件规范
-
-### 拒绝模板化
-```jsx
-// ❌ 禁止:
-function Button({ children }) {
-  return (
-    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-      {children}
-    </button>
-  );
-}
-```
-
-### 推荐做法
-```jsx
-// ✅ 好的组件:
-// 明确组件职责与 Props
-function SubmitButton({
-  children,
-  isLoading = false,
-  variant = 'primary'
-}) {
-  const baseStyles = 'px-4 py-2 rounded-md font-medium transition-colors';
-  const variants = {
-    primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
-    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-  };
-
-  return (
-    <button
-      className={`${baseStyles} ${variants[variant]}`}
-      disabled={isLoading}
-    >
-      {isLoading ? <Spinner /> : children}
-    </button>
-  );
-}
-```
-
----
-
-## 4. 文档规范
-
-### 拒绝冗余
-```markdown
-<!-- ❌ 禁止: -->
-# 功能介绍
-
-本文档介绍了一个非常棒的功能，它可以帮助你做很多事情。
-
-这个功能的特点是:
-1. 快速
-2. 高效
-3. 可靠
-```
-
-### 推荐做法
-```markdown
-<!-- ✅ 推荐: -->
-# 用户认证 API
-
-## 端点
-- `POST /api/auth/login` - 用户登录
-- `POST /api/auth/logout` - 用户登出
-
-## 请求体
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| email | string | 是 | 用户邮箱 |
-| password | string | 是 | 密码 |
-
-## 响应
-返回 JWT token，有效期 24 小时。
-```
-
----
-
-## 5. 项目结构规范
-
-### 拒绝过度设计
-```
-<!-- ❌ 禁止: -->
-/src
-  /core
-    /base
-      /abstract
-      /interface
-      /mixin
-    /util
-      /helper
-      /factory
-      /builder
-  /common
-    /components
-    /hooks
-    /utils
-  /features
-  /pages
-  /layouts
-```
-
-### 推荐做法
-```
-<!-- ✅ 推荐: -->
-/src
-  /components     # 共享组件
-  /features       # 功能模块
-  /hooks          # 自定义 Hooks
-  /lib            # 工具函数
-  /pages          # 页面路由
-  App.tsx
-  main.tsx
-```
-
----
-
-## 6. 检查清单
-
-在提交代码前，确认:
-
-- [ ] 没有使用默认 Bootstrap/Tailwind 样式
-- [ ] 没有渐变色滥用
-- [ ] 注释有实际价值
-- [ ] 函数名清晰表达意图
-- [ ] 组件有明确的职责
-- [ ] 文档简洁有用
-- [ ] 项目结构简洁
+**提交前必须自审的标尺**：
+“这份代码若是拿给苛刻的资深人类工程师看，他们会不会一眼识破这是 AI 在无脑填充模板糊弄过去的？”如果是的话，立刻打回重写。
