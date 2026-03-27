@@ -16,41 +16,42 @@
 
 ```
 .
-├── CLAUDE.md              # 🤖 AI 灵魂中枢（AI 行为规范入口）
+├── CLAUDE.md              # 🤖 AI 行为总入口
 ├── SCAFFOLD_VERSION       # 脚手架版本号
 ├── CHANGELOG.md           # 版本变更记录
 ├── CLAUDE.local.md.template  # 本地配置覆盖模板（实际文件不提交）
 │
-├── .claude/
-│   ├── rules/             # 📜 核心准则 (Layer 0，全局加载)
-│   ├── commands/          # ⚡ Slash Commands (Layer 0)
-│   ├── agents/            # 🎭 专属 Agent (Layer 0，后台运行)
-│   └── skills/            # 🛠️ 技能工具箱 (Layer 0，含 gstack + 自定义)
+├── .agents/               # 🤖 Agent 技能扩展（gstack / OMC 等）
+│   └── skills/
 │
-├── scripts/               # 🔧 工具脚本（初始化、任务锁）
+├── .claude/               # 🧠 AI 行为层 (Layer 0)
+│   ├── rules/             # 📜 核心准则（全局加载）
+│   ├── commands/          # ⚡ Slash Commands
+│   ├── agents/            # 🎭 专属 Agent（后台运行）
+│   ├── skills/            # 🛠️ 技能工具箱（gstack + 自定义）
+│   └── project-config.json # ⚙️ 角色配置（currentRole、gitUser）
+│
+├── scripts/               # 🔧 脚手架工具脚本
 │   ├── replace-placeholders.sh   # 新项目初始化
+│   ├── sync-agents-skills.sh     # gstack 升级同步
 │   └── lock.sh                   # 多 AI 并发任务锁
-│
-├── templates/             # 📋 技术栈结构模板
-│   ├── frontend/          # react / vue / next
-│   └── backend/           # java / python
 │
 ├── memory/                # 💾 跨会话记忆体 (Layer 1)
 │   ├── .index/            # 团队概览 + 任务注册表
 │   ├── roles/             # 按角色存储的工作日志
 │   ├── persons/           # 按人员存储的工作日志
+│   ├── shared/            # 共享文档（复盘、审计）
 │   └── lock/              # 任务锁文件
 │
-├── docs/                  # 📖 知识库 (Layer 2)
-│   ├── 00_ai_system/      # AI 系统文档（路由矩阵、subtree 手册、角色配置）
-│   ├── 01_product/        # 产品文档
-│   ├── 02_design/         # 设计规范
-│   ├── 03_architecture/   # 架构设计
-│   ├── 04_qa/             # 测试用例
-│   ├── 05_ops/            # 运维手册
-│   └── 06_handbooks/      # 各角色操作手册
-│
-└── scripts/               # 🔧 脚手架工具脚本
+└── docs/                  # 📖 知识库 (Layer 2)
+    ├── 00_ai_system/      # AI 系统文档 + 角色配置
+    │   └── roles/         # AI-Native / 传统体系角色定义
+    ├── 01_product/        # 产品文档（PRD、业务规则）
+    ├── 02_design/         # 设计规范（设计系统、UI 资产）
+    ├── 03_architecture/   # 架构设计（API、数据库、流程）
+    ├── 04_qa/             # 测试用例 + 审计日志
+    ├── 05_ops/            # 运维手册（部署、Runbook）
+    └── 06_handbooks/      # 各角色操作手册
 ```
 
 ---
