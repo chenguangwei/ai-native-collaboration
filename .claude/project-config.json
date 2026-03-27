@@ -1,73 +1,64 @@
 {
   "project": "ai-native-scaffold",
-  "version": "1.0",
-  "_comment": "项目角色配置 - 用于 AI 原生开发方法论",
+  "version": "2.0",
+  "_comment": "项目角色配置 - 支持 AI-Native 和传统两套体系。focus 路径指接入方项目的目录",
   "roles": {
-    "fullstack": {
-      "name": "全栈工程师",
-      "description": "同时负责前端和后端开发",
+    "_comment_roles": "AI-Native 角色（推荐）",
+    "delivery-engineer": {
+      "name": "交付工程师",
+      "description": "端到端交付产品特性（含部署上线），不区分前后端语言栈",
       "focus": [
         "src/frontend",
-        "src/backend"
+        "src/backend",
+        "src/shared",
+        "ops"
       ],
-      "memory": "memory/roles/fullstack"
+      "memory": "memory/roles/delivery-engineer"
     },
-    "frontend": {
-      "name": "前端工程师",
-      "description": "专注于前端开发",
+    "ai-engineer": {
+      "name": "AI 工程师",
+      "description": "Agent 编排、LLM 集成、AI 流水线",
       "focus": [
-        "src/frontend"
+        "src",
+        ".claude/agents",
+        ".agents/skills"
       ],
-      "memory": "memory/roles/frontend"
+      "memory": "memory/roles/ai-engineer"
     },
-    "backend": {
-      "name": "后端工程师",
-      "description": "专注于后端开发",
-      "focus": [
-        "src/backend"
-      ],
-      "memory": "memory/roles/backend"
-    },
-    "pm": {
-      "name": "产品经理",
-      "description": "产品规划与需求管理",
-      "focus": [
-        "docs/01_product"
-      ],
-      "memory": "memory/roles/pm"
-    },
-    "qa": {
-      "name": "测试工程师",
-      "description": "质量保证与测试",
+    "quality-engineer": {
+      "name": "质量工程师",
+      "description": "全栈测试 + 安全 + 可靠性 + 可观测性",
       "focus": [
         "tests"
       ],
-      "memory": "memory/roles/qa"
+      "memory": "memory/roles/quality-engineer"
     },
-    "devops": {
-      "name": "运维工程师",
-      "description": "部署与运维",
+    "product-owner": {
+      "name": "产品负责人",
+      "description": "需求策略、PRD、用户研究",
       "focus": [
-        "ops"
+        "docs/01_product"
       ],
-      "memory": "memory/roles/devops"
+      "memory": "memory/roles/product-owner"
     },
-    "architect": {
-      "name": "架构师",
-      "description": "系统架构设计",
-      "focus": [
-        "docs/03_architecture"
-      ],
-      "memory": "memory/roles/architect"
-    }
+    "_comment_legacy": "传统角色别名（过渡期兼容，映射到 AI-Native 角色）",
+    "fullstack": { "_aliasOf": "delivery-engineer" },
+    "frontend": { "_aliasOf": "delivery-engineer" },
+    "backend": { "_aliasOf": "delivery-engineer" },
+    "pm": { "_aliasOf": "product-owner" },
+    "qa": { "_aliasOf": "quality-engineer" },
+    "devops": { "_aliasOf": "delivery-engineer" },
+    "architect": { "_aliasOf": "ai-engineer" }
   },
   "_usage": {
     "description": "使用说明",
-    "step1": "在下方 currentRole 填写当前角色",
+    "step1": "在下方 currentRole 填写当前角色（推荐使用 AI-Native 角色名）",
     "step2": "AI 启动时会读取此配置",
-    "step3": "使用 /switch-role <role> 切换角色"
+    "step3": "使用 /switch-role <role> 切换角色",
+    "ai_native_roles": "delivery-engineer | ai-engineer | quality-engineer | product-owner",
+    "legacy_roles": "fullstack | frontend | backend | pm | qa | devops | architect（自动映射到 AI-Native 角色）"
   },
-  "currentRole": "fullstack",
+  "currentRole": "delivery-engineer",
   "gitUser": "chenguangwei@unisound.com",
   "team": "development",
   "scaffoldVersion": "2.0.0"

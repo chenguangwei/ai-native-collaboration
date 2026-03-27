@@ -42,28 +42,15 @@
 │   └── lock/              # 任务锁文件
 │
 ├── docs/                  # 📖 知识库 (Layer 2)
-│   ├── 00_ai_system/      # AI 系统文档（路由矩阵、subtree 手册）
+│   ├── 00_ai_system/      # AI 系统文档（路由矩阵、subtree 手册、角色配置）
 │   ├── 01_product/        # 产品文档
 │   ├── 02_design/         # 设计规范
 │   ├── 03_architecture/   # 架构设计
 │   ├── 04_qa/             # 测试用例
 │   ├── 05_ops/            # 运维手册
-│   ├── 06_skills/         # 角色技能配置
-│   └── 07_handbooks/      # 各角色操作手册
+│   └── 06_handbooks/      # 各角色操作手册
 │
-├── src/                   # ⌨️ 代码开发区 (Layer 3)
-│   ├── frontend/          # 前端应用（选定技术栈后初始化）
-│   ├── backend/           # 后端服务（选定技术栈后初始化）
-│   └── shared/            # 前后端共享类型/常量
-│
-├── tests/                 # 🕵️ 自动化测试 (Layer 3)
-│   ├── unit/              # 单元测试
-│   ├── api_integration/   # API 集成测试
-│   └── e2e_browser/       # 端到端测试
-│
-└── ops/                   # ☁️ 基础设施 (Layer 3)
-    ├── docker-compose.yml
-    └── k8s/
+└── scripts/               # 🔧 脚手架工具脚本
 ```
 
 ---
@@ -152,13 +139,13 @@ model: sonnet
 我需要把 AI Native 脚手架接入当前项目。
 
 脚手架 GitLab 地址：http://gitlab-iot.yunzhisheng.cn/med-ai/med-ai-native-collaboration.git
-当前项目是 Java Spring Boot 后端项目，我的角色是 backend，gitUser 是 xxx@email.com
+当前项目是 Java Spring Boot 后端项目，我的角色是 delivery-engineer，gitUser 是 xxx@email.com
 
 请帮我：
 1. 把脚手架以 git subtree 方式引入到 .scaffold/ 目录（remote 名称用 scaffold）
 2. 把 CLAUDE.md、.claude/、.agents/、docs/、memory/ 复制到项目根目录
 3. 更新 .claude/project-config.json，设置 project、currentRole、gitUser
-4. 初始化 memory/roles/backend/today.md 工作日志
+4. 初始化 memory/roles/delivery-engineer/today.md 工作日志
 5. 告诉我后续如何更新脚手架
 
 注意：不要改动现有 src/ 代码和 pom.xml。
@@ -173,13 +160,13 @@ model: sonnet
 - 前端：React 18 + TypeScript + Next.js 14（src/frontend/）
 - 后端：Python 3.11 + FastAPI（src/backend/）
 - 数据库：PostgreSQL + Redis
-我的角色是 fullstack，gitUser 是 xxx@email.com
+我的角色是 delivery-engineer，gitUser 是 xxx@email.com
 
 请帮我：
 1. 把脚手架以 git subtree 方式引入到 .scaffold/ 目录（remote 名称用 scaffold）
 2. 把 CLAUDE.md、.claude/、.agents/、docs/、memory/ 复制到项目根目录
-3. 更新 .claude/project-config.json，设置 project="my-app"、currentRole="fullstack"、gitUser
-4. 初始化 memory/roles/fullstack/today.md 工作日志
+3. 更新 .claude/project-config.json，设置 project="my-app"、currentRole="delivery-engineer"、gitUser
+4. 初始化 memory/roles/delivery-engineer/today.md 工作日志
 5. 告诉我后续如何更新脚手架
 
 注意：不要改动现有 src/ 代码、pom.xml、requirements.txt。
@@ -226,7 +213,7 @@ skill 会自动完成完整升级流程：
 |------|------|
 | 覆盖（脚手架拥有） | `.claude/rules/`、`.claude/agents/`、`.agents/skills/`、`scripts/` |
 | 智能检测 | `CLAUDE.md`（如被项目修改过，冲突时提示 diff） |
-| 永不覆盖（项目专属） | `.claude/project-config.json`、`memory/`、`src/`、`ops/`、`tests/` |
+| 永不覆盖（项目专属） | `.claude/project-config.json`、`memory/` |
 
 > **前提**：项目已通过 git subtree 接入脚手架（存在 `.scaffold/` 目录和 `scaffold` remote）。
 > 如未接入，参考[手动接入操作手册](docs/00_ai_system/scaffold-integration-manual.md)。
@@ -273,14 +260,37 @@ skill 会自动完成完整升级流程：
 
 ```json
 {
-  "currentRole": "backend",
+  "currentRole": "delivery-engineer",
   "gitUser": "your@email.com"
 }
 ```
 
-支持角色：`fullstack` | `frontend` | `backend` | `pm` | `qa` | `devops` | `architect`
+#### AI-Native 体系 🚀（推荐）
 
-详见 [角色技能配置说明](docs/06_skills/roles/ROLE_SETUP.md)
+> 按「解决什么问题」划分岗位，AI 处理语言栈技术细节
+
+| 角色 | currentRole 值 | 说明 |
+|------|---------------|------|
+| 交付工程师 | `delivery-engineer` | 端到端交付产品特性（含部署上线，替代前端/后端/全栈/运维）|
+| AI 工程师 | `ai-engineer` | Agent 编排、LLM 集成、AI 流水线 |
+| 质量工程师 | `quality-engineer` | 全栈测试 + 安全 + 可靠性 + 可观测性 |
+| 产品负责人 | `product-owner` | 需求策略、PRD、用户研究 |
+
+详见 [AI-Native 角色配置说明](docs/00_ai_system/roles/ai-native/ROLE_SETUP.md)
+
+#### 传统体系 👥（过渡期）
+
+> 保留原有岗位名称，映射到 AI-Native 角色值
+
+| 你的岗位 | currentRole 值 | 说明 |
+|---------|---------------|------|
+| 产品经理 | `product-owner` | 需求策略、PRD |
+| 前端工程师 | `delivery-engineer` | UI、交互、前端逻辑 |
+| 后端工程师 | `delivery-engineer` | API、服务、数据层 |
+| 测试工程师 | `quality-engineer` | 测试、安全、质量保障 |
+| 运维工程师 | `delivery-engineer` | 基础设施、部署、监控 |
+
+详见 [传统角色配置说明](docs/00_ai_system/roles/traditional/ROLE_SETUP.md) | [传统体系操作手册](docs/06_handbooks/traditional/README.md)
 
 ---
 
@@ -288,10 +298,25 @@ skill 会自动完成完整升级流程：
 
 > 不同岗位只拉取自己关注的目录，不影响 push/merge
 
-```bash
-# 全栈工程师
-git sparse-checkout set src docs memory
+### AI-Native 体系
 
+```bash
+# 交付工程师（前端+后端+运维全覆盖）
+git sparse-checkout set src ops docs memory
+
+# AI 工程师
+git sparse-checkout set src .claude .agents docs/03_architecture memory
+
+# 质量工程师
+git sparse-checkout set tests docs/04_qa docs/03_architecture memory
+
+# 产品负责人
+git sparse-checkout set docs/01_product docs/02_design memory
+```
+
+### 传统体系
+
+```bash
 # 前端工程师
 git sparse-checkout set src/frontend src/shared docs/02_design docs/04_qa memory
 
@@ -306,9 +331,6 @@ git sparse-checkout set tests docs/04_qa docs/03_architecture memory
 
 # 运维工程师
 git sparse-checkout set ops docs/05_ops memory
-
-# 架构师
-git sparse-checkout set docs/03_architecture docs/01_product src memory
 ```
 
 ---
@@ -319,12 +341,20 @@ git sparse-checkout set docs/03_architecture docs/01_product src memory
 
 | 文档 | 说明 |
 |------|------|
-| [各岗位工作流Skills 速查索引](docs/06_skills/SKILLS_INDEX.md) | 80 个技能按岗位分类，含触发方式与来源 |
+| [Skills 速查索引](docs/00_ai_system/roles/ai-native/SKILLS_INDEX.md) | 88 个技能按岗位分类，含触发方式与来源 |
 | [Commands 命令集](.claude/commands/README.md) | 8 个轻量命令列表与用法 |
 | [Agents 说明](.claude/agents/README.md) | Agent 列表与使用方式 |
-| [角色技能配置](docs/06_skills/roles/ROLE_SETUP.md) | 各角色工具与工作焦点 |
+| [AI-Native 角色配置](docs/00_ai_system/roles/ai-native/ROLE_SETUP.md) | AI-Native 岗位配置与决策树 |
+| [传统角色配置](docs/00_ai_system/roles/traditional/ROLE_SETUP.md) | 传统岗位映射与过渡指南 |
 | [AI 系统文档](docs/00_ai_system/) | 路由矩阵、subtree 接入手册 |
 | [Claude Code 使用技巧：从入门到精通](docs/00_ai_system/claude-code-40-best-practices.md) | 从配置到多 Agent，40+ 个提升工作流效率的技巧 |
+
+### 操作手册
+
+| 文档 | 说明 |
+|------|------|
+| [AI-Native 操作手册](docs/06_handbooks/ai-native/README.md) | 4 个 AI-Native 岗位操作指南 |
+| [传统体系操作手册](docs/06_handbooks/traditional/README.md) | 产品/前端/后端/QA/运维完整协作规范 |
 
 ### 产品与研发
 
@@ -335,9 +365,8 @@ git sparse-checkout set docs/03_architecture docs/01_product src memory
 | [架构设计](docs/03_architecture/) | API 规范、数据库设计、系统流程 |
 | [测试用例](docs/04_qa/) | 测试计划、审计日志 |
 | [运维手册](docs/05_ops/) | 部署环境、Runbook |
-| [产品全流程操作手册](docs/07_handbooks/handbook-product-workflow.md) | 产品→研发→测试→运维完整交付链路与协作规范 |
-| [各角色操作手册](docs/07_handbooks/) | 产品/前端/后端/QA/运维各角色详细操作指南 |
 
 ---
 
-*最后更新: 2026-03-24 by Claude Code*
+*最后更新: 2026-03-27 by Claude Code*
+

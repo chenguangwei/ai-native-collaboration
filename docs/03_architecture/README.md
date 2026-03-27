@@ -14,4 +14,4 @@
 
 - [产品文档](../01_product/README.md)
 - [运维手册](../05_ops/README.md)
-- [API 设计技能](../06_skills/SKILLS_INDEX.md#nodejs-后端工程师)
+- [API 设计技能](../00_ai_system/roles/SKILLS_INDEX.md#nodejs-后端工程师)

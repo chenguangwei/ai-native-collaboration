@@ -12,5 +12,5 @@
 ## 相关文档
 
 - [架构设计](../03_architecture/README.md)
-- [QA 技能](../06_skills/SKILLS_INDEX.md#qa-测试)
-- [操作手册 — QA](../07_handbooks/handbook-qa.md)
+- [QA 技能](../00_ai_system/roles/SKILLS_INDEX.md#qa-测试)
+- [操作手册 — QA](../06_handbooks/handbook-qa.md)

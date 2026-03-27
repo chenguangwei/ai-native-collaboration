@@ -12,5 +12,5 @@
 ## 相关文档
 
 - [架构设计](../03_architecture/README.md)
-- [运维技能](../06_skills/SKILLS_INDEX.md#运维devops)
-- [操作手册 — DevOps](../07_handbooks/handbook-devops.md)
+- [运维技能](../00_ai_system/roles/SKILLS_INDEX.md#运维devops)
+- [操作手册 — DevOps](../06_handbooks/handbook-devops.md)

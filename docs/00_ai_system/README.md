@@ -12,7 +12,7 @@
 
 ## 关联入口
 
-- [Skills 速查索引](../06_skills/SKILLS_INDEX.md) — 80 个技能按岗位分类
+- [Skills 速查索引](../00_ai_system/roles/SKILLS_INDEX.md) — 80 个技能按岗位分类
 - [Commands 命令集](../../.claude/commands/README.md) — 8 个轻量命令
 - [Agents 说明](../../.claude/agents/README.md) — 后台专家 Agent 列表
 - [CLAUDE.md](../../CLAUDE.md) — AI 行为规范总入口

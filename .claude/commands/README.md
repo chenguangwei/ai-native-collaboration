@@ -88,4 +88,4 @@ Skills (.claude/skills/ 或 .agents/skills/):
   /systematic-debugging → 详细的 5 步排障方法论 + 工具调用规范
 ```
 
-更多技能参见 [Skills 速查索引](../../docs/06_skills/SKILLS_INDEX.md)。
+更多技能参见 [Skills 速查索引](../../docs/00_ai_system/roles/SKILLS_INDEX.md)。

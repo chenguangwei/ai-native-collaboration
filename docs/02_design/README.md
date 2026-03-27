@@ -12,4 +12,4 @@
 ## 相关文档
 
 - [产品文档](../01_product/README.md)
-- [前端技能](../06_skills/SKILLS_INDEX.md#设计师)
+- [前端技能](../00_ai_system/roles/SKILLS_INDEX.md#设计师)
