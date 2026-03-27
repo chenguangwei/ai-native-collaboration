@@ -20,24 +20,15 @@
 
 ## 能力索引
 
-| 能力类型 | 位置 | 说明 |
-|---------|------|------|
-| Commands | `.claude/commands/` | 轻量斜杠命令（`/review`、`/ship` 等） |
-| Agents | `.claude/agents/` | 后台专家（静默运行，只返回报告） |
-| Skills | `.claude/skills/` | 复杂工作流（含 gstack、OMC） |
-
-> 上述目录中的文件会被自动发现和加载，无需在此逐一列举。
-
-## 启动流程
-
-1. 读取 `.claude/project-config.json` 中的 `currentRole` 识别角色
-2. 加载 `.claude/rules/` 行为规则
-3. 检查 `memory/roles/{role}/today.md` 角色日志
-4. 检查 `memory/persons/{git-user}/today.md` 人员日志
+| 能力类型 | 位置 |
+|---------|------|
+| Commands | `.claude/commands/` |
+| Agents | `.claude/agents/` |
+| Skills | `.claude/skills/` |
 
 ## 角色体系
 
-在 `.claude/project-config.json` 中配置：
+启动时读取 `.claude/project-config.json` 识别角色，加载对应的 `memory/roles/{role}/today.md` 日志。
 
 ```json
 {
