@@ -59,6 +59,7 @@ paths:
 - `/ship` - 执行发版检查
 - `/debug` - 启动结构化排障
 - `/retro` - 生成复盘报告
+- `/scaffold-upgrade` - 升级 AI Native 脚手架到最新版本
 
 ### 可用的 Agent
 
