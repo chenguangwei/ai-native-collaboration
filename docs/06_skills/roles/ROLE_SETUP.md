@@ -1,6 +1,6 @@
-# 角色技能配置说明
+# AI-Native 岗位配置说明
 
-> 各角色启动时需要了解的技能和工作模式。
+> AI-Native 时代不再按技术栈划分岗位。你解决**什么问题**决定你的角色，AI 负责技术细节。
 
 ---
 
@@ -10,145 +10,259 @@
 
 ```json
 {
-  "currentRole": "backend",
+  "currentRole": "product-engineer",
   "gitUser": "your@email.com"
 }
 ```
 
-或使用命令切换：`/switch-role backend`
+或使用命令切换：`/switch-role product-engineer`
+
+**支持的角色值**：`product-engineer` | `ai-engineer` | `quality-engineer` | `platform-engineer` | `product-owner`
 
 ---
 
-## 各角色说明
+## 岗位对照表（新旧映射）
 
-### fullstack（全栈工程师）
-
-**工作焦点：** `src/frontend/`、`src/backend/`、`src/shared/`
-
-**常用命令：**
-- `/plan-architect` — 技术方案设计
-- `/review` — 代码审查（前后端均覆盖）
-- `/qa` — 全栈测试
-
-**推荐 Agent：**
-- `frontend-reviewer`（前端代码审查）
-- `java-reviewer` 或 `python-reviewer`（后端代码审查）
-- `security-auditor`（安全扫描）
+| AI-Native 岗位 | 替代了 | 核心转变 |
+|--------------|--------|---------|
+| 产品工程师 | frontend + backend + fullstack | 不再区分语言栈，端到端交付特性 |
+| AI 工程师 | architect + 新增 | Agent 编排、LLM 集成成为独立专业 |
+| 质量工程师 | QA | 从"写测试"扩展到安全+可靠性+可观测性 |
+| 平台工程师 | DevOps | 从运维扩展到开发者体验 |
+| 产品负责人 | PM | 用 AI 工具放大产品洞察能力 |
 
 ---
 
-### frontend（前端工程师）
+## 各岗位详情
 
-**工作焦点：** `src/frontend/`、`src/shared/types/`
+### 产品工程师 (product-engineer)
 
-**常用命令：**
-- `/review` — 前端代码审查
-- `/qa` — 前端测试
+**核心使命**：端到端交付用户可用的产品特性。从需求到上线，不依赖其他角色。
 
-**推荐 Agent：**
-- `frontend-reviewer`
-- `performance-analyzer`（性能分析）
+**工作范围**：`src/`（前端+后端均覆盖）、`tests/`
 
-**专属规则：** `.claude/rules/component-rules.md`（组件规范）
+**日常工作流**：
+```
+/deep-interview（需求澄清）→ /brainstorming → /writing-plans
+→ /test-driven-development → 编写代码（前端/后端均可）
+→ /ai-slop-cleaner → /review → /ship
+```
 
----
+**核心技能**：
 
-### backend（后端工程师）
+| 技能 | 场景 |
+|------|------|
+| `/deep-interview` | 需求不清时 Socratic 澄清 |
+| `/test-driven-development` + `/tdd-workflow` | 所有功能开发 |
+| `/coding-standards` | 编码规范（语言无关）|
+| `/api-design` | API 设计 |
+| `/frontend-design` | UI 界面构建 |
+| `/review` | 代码审查 |
+| `/ai-slop-cleaner` | 清理 AI 生成代码味道 |
+| `/ultraqa` | QA 循环至通过 |
+| `/learner` | 提取调试经验 |
+| `/ralph` | 复杂特性持续执行 |
 
-**工作焦点：** `src/backend/`、`src/shared/types/`
-
-**常用命令：**
-- `/review` — 后端代码审查
-- `/qa` — API 集成测试
-
-**推荐 Agent：**
-- `java-reviewer` 或 `python-reviewer`
-- `security-auditor`
-
-**专属规则：** `.claude/rules/api-rules.md`（API 规范）
-
----
-
-### pm（产品经理）
-
-**工作焦点：** `docs/01_product/`、`memory/roles/pm/`
-
-**常用命令：**
-- `/plan-ceo` — 产品规划
-- `/retro` — 迭代复盘
-
-**日常文件：**
-- `docs/01_product/prd_v1.0.md` — PRD
-- `docs/01_product/business_rules.md` — 业务规则
+**推荐 Agents**：
+- `omc-code-reviewer` — 代码质量
+- `omc-critic` — 技术方案批判
+- `security-auditor`（内置）— 安全扫描
 
 ---
 
-### qa（测试工程师）
+### AI 工程师 (ai-engineer)
 
-**工作焦点：** `tests/`、`docs/04_qa/`
+**核心使命**：设计和构建 AI 系统。包括 Agent 编排、LLM 集成、RAG 流水线、Prompt 工程优化。
 
-**常用命令：**
-- `/qa` — 执行测试计划
-- `/review` — 测试代码审查
+**工作范围**：`src/ai/`、`.claude/agents/`、`.agents/skills/`、AI 相关基础设施
 
-**目录说明：**
+**日常工作流**：
+```
+/ralplan（多视角架构规划）→ /writing-plans
+→ 设计 Agent 工具/观察格式/错误恢复
+→ /executing-plans → 验证 AI 系统行为
+→ /learner（记录 AI 系统调试经验）
+```
+
+**核心技能**：
+
+| 技能 | 场景 |
+|------|------|
+| `agent-harness-construction` | Agent 系统设计 |
+| `/dispatching-parallel-agents` | 并行 Agent 编排 |
+| `/subagent-driven-development` | 子代理驱动开发 |
+| `/claude-api` | Claude API / Anthropic SDK |
+| `/ultrawork` | 并行执行引擎 |
+| `/autopilot` | 全自动 AI 流水线 |
+| `/ralplan` | 三视角架构共识 |
+| `/deep-interview` | 复杂 AI 需求澄清 |
+| `/plan-eng-review` | 工程架构评审 |
+
+**推荐 Agents**：
+- `omc-architect` — 架构决策
+- `omc-critic` — 方案批判
+- `omc-planner` — 实施规划
+- `analyst`（内置）— 需求结构化分析
+
+---
+
+### 质量工程师 (quality-engineer)
+
+**核心使命**：保障产品可靠性、安全性和可观测性。不只是测试——包括安全审计、性能监控、混沌工程。
+
+**工作范围**：`tests/`、`docs/04_qa/`、安全配置
+
+**日常工作流**：
+```
+制定测试策略 → /tdd-workflow（测试代码模式）
+→ /qa（自动化执行）→ /ultraqa（循环至通过）
+→ /cso（安全审计）→ /benchmark（性能基线）
+→ /learner（提取 Bug 模式）
+```
+
+**核心技能**：
+
+| 技能 | 场景 |
+|------|------|
+| `/qa` + `/qa-only` | 自动化测试执行 |
+| `/ultraqa` | QA 循环直到全部通过 |
+| `browser-qa` | 视觉/交互/无障碍 QA |
+| `/tdd-workflow` | 测试代码模式 |
+| `/cso` | 安全审计 |
+| `/benchmark` | 性能基线 |
+| `/audit` | UI 质量审计 |
+| `/learner` | 提取 Bug 模式为可复用知识 |
+
+**测试目录**：
 - `tests/unit/` — 单元测试
 - `tests/api_integration/` — API 集成测试
 - `tests/e2e_browser/` — 端到端测试
 
+**推荐 Agents**：
+- `omc-qa-tester` — QA 测试执行
+- `omc-verifier` — 验证完成标准
+- `omc-security-reviewer` — 安全审查
+- `security-auditor`（内置）— 漏洞扫描
+
 ---
 
-### devops（运维工程师）
+### 平台工程师 (platform-engineer)
 
-**工作焦点：** `ops/`、`docs/05_ops/`
+**核心使命**：让团队高效开发。包括 CI/CD、可观测性、基础设施、开发者体验优化。
 
-**常用命令：**
-- `/ship` — 发布检查
-- `/debug` — 生产问题排查
+**工作范围**：`ops/`、`docs/05_ops/`、CI/CD 配置
 
-**常用文件：**
+**日常工作流**：
+```
+/ship（发布检查）→ /land-and-deploy（自动化部署）
+→ /canary（金丝雀监控）→ 观察指标
+→ 故障时：/systematic-debugging → /investigate → /retro
+→ /learner（提取故障处理经验）
+```
+
+**核心技能**：
+
+| 技能 | 场景 |
+|------|------|
+| `/ship` | 发布前检查 |
+| `/land-and-deploy` | 合并 + 自动部署 |
+| `/canary` | 金丝雀发布监控 |
+| `/setup-deploy` | 部署环境配置 |
+| `/guard` + `/careful` | 安全操作保护 |
+| `/systematic-debugging` | 生产故障排查 |
+| `/investigate` | 根因调查 |
+| `/retro` | 故障/迭代复盘 |
+| `/learner` | 提取运维经验 |
+| `/ralph` | 复杂运维任务持续执行 |
+
+**常用文件**：
 - `ops/docker-compose.yml`
 - `ops/k8s/`
 - `docs/05_ops/runbook.md`
 
 ---
 
-### architect（架构师）
+### 产品负责人 (product-owner)
 
-**工作焦点：** `docs/03_architecture/`
+**核心使命**：定义"做什么"和"为什么做"。从用户需求出发，提供清晰的验收标准，让工程团队方向正确。
 
-**常用命令：**
-- `/plan-architect` — 架构设计
-- `/retro` — 架构复盘
+**工作范围**：`docs/01_product/`、`memory/roles/product-owner/`
 
-**核心文档：**
-- `docs/03_architecture/system_flow.md`
-- `docs/03_architecture/api_specs.md`
-- `docs/03_architecture/db_schema.md`
+**日常工作流**：
+```
+/deep-interview（挖掘用户真实需求）
+→ /office-hours（强迫症提问，逼出核心假设）
+→ /ralplan（多视角共识规划）
+→ /plan-ceo-review（CEO 视角评审）
+→ /document-release（发布后更新文档）
+→ /retro（迭代复盘）
+```
+
+**核心技能**：
+
+| 技能 | 场景 |
+|------|------|
+| `/deep-interview` | 用户需求深度 Socratic 挖掘 |
+| `/office-hours` | YC 式强迫症提问 |
+| `/plan-ceo-review` | CEO 视角产品方向评审 |
+| `/plan-design-review` | 设计可行性评审 |
+| `/plan-eng-review` | 工程方案评审 |
+| `/ralplan` | 多视角功能规划 |
+| `/design-consultation` | 设计方向咨询 |
+| `/document-release` | 发布后文档更新 |
+| `/retro` | 迭代复盘 |
+| `/autopilot` | 快速原型验证假设 |
+
+**核心文档**：
+- `docs/01_product/prd_v1.0.md` — PRD
+- `docs/01_product/business_rules.md` — 业务规则
+
+**推荐 Agents**：
+- `analyst`（内置）— 需求结构化分析
+- `omc-analyst` — OMC 需求分析
+- `omc-critic` — 挑战产品假设
 
 ---
 
 ## 多 AI 并发配置
 
-多人/多窗口并发工作时：
+多人/多窗口并发工作时，用 git worktree 隔离：
 
 ```bash
-# 创建独立工作目录（前端 AI 使用）
-git worktree add ../workspace-frontend feature/login-ui
-cd ../workspace-frontend
-# 修改此目录的 .claude/project-config.json → currentRole = "frontend"
+# 产品工程师 A 在独立 worktree 工作
+git worktree add ../workspace-feature-login feature/login
+cd ../workspace-feature-login
+# 修改 .claude/project-config.json → currentRole = "product-engineer"
 ```
 
 任务协调使用 `scripts/lock.sh`：
 
 ```bash
-./scripts/lock.sh acquire login-ui-task frontend
+./scripts/lock.sh acquire login-feature product-engineer
 # ... 完成工作 ...
-./scripts/lock.sh release login-ui-task
+./scripts/lock.sh release login-feature
+./scripts/lock.sh status   # 查看所有锁状态
 ```
 
-查看所有角色任务锁状态：
+---
 
-```bash
-./scripts/lock.sh status
+## 岗位选择决策树
+
+```
+你今天主要做什么？
+│
+├── 构建用户可见的功能（页面/API/数据）
+│   └── → product-engineer
+│
+├── 设计 AI Agent / LLM 集成 / 提示工程
+│   └── → ai-engineer
+│
+├── 保障代码质量 / 测试 / 安全审计
+│   └── → quality-engineer
+│
+├── 维护基础设施 / CI/CD / 部署监控
+│   └── → platform-engineer
+│
+└── 定义需求 / 写 PRD / 评审方案
+    └── → product-owner
 ```

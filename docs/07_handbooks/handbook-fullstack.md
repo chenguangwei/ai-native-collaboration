@@ -1,6 +1,8 @@
-# 🚀 全栈工程师操作手册
+# 🚀 产品工程师操作手册
 
-> 适用于全栈开发角色，基于 AI 原生开发方法论
+> AI-Native 时代不再区分"前端工程师"或"Java 工程师"。产品工程师端到端交付特性——AI 处理语言栈技术细节，你负责产品判断和用户价值交付。
+>
+> 旧角色（frontend / backend / fullstack）统一升级为 **产品工程师**。
 
 ---
 
@@ -12,7 +14,7 @@
 
 ```json
 {
-  "currentRole": "fullstack",
+  "currentRole": "product-engineer",
   "gitUser": "your@email.com",
   "team": "development"
 }
@@ -95,12 +97,14 @@ cat memory/lock/conductor-tasks.json
 | `/review` | 代码审查 |
 | `/simplify` | 代码简化优化 |
 | `/codex` | 代码风格检查 |
+| `/ai-slop-cleaner` | 清理 AI 生成代码味道（OMC）|
 
 ### 测试发布
 
 | 命令 | 用途 |
 |------|------|
 | `/qa` | 自动化测试 |
+| `/ultraqa` | QA 循环直到全部通过（OMC）|
 | `/ship` | 发布检查 |
 
 ### 调试问题
@@ -109,6 +113,7 @@ cat memory/lock/conductor-tasks.json
 |------|------|
 | `/systematic-debugging` | 结构化调试 |
 | `/investigate` | 根因调查 |
+| `/learner` | 提取调试经验为可复用知识（OMC）|
 
 ---
 
@@ -117,19 +122,36 @@ cat memory/lock/conductor-tasks.json
 ### 功能开发
 
 ```
-/brainstorming → /writing-plans → /test-driven-development → 编写代码 → /verification-before-completion → /review
+需求不清楚 → /deep-interview（OMC Socratic 澄清）
+         ↓
+/brainstorming → /writing-plans → /test-driven-development → 编写代码
+         ↓
+/verification-before-completion → /review → /ai-slop-cleaner（可选）
 ```
 
 ### Bug 修复
 
 ```
 /systematic-debugging → 定位问题 → 编写修复 → /verification-before-completion → /review
+复杂 Bug → /learner（提取经验，避免重蹈覆辙）
 ```
 
 ### 发布流程
 
 ```
-/ship → /qa → 修复问题 → /verification-before-completion → 合并发布
+/ship → /ultraqa（循环至通过）→ /verification-before-completion → 合并发布
+```
+
+### 复杂多步任务
+
+```
+/ralplan（多视角规划）→ /ralph（持续执行，不完成不停止）
+```
+
+### 快速原型
+
+```
+/autopilot（idea → 规格 → 实现 → QA 全自动）
 ```
 
 ---
@@ -263,21 +285,34 @@ npm test
 
 ### 设计阶段
 - `/brainstorming` - 头脑风暴
+- `/deep-interview` - 需求 Socratic 澄清（OMC）
 - `/plan-ceo-review` - 产品方向审视
 - `/plan-architect` - 架构评审
+- `/ralplan` - 多视角共识规划（OMC）
 - `/design-consultation` - 设计咨询
 
 ### 开发阶段
 - `/test-driven-development` - TDD
 - `/verification-before-completion` - 完成验证
 - `/systematic-debugging` - 调试
+- `/learner` - 提取调试经验（OMC）
 - `/simplify` - 代码简化
+- `/ai-slop-cleaner` - AI 代码味清理（OMC）
 
 ### 质量保证
 - `/review` - 代码审查
 - `/qa` - 自动化测试
+- `/ultraqa` - QA 循环至通过（OMC）
 - `/ship` - 发布检查
+
+### OMC 高阶工作流
+- `/ralph` - 持续执行，不完成不停止
+- `/ultrawork` - 并行执行引擎（分层路由）
+- `/autopilot` - idea → QA 全自动流水线
+
+### OMC 管理
+- `/omc-upgrade` - 安装或升级 oh-my-claudecode
 
 ---
 
-*基于 AI 原生开发方法论 v1.1*
+*基于 AI 原生开发方法论 v1.1 | OMC v27527267*
