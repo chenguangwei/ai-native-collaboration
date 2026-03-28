@@ -336,6 +336,7 @@ git sparse-checkout set ops docs/05_ops memory
 | 文档 | 说明 |
 |------|------|
 | [全局操作总纲 SOP(必读)](docs/00_AI_NATIVE_SOP.md) | 最核心的协作规范：ROM/RAM 分区及过渡期剧本指引 |
+| [RAM 架构与重构释疑 FAQ](docs/00_ai_system/memory-architecture-faq.md) | 关于无锁多并发、职责拆分解惑 100 问 |
 | [Skills 速查索引](docs/06_handbooks/ai-native/SKILLS_INDEX.md) | 88 个强悍技能按 4 大职业分类，含触发方式 |
 | [Commands 命令集](.claude/commands/README.md) | 轻量且高频的核心执行命令 |
 | [Agents 说明](.claude/agents/README.md) | 后台分析师/测试员/监控卫士列表 |
