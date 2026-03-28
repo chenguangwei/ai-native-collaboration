@@ -367,7 +367,7 @@ git sparse-checkout set ops docs/05_ops memory
 >
 > [autoresearch](https://github.com/uditgoenka/autoresearch) — 自主目标驱动迭代引擎，Karpathy autoresearch 理念的 Claude Code 实现
 >
-> [everything-claude-code](https://github.com/affaan-m/everything-claude-code)
+> [everything-claude-code](https://github.com/affaan-m/everything-claude-code) — 来自 Anthropic 黑客马拉松获胜者的完整 Claude Code 配置集合
 
 
 ---
