@@ -1,1 +1,0 @@
-../skills/omc/agents/document-specialist.md

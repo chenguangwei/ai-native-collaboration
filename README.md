@@ -243,6 +243,19 @@ skill 会自动完成完整升级流程：
 /ralplan          # Planner→Architect→Critic 共识规划
 ```
 
+**Autoresearch**（[autoresearch](https://github.com/uditgoenka/autoresearch) 自主目标驱动迭代引擎，已内置）：
+```bash
+/autoresearch          # 通用自主优化循环：修改→验证→保留/丢弃→重复
+/autoresearch:plan     # 将自然语言目标转化为可执行配置
+/autoresearch:debug    # 科学方法驱动的 Bug 猎杀循环
+/autoresearch:fix      # 自动修复错误，直到测试/构建/类型全部通过
+/autoresearch:security # STRIDE + OWASP Top 10 自主安全审计
+/autoresearch:ship     # 通用交付工作流（代码/内容/部署/营销）
+/autoresearch:scenario # 场景驱动用例生成，探索边界与失效模式
+/autoresearch:predict  # 多专家视角群体预测（架构/安全/性能）
+/autoresearch:learn    # 自主学习代码库，生成/更新文档
+```
+
 ### 多元角色融合与切换
 
 摒弃死板的 JSON 文件角色锁，系统采用高自由度的动态机甲加载方案：你可以直接通过撰写 `memory/active-task.md` 来让 AI **隐式流转角色**；或者在对话中显式执行 `/switch-role [角色名]` 进行强制状态锚定。
@@ -328,6 +341,7 @@ git sparse-checkout set ops docs/05_ops memory
 | [Agents 说明](.claude/agents/README.md) | 后台分析师/测试员/监控卫士列表 |
 | [AI 系统文档](docs/00_ai_system/) | 路由矩阵、subtree 接入手册 |
 | [Claude Code 使用技巧：从入门到精通](docs/00_ai_system/claude-code-40-best-practices.md) | 从配置到多 Agent，40+ 个提升工作流效率的技巧 |
+| [Autoresearch 使用手册](docs/00_ai_system/autoresearch-guide.md) | 自主目标驱动迭代引擎：9 个子命令完整使用指南 |
 
 ### 操作手册
 
@@ -348,7 +362,8 @@ git sparse-checkout set ops docs/05_ops memory
 
 > 引用 [oh-my-claudecode Claude Code 的多智能体编排系统](https://github.com/Yeachan-Heo/oh-my-claudecode)
 > 引用 [gstack 将 Claude Code 转化为虚拟工程团队](https://github.com/garrytan/gstack)
+> 引用 [autoresearch 自主目标驱动迭代引擎，Karpathy autoresearch 理念的 Claude Code 实现](https://github.com/uditgoenka/autoresearch)
 ---
 
-*最后更新: 2026-03-27 by Claude Code*
+*最后更新: 2026-03-28 by Claude Code*
 

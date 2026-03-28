@@ -1,1 +1,0 @@
-../skills/omc/agents/critic.md

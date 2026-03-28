@@ -1,1 +1,0 @@
-../skills/omc/agents/test-engineer.md

@@ -23,14 +23,8 @@
       "Bash(git push:*)",
       "Bash(codex:*)",
       "Bash(npx codex:*)",
-      "Bash(chmod:*)",
       "Bash(find:*)",
-      "Bash(cp:*)",
-      "Bash(mv:*)",
       "Bash(touch:*)",
-      "Bash(rm:*)",
-      "Bash(bash:*)",
-      "Bash(sh:*)",
       "Bash(git checkout:*)"
     ]
   }

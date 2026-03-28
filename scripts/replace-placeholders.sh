@@ -21,12 +21,37 @@ echo ""
 
 # Step 1: 替换文档中的占位符
 echo "📝 替换占位符..."
-find . \( -name "*.md" -o -name "*.json" -o -name "*.yml" \) \
-  -not -path "./.git/*" \
-  -not -path "./node_modules/*" \
-  -not -path "./.scaffold/*" \
-  -exec sed -i.bak "s/\[项目名称\]/$PROJECT_NAME/g" {} \;
-find . -name "*.bak" -delete
+if command -v python3 &>/dev/null; then
+  python3 -c "
+import os, sys
+project_name = sys.argv[1]
+for root, dirs, files in os.walk('.'):
+    if '.git' in root or 'node_modules' in root or '.scaffold' in root: continue
+    for file in files:
+        if file.endswith(('.md', '.json', '.yml', '.yaml')):
+            p = os.path.join(root, file)
+            try:
+                with open(p, 'r', encoding='utf-8') as f:
+                    c = f.read()
+                if '[项目名称]' in c:
+                    with open(p, 'w', encoding='utf-8') as f:
+                        f.write(c.replace('[项目名称]', project_name))
+            except Exception: pass
+  " "$PROJECT_NAME"
+else
+  echo "   ⚠️ 未找到 python3，降级使用 sed (不同系统可能有兼容性警告)"
+  find . \( -name "*.md" -o -name "*.json" -o -name "*.yml" \) \
+    -not -path "./.git/*" \
+    -not -path "./node_modules/*" \
+    -not -path "./.scaffold/*" \
+    -exec sed -i.bak "s/\[项目名称\]/$PROJECT_NAME/g" {} \; 2>/dev/null || \
+  find . \( -name "*.md" -o -name "*.json" -o -name "*.yml" \) \
+    -not -path "./.git/*" \
+    -not -path "./node_modules/*" \
+    -not -path "./.scaffold/*" \
+    -exec sed -i \"\" "s/\[项目名称\]/$PROJECT_NAME/g" {} \;
+  find . -name "*.bak" -delete 2>/dev/null || true
+fi
 echo "   ✅ 占位符替换完成"
 
 # Step 2: 复制前端技术栈模板
