@@ -258,7 +258,7 @@ skill 会自动完成完整升级流程：
 
 ### 多元角色融合与切换
 
-摒弃死板的 JSON 文件角色锁，系统采用高自由度的动态机甲加载方案：你可以直接通过撰写 `memory/active-task.md` 来让 AI **隐式流转角色**；或者在对话中显式执行 `/switch-role [角色名]` 进行强制状态锚定。
+通过 `.claude/project-config.json` 中的 `currentRole` 字段声明当前角色，或在对话中执行 `/switch-role [角色名]` 即时切换。`memory/active-task.md` 由 AI 自动维护当前任务拆解树，无需手动编辑。
 
 #### AI-Native 体系 🚀（推荐）
 
