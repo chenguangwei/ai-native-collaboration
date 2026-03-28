@@ -4,25 +4,9 @@
 
 ---
 
-## 角色配置
+## 角色流转 (Role Switch)
 
-### 1. 配置当前角色
-
-编辑 `.claude/project-config.json`:
-
-```json
-{
-  "currentRole": "product-owner",
-  "gitUser": "your@email.com",
-  "team": "product-team"
-}
-```
-
-### 2. 验证配置
-
-```bash
-cat .claude/project-config.json | grep currentRole
-```
+在会话输入栏中敲击 ，或者直接编辑  认领待办以隐式切换。
 
 ---
 
@@ -32,7 +16,7 @@ cat .claude/project-config.json | grep currentRole
 
 ```bash
 # 查看今日任务
-cat memory/roles/product-owner/today.md
+cat memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)
 
 # 查看产品文档
 cat docs/01_product/prd_v1.0.md
@@ -82,14 +66,14 @@ cat docs/01_product/business_rules.md
 ### 每日开始
 
 ```bash
-cat memory/roles/product-owner/today.md
+cat memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)
 cat docs/01_product/prd_v1.0.md
 ```
 
 ### 每日结束
 
 ```markdown
-# 更新 memory/roles/product-owner/today.md
+# 更新 memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)
 - 记录今日完成的需求评审
 - 记录待处理的需求
 - 记录需求变更
@@ -139,7 +123,7 @@ docs/01_product/
 ### 4. 进度跟踪
 
 ```markdown
-# 更新 memory/roles/pm/today.md
+# 更新 memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)
 # 更新 memory/.index/today-overview.md
 ```
 

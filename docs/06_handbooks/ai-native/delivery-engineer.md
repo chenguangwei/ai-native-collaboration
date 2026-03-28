@@ -6,29 +6,9 @@
 
 ---
 
-## 角色配置
+## 角色流转 (Role Switch)
 
-### 1. 配置当前角色
-
-编辑 `.claude/project-config.json`:
-
-```json
-{
-  "currentRole": "delivery-engineer",
-  "gitUser": "your@email.com",
-  "team": "development"
-}
-```
-
-### 2. 验证配置
-
-```bash
-# 确认角色
-cat .claude/project-config.json | grep currentRole
-
-# 确认 git 用户
-git config user.email
-```
+在会话输入栏中敲击 ，或者直接编辑  认领待办以隐式切换。
 
 ---
 
@@ -38,7 +18,7 @@ git config user.email
 
 ```bash
 # 1. 查看今日任务
-cat memory/roles/delivery-engineer/today.md
+cat memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)
 
 # 2. 查看团队概览
 cat memory/.index/today-overview.md
@@ -162,7 +142,7 @@ cat memory/lock/conductor-tasks.json
 
 ```bash
 # 查看今日工作
-cat memory/roles/delivery-engineer/today.md
+cat memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)
 
 # 查看团队进度
 cat memory/.index/today-overview.md
@@ -175,7 +155,7 @@ cat memory/.index/active-tasks.json
 
 ```bash
 # 更新今日工作
-# 编辑 memory/roles/delivery-engineer/today.md
+# 编辑 memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)
 
 # 同步到人员目录
 PERSON=$(git config user.email | tr '@' '_')

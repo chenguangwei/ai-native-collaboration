@@ -4,25 +4,9 @@
 
 ---
 
-## 角色配置
+## 角色流转 (Role Switch)
 
-### 1. 配置当前角色
-
-编辑 `.claude/project-config.json`:
-
-```json
-{
-  "currentRole": "quality-engineer",
-  "gitUser": "your@email.com",
-  "team": "qa-team"
-}
-```
-
-### 2. 验证配置
-
-```bash
-cat .claude/project-config.json | grep currentRole
-```
+在会话输入栏中敲击 ，或者直接编辑  认领待办以隐式切换。
 
 ---
 
@@ -32,7 +16,7 @@ cat .claude/project-config.json | grep currentRole
 
 ```bash
 # 查看今日任务
-cat memory/roles/qa/today.md
+cat memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)
 
 # 查看测试用例
 cat docs/04_qa/test_cases.md
@@ -112,14 +96,14 @@ npx playwright test
 ### 每日开始
 
 ```bash
-cat memory/roles/qa/today.md
+cat memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)
 cat docs/04_qa/test_cases.md
 ```
 
 ### 每日结束
 
 ```markdown
-# 更新 memory/roles/qa/today.md
+# 更新 memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)
 - 记录测试用例执行结果
 - 记录发现的 bug
 - 记录待验证的修复

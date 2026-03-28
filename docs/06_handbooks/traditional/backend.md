@@ -4,25 +4,9 @@
 
 ---
 
-## 角色配置
+## 角色流转 (Role Switch)
 
-### 1. 配置当前角色
-
-编辑 `.claude/project-config.json`:
-
-```json
-{
-  "currentRole": "delivery-engineer",
-  "gitUser": "your@email.com",
-  "team": "backend-team"
-}
-```
-
-### 2. 验证配置
-
-```bash
-cat .claude/project-config.json | grep currentRole
-```
+在会话输入栏中敲击 ，或者直接编辑  认领待办以隐式切换。
 
 ---
 
@@ -32,7 +16,7 @@ cat .claude/project-config.json | grep currentRole
 
 ```bash
 # 查看今日任务
-cat memory/roles/backend/today.md
+cat memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)
 
 # 查看 API 文档
 cat docs/03_architecture/api_specs.md
@@ -97,14 +81,14 @@ cat docs/03_architecture/db_schema.md
 ### 每日开始
 
 ```bash
-cat memory/roles/backend/today.md
+cat memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)
 cat docs/03_architecture/api_specs.md
 ```
 
 ### 每日结束
 
 ```markdown
-# 更新 memory/roles/backend/today.md
+# 更新 memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)
 - 记录今日完成
 - 记录待办
 - 记录问题

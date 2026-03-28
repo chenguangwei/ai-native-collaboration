@@ -137,11 +137,11 @@
 
 **每日开始：**
 ```bash
-cat memory/roles/pm/today.md
+cat memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)
 cat memory/.index/today-overview.md
 ```
 
-**每日结束，更新 `memory/roles/pm/today.md`：**
+**每日结束，更新 `memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)`：**
 ```markdown
 ## 今日完成
 - [x] 完成用户认证功能 PRD 初稿
@@ -462,7 +462,7 @@ cat docs/04_qa/                        # 查看已有测试用例
 
 ### 3.7 测试阶段记忆管理
 
-**每日结束，更新 `memory/roles/qa/today.md`：**
+**每日结束，更新 `memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)`：**
 
 ```markdown
 ## 今日测试结论
@@ -604,7 +604,7 @@ cat ops/monitoring/
 
 ### 4.7 运维阶段记忆管理
 
-**每次发布后，更新 `memory/roles/devops/today.md`：**
+**每次发布后，更新 `memory/active-task.md (宏观进度) / memory/handoff.md (微观交接单)`：**
 
 ```markdown
 ## 今日发布
