@@ -360,9 +360,13 @@ git sparse-checkout set ops docs/05_ops memory
 | [测试用例](docs/04_qa/) | 测试计划、审计日志 |
 | [运维手册](docs/05_ops/) | 部署环境、Runbook |
 
-> 引用 [oh-my-claudecode Claude Code 的多智能体编排系统](https://github.com/Yeachan-Heo/oh-my-claudecode)
-> 引用 [gstack 将 Claude Code 转化为虚拟工程团队](https://github.com/garrytan/gstack)
-> 引用 [autoresearch 自主目标驱动迭代引擎，Karpathy autoresearch 理念的 Claude Code 实现](https://github.com/uditgoenka/autoresearch)
+
+>  [oh-my-claudecode Claude Code 的多智能体编排系统](https://github.com/Yeachan-Heo/oh-my-claudecode)
+>  [gstack 将 Claude Code 转化为虚拟工程团队](https://github.com/garrytan/gstack)
+>  [autoresearch 自主目标驱动迭代引擎，Karpathy autoresearch 理念的 Claude Code 实现](https://github.com/uditgoenka/autoresearch)
+>  [Ceverything-claude-code](https://github.com/affaan-m/everything-claude-code)
+
+
 ---
 
 *最后更新: 2026-03-28 by Claude Code*
