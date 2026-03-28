@@ -361,10 +361,13 @@ git sparse-checkout set ops docs/05_ops memory
 | [运维手册](docs/05_ops/) | 部署环境、Runbook |
 
 
->  [oh-my-claudecode Claude Code 的多智能体编排系统](https://github.com/Yeachan-Heo/oh-my-claudecode)
->  [gstack 将 Claude Code 转化为虚拟工程团队](https://github.com/garrytan/gstack)
->  [autoresearch 自主目标驱动迭代引擎，Karpathy autoresearch 理念的 Claude Code 实现](https://github.com/uditgoenka/autoresearch)
->  [Ceverything-claude-code](https://github.com/affaan-m/everything-claude-code)
+> [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) — Claude Code 的多智能体编排系统
+>
+> [gstack](https://github.com/garrytan/gstack) — 将 Claude Code 转化为虚拟工程团队
+>
+> [autoresearch](https://github.com/uditgoenka/autoresearch) — 自主目标驱动迭代引擎，Karpathy autoresearch 理念的 Claude Code 实现
+>
+> [everything-claude-code](https://github.com/affaan-m/everything-claude-code)
 
 
 ---
