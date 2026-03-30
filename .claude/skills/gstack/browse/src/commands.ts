@@ -31,9 +31,29 @@ export const META_COMMANDS = new Set([
   'chain', 'diff',
   'url', 'snapshot',
   'handoff', 'resume',
+  'connect', 'disconnect', 'focus',
+  'inbox',
+  'watch',
+  'state',
+  'frame',
 ]);
 
 export const ALL_COMMANDS = new Set([...READ_COMMANDS, ...WRITE_COMMANDS, ...META_COMMANDS]);
+
+/** Commands that return untrusted third-party page content */
+export const PAGE_CONTENT_COMMANDS = new Set([
+  'text', 'html', 'links', 'forms', 'accessibility',
+  'console', 'dialog',
+]);
+
+/** Wrap output from untrusted-content commands with trust boundary markers */
+export function wrapUntrustedContent(result: string, url: string): string {
+  // Sanitize URL: remove newlines to prevent marker injection via history.pushState
+  const safeUrl = url.replace(/[\n\r]/g, '').slice(0, 200);
+  // Escape marker strings in content to prevent boundary escape attacks
+  const safeResult = result.replace(/--- (BEGIN|END) UNTRUSTED EXTERNAL CONTENT/g, '--- $1 UNTRUSTED EXTERNAL C\u200BONTENT');
+  return `--- BEGIN UNTRUSTED EXTERNAL CONTENT (source: ${safeUrl}) ---\n${safeResult}\n--- END UNTRUSTED EXTERNAL CONTENT ---`;
+}
 
 export const COMMAND_DESCRIPTIONS: Record<string, { category: string; description: string; usage?: string }> = {
   // Navigation
@@ -98,6 +118,18 @@ export const COMMAND_DESCRIPTIONS: Record<string, { category: string; descriptio
   // Handoff
   'handoff': { category: 'Server', description: 'Open visible Chrome at current page for user takeover', usage: 'handoff [message]' },
   'resume':  { category: 'Server', description: 'Re-snapshot after user takeover, return control to AI', usage: 'resume' },
+  // Headed mode
+  'connect': { category: 'Server', description: 'Launch headed Chromium with Chrome extension', usage: 'connect' },
+  'disconnect': { category: 'Server', description: 'Disconnect headed browser, return to headless mode' },
+  'focus':   { category: 'Server', description: 'Bring headed browser window to foreground (macOS)', usage: 'focus [@ref]' },
+  // Inbox
+  'inbox':   { category: 'Meta', description: 'List messages from sidebar scout inbox', usage: 'inbox [--clear]' },
+  // Watch
+  'watch':   { category: 'Meta', description: 'Passive observation — periodic snapshots while user browses', usage: 'watch [stop]' },
+  // State
+  'state':   { category: 'Server', description: 'Save/load browser state (cookies + URLs)', usage: 'state save|load <name>' },
+  // Frame
+  'frame':   { category: 'Meta', description: 'Switch to iframe context (or main to return)', usage: 'frame <sel|@ref|--name n|--url pattern|main>' },
 };
 
 // Load-time validation: descriptions must cover exactly the command sets
