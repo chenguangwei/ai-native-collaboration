@@ -3,6 +3,12 @@
 > 综合 40+ 实战技巧，按学习曲线分级编排。
 > 建议第一次阅读时顺序过一遍；之后当作工具手册按需查阅。
 
+## 快速速查表
+
+| macOS | Windows |
+|-------|---------|
+| ![Claude Code 速查表 Mac](images/Claude%20code速查表-mac-26.3.jpg) | ![Claude Code 速查表 Win](images/Claude%20code速查表-win-26.3.jpg) |
+
 ---
 
 ## 目录
