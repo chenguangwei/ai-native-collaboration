@@ -57,12 +57,15 @@
 
 | 特性 | Commands | Skills | Agents |
 |------|----------|--------|--------|
-| 复杂度 | 简单，一个文件 | 复杂，多文件工作流 | 独立子任务 |
+| 复杂度 | 简单，一个文件 | 复杂，多文件工作流 | 专职同事,独立子任务 |
 | 结构 | 单个 `.md` 文件 | `SKILL.md` + 关联文件 | `.md` + YAML frontmatter |
 | 运行方式 | 主对话内执行 | 主对话内执行 | **后台独立运行** |
 | 输出 | 内联输出 | 内联输出 | **只返回最终报告** |
 | 适用场景 | 快速触发单一任务 | 需要详细指导的工作流 | 大规模分析、审查 |
 | 示例 | `/review` 触发审查 | `/browse` 浏览器自动化 | `security-auditor` 扫描全库 |
+
+
+![alt text](docs/00_ai_system/images/agents_vs_skills_comparison.svg)
 
 ### Commands — 轻量快捷
 
