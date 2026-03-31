@@ -1,6 +1,6 @@
 # Skills 速查索引
 
-> AI-Native 岗位技能速查手册 — 共 88 个技能
+> AI-Native 岗位技能速查手册 — 共 95 个技能
 
 **AI-Native 核心理念**：岗位不再按技术栈划分（不再有"Java 工程师"vs"前端工程师"），而是按**你解决什么问题**来划分。AI 负责处理语言/框架的技术细节，人负责产品判断、系统设计和质量保障。
 
@@ -9,6 +9,7 @@
 - 🌐 **gstack** — 浏览器自动化套件（`scripts/sync-agents-skills.sh` 同步）
 - 📦 **ECC** — 来自 [everything-claude-code](https://github.com/swirlai/everything-claude-code) 最佳实践
 - ⭐ **OMC** — 来自 [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)，通过 `/omc-upgrade` 安装/升级
+- 🤖 **Codex** — OpenAI Codex CLI 集成，项目内置（需全局安装 `npm install -g @openai/codex`）
 
 ---
 
@@ -16,11 +17,12 @@
 
 1. [通用技能](#通用技能) — 所有岗位必备
 2. [OMC 高阶技能](#omc-高阶技能) — 超越岗位边界的 AI 增强套件
-3. [交付工程师](#交付工程师) — 端到端交付产品特性（含部署上线）
-4. [AI 工程师](#ai-工程师) — Agent 编排、LLM 集成、AI 流水线
-5. [质量工程师](#质量工程师) — 全栈测试 + 安全 + 可靠性 + 可观测性
-6. [产品负责人](#产品负责人) — 需求策略、PRD、用户研究
-7. [gstack 浏览器自动化](#gstack-浏览器自动化)
+3. [Codex 代码审查与修复](#codex-代码审查与修复) — OpenAI Codex CLI 集成
+4. [交付工程师](#交付工程师) — 端到端交付产品特性（含部署上线）
+5. [AI 工程师](#ai-工程师) — Agent 编排、LLM 集成、AI 流水线
+6. [质量工程师](#质量工程师) — 全栈测试 + 安全 + 可靠性 + 可观测性
+7. [产品负责人](#产品负责人) — 需求策略、PRD、用户研究
+8. [gstack 浏览器自动化](#gstack-浏览器自动化)
 
 ---
 
@@ -88,6 +90,86 @@
 | `omc-qa-tester` | QA 测试 |
 | `omc-debugger` | 调试分析 |
 | `omc-verifier` | 完成验证 |
+
+---
+
+## Codex 代码审查与修复
+
+> **定位**：OpenAI Codex CLI 深度集成，提供独立于 Claude 的第二视角代码审查、问题诊断与自主修复能力。所有 Codex 命令跨岗位通用。
+>
+> **前置条件**：`npm install -g @openai/codex` + `codex login`（首次使用运行 `/codex:setup` 检查）
+
+### 初始化
+
+| 命令 | 触发 | 用途 |
+|------|------|------|
+| — | `/codex:setup` | 检查 Codex CLI 安装状态，引导登录；可选开启 stop-time review gate |
+
+### 代码审查
+
+| 命令 | 触发 | 用途 |
+|------|------|------|
+| — | `/codex:review` | 基于当前 git diff 进行代码审查（前台或后台执行）|
+| — | `/codex:adversarial-review` | **挑战式审查**：质疑设计决策、接口假设和架构取舍，不只找实现缺陷 |
+
+审查参数：
+
+```
+/codex:review --wait                      # 前台等待结果
+/codex:review --background                # 后台运行，用 /codex:status 查进度
+/codex:review --base main                 # 与 main 分支对比
+/codex:adversarial-review 关注 auth 模块   # 聚焦特定模块的对抗审查
+```
+
+### 任务委托（Rescue）
+
+将复杂调试、根因分析或实现任务完全交给 Codex 执行：
+
+| 命令 | 触发 | 用途 |
+|------|------|------|
+| — | `/codex:rescue <任务描述>` | 把任务转发给 `codex-rescue` subagent 执行，返回结果原文 |
+
+任务参数：
+
+```
+/codex:rescue 找出内存泄漏根因并修复
+/codex:rescue --background 重构 auth 模块   # 后台运行
+/codex:rescue --resume 继续上次任务          # 续接上一次 Codex 线程
+/codex:rescue --effort high 优化数据库查询  # 指定推理力度
+/codex:rescue --model spark 快速原型        # 使用 spark 轻量模型
+```
+
+### 任务管理
+
+| 命令 | 触发 | 用途 |
+|------|------|------|
+| — | `/codex:status` | 查看当前会话所有 Codex 任务状态（表格视图）|
+| — | `/codex:status <job-id>` | 查看指定任务详情 |
+| — | `/codex:result <job-id>` | 获取已完成任务的完整输出 |
+| — | `/codex:cancel <job-id>` | 取消正在运行的后台任务 |
+
+### 内部 Skills（不可直接调用，供 Agent 使用）
+
+| Skill | 文件位置 | 用途 |
+|-------|----------|------|
+| `codex-cli-runtime` | `.agents/skills/codex-cli-runtime/` | Codex companion 脚本调用契约 |
+| `codex-result-handling` | `.agents/skills/codex-result-handling/` | 审查结果展示规则（禁止自动修复）|
+| `gpt-5-4-prompting` | `.agents/skills/gpt-5-4-prompting/` | GPT-5.4 提示词组装指南（含 recipes、anti-patterns）|
+
+### Agent
+
+| Agent | 文件位置 | 用途 |
+|-------|----------|------|
+| `codex-rescue` | `.claude/agents/codex-rescue.md` | 薄封装转发层，把任务原文转发给 Codex，不做额外处理 |
+
+### 典型工作流
+
+```
+PR 合并前    → /codex:review --background（后台审查，不阻塞开发）
+架构评审     → /codex:adversarial-review --base main（质疑整体设计）
+卡住了       → /codex:rescue 描述问题（第二视角诊断）
+后台任务跟进 → /codex:status → /codex:result <id>
+```
 
 ---
 
@@ -344,4 +426,4 @@ QA 测试     → /qa | /qa-only | /ultraqa（循环至通过）
 
 ---
 
-*最后更新: 2026-03-27 by Claude Code — 共 88 个技能 | AI-Native 岗位体系 v2.0*
+*最后更新: 2026-03-31 by Claude Code — 共 95 个技能 | AI-Native 岗位体系 v2.0 + Codex 集成*

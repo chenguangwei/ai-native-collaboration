@@ -41,6 +41,31 @@ agent-harness-construction → 工具设计、观察格式化、错误恢复、c
 /claude-api         → Anthropic SDK 使用指南
 ```
 
+### Codex 二次验证
+
+AI 工程师构建 AI 系统时，最容易产生"自我验证"的盲区——用 Claude 写的代码让 Claude 来审。Codex 提供独立的第二视角：
+
+```
+/codex:setup                               → 首次使用：检查安装状态，登录账号
+/codex:review --wait                       → PR 前同步代码审查（小 diff 用这个）
+/codex:review --background                 → 大 diff 后台审查，不阻塞开发
+/codex:adversarial-review                  → 挑战式：质疑 Agent 设计决策和架构假设
+/codex:rescue 描述问题                     → 卡住时把任务交给 Codex 独立处理
+/codex:rescue --resume 继续修复            → 续接上次 Codex 线程
+/codex:status                              → 查看所有后台任务进度
+/codex:result <job-id>                     → 获取完整审查结果
+```
+
+**何时用 Codex vs Claude：**
+
+| 场景 | 推荐 |
+|------|------|
+| 快速修改、简单 bug | Claude（当前会话直接处理）|
+| 大型重构、多文件变更 | Codex（`/codex:rescue --background`）|
+| PR 代码审查 | Codex（`/codex:review`，独立视角）|
+| 架构设计是否合理 | Codex（`/codex:adversarial-review`）|
+| Claude 反复失败、卡住 | Codex（`/codex:rescue`，第二视角）|
+
 ---
 
 ## 常用技能速查
@@ -54,6 +79,9 @@ agent-harness-construction → 工具设计、观察格式化、错误恢复、c
 | 全自动流水线 | `/autopilot` |
 | 工程评审 | `/plan-eng-review` |
 | 根因调查 | `/investigate` |
+| 代码审查（独立视角） | `/codex:review` |
+| 架构决策验证 | `/codex:adversarial-review` |
+| 任务委托 Codex | `/codex:rescue` |
 | 经验沉淀 | `/learner` |
 
 ---
@@ -65,6 +93,7 @@ agent-harness-construction → 工具设计、观察格式化、错误恢复、c
 - [ ] 错误恢复策略明确（重试/降级/中止）
 - [ ] Context 预算合理（不超出窗口上限）
 - [ ] 并行 vs 串行任务划分正确
+- [ ] 已用 `/codex:adversarial-review` 做独立架构验证
 
 ---
 
@@ -76,6 +105,7 @@ agent-harness-construction → 工具设计、观察格式化、错误恢复、c
 | `omc-critic` | 方案批判与风险识别 |
 | `omc-planner` | 实施规划 |
 | `analyst`（内置）| 需求结构化分析 |
+| `codex-rescue`（内置）| Codex 任务委托 subagent |
 
 ---
 
