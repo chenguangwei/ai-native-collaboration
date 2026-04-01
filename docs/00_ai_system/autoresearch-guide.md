@@ -1,7 +1,7 @@
 # Autoresearch 使用手册
 
 > 自主目标驱动迭代引擎。灵感来源：[Karpathy's autoresearch](https://github.com/karpathy/autoresearch)
-> 插件来源：[uditgoenka/autoresearch](https://github.com/uditgoenka/autoresearch) v1.8.2
+> 插件来源：[uditgoenka/autoresearch](https://github.com/uditgoenka/autoresearch) v1.9.0
 
 ---
 
@@ -26,6 +26,7 @@
 | `/autoresearch:scenario` | 场景驱动用例生成，探索边界与失效模式 |
 | `/autoresearch:predict` | 多专家视角群体预测（架构师/安全分析/性能工程师等） |
 | `/autoresearch:learn` | 自主学习代码库，生成/更新文档 |
+| `/autoresearch:reason` | 对抗性精炼——盲评委面板对无客观指标的主观决策进行多轮辩论收敛 |
 
 ---
 
@@ -148,6 +149,24 @@ Goal: 新功能全质量流水线
 /autoresearch:learn --mode check
 ```
 
+### 对抗性精炼（无客观指标的主观决策）
+
+```
+# 架构决策辩论
+/autoresearch:reason
+Task: 我们是否应该为订单系统引入事件溯源？
+Domain: software
+Iterations: 8
+
+# 产品策略收敛
+/autoresearch:reason --domain product --iterations 6
+
+# 收敛后直接链式执行
+/autoresearch:reason --chain predict        # 收敛再压力测试
+/autoresearch:reason --chain plan,fix       # 收敛再落地实施
+/autoresearch:reason --chain scenario       # 收敛再探索边界情况
+```
+
 ---
 
 ## 循环机制
@@ -184,6 +203,7 @@ LOOP (无限 or N 次):
 | `scenario` | `scenario/{YYMMDD}-{HHMM}-{slug}/` |
 | `predict` | `predict/{YYMMDD}-{HHMM}-{slug}/` |
 | `learn` | `learn/{YYMMDD}-{HHMM}-{slug}/` |
+| `reason` | `reason/{YYMMDD}-{HHMM}-{slug}/`（含 lineage.md / candidates.md / judge-transcripts.md / reason-results.tsv / handoff.json） |
 
 ---
 
@@ -204,13 +224,19 @@ LOOP (无限 or N 次):
 | 技能 | 定位 |
 |------|------|
 | `/autoresearch` | **自主闭环迭代**，有指标，无人监督 |
+| `/autoresearch:predict` | 一次性多专家分析（5 个专家视角辩论现有代码） |
+| `/autoresearch:reason` | 迭代精炼循环（盲评委面板对无客观指标的主观决策多轮收敛） |
 | `/ultrawork` | 并行执行引擎，Haiku/Sonnet/Opus 分层路由 |
 | `/ralph` | PRD 驱动的持续执行，不完成不停止 |
 | `/ultraqa` | QA 循环直到全部测试通过 |
 | `/autopilot` | idea → 规格 → 实现 → QA 全自动流水线 |
 
-autoresearch 的核心差异：**有可量化的机械指标驱动的修改-验证循环**，适合有明确"好/坏"判断标准的任务。
+**predict vs reason 的区别**：
+- `predict` 是一次性分析——5 位专家辩论你的现有代码，用于行动前的分析。
+- `reason` 是迭代精炼循环——竞争候选方案经过生成、批评、综合、盲评，多轮收敛，用于无客观指标的决策（架构选型、产品策略、内容质量）。
+
+autoresearch 的核心差异：**有可量化的机械指标驱动的修改-验证循环**，适合有明确"好/坏"判断标准的任务；`reason` 将盲评委面板本身作为适应度函数，扩展到主观领域。
 
 ---
 
-*插件版本: v1.8.2 | 上游: [uditgoenka/autoresearch](https://github.com/uditgoenka/autoresearch)*
+*插件版本: v1.9.0 | 上游: [uditgoenka/autoresearch](https://github.com/uditgoenka/autoresearch)*
