@@ -1,15 +1,7 @@
----
-paths:
-  - "src/components/**"
-  - "src/ui/**"
-  - "src/widgets/**"
-  - "src/views/**"
-  - "**/*.component.*"
----
-
 # 🎨 UI 组件规范
 
 > 作用域: `src/components/**`, `src/ui/**`, `src/views/**` 相关的组件结构边界。
+> **注意**：这是可选阅读的业务域知识 ROM，供 AI 在构建前端架构时查阅参考，不强占系统提示词（RAM）。
 
 ## 1. 组件结构分离
 

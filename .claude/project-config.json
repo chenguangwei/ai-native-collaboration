@@ -2,7 +2,6 @@
   "project": "ai-native-scaffold",
   "version": "2.0",
   "gitUser": "chenguangwei@unisound.com",
-  "team": "development",
   "scaffoldVersion": "2.0.0",
-  "_comment": "项目基础配置 - 记录脚手架核心元数据。注：已彻底弃用原先的 currentRole 及静态角色目录隔离方案。现有的多角色无缝流转通过读写 memory/active-task.md 及调用 /switch-role 进行动态挂载即可。"
+  "_comment": "项目基础配置 - 记录脚手架核心元数据。多角色无缝流转通过读写 memory/active-task.md 及调用 /switch-role 进行动态挂载。"
 }

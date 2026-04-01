@@ -1,19 +1,11 @@
----
-paths:
-  - "src/api/**"
-  - "src/handlers/**"
-  - "src/server/**"
-  - "src/controllers/**"
-  - "**/api.*"
----
-
 # 🔌 API 开发规范
 
-> 作用域: `src/api/**`, `src/handlers/**`, `src/server/**` 及所有包含 `api` 关键字的文件名。
+> 作用域: `src/api/**`, `src/handlers/**`, `src/server/**` 及所有后端接口层。
+> **注意**：这是可选阅读的业务域知识 ROM，供 AI 在构建后端功能时索引，不再强制霸占热内存系统提示词资源。
 
 ## 1. 响应标准格式
 
-所有 API 端点必须遵守统一的数据返回格式：
+所有 API 端点建议遵守统一的数据返回格式：
 
 ### 成功响应
 ```json

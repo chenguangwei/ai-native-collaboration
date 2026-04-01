@@ -73,7 +73,7 @@
 ## 脚手架开发注意事项
 
 1. **修改 CLAUDE.md 后**：确保内容对任意业务项目都通用，不要加入脚手架特有的路径描述
-2. **新增 Skill**：在 `.agents/skills/` 下创建目录，然后在 `.claude/skills/` 建立符号链接
+2. **新增 Skill**：在 `.agents/skills/` 下维护，系统将通过同步脚本采用硬拷贝 (`cp -a`) 策略同步到 `.claude/skills/`。不要使用针对跨平台极度脆弱的符号链接 (`ln -s`) 映射。
 3. **新增 Rule**：在 `.claude/rules/` 下添加 `.md` 文件，注意使用 YAML frontmatter 声明 paths 作用域
 4. **版本发布**：更新 `SCAFFOLD_VERSION` 和 `CHANGELOG.md`
 
