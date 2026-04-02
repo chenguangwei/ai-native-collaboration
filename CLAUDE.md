@@ -13,10 +13,9 @@
 
 ## 行为规则
 
-- 遵循 `.claude/rules/behaviors.md` 核心准则
-- 遵守 `.claude/rules/anti-slop.md` 设计规范
-- 使用 `.claude/rules/skill-triggers.md` 技能触发
-- 响应 `.claude/rules/memory-sync.md` 执行短时记忆交接
+- 遵循 `.claude/rules/01-behaviors.md` 核心准则
+- 响应 `.claude/rules/02-memory-protocol.md` 执行短时记忆交接
+- 遵守 `.claude/rules/03-anti-slop.md` 设计规范
 
 ## 能力索引
 

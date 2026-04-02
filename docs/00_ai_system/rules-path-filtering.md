@@ -4,7 +4,7 @@
 
 ## 概述
 
-默认情况下，`/rules` 目录下的所有规则文件都会被全局加载。但有时候你需要一个**只针对特定目录**的规则——比如 API 开发规范只对 `src/api/` 生效，组件规范只对 `src/components/` 生效。
+默认情况下，`.claude/rules/` 目录下的所有规则文件都会被全局加载。但有时候你需要一个**只针对特定目录**的规则——比如 API 开发规范只对 `src/api/` 生效，组件规范只对 `src/components/` 生效。
 
 路径过滤功能允许你通过 YAML frontmatter 声明规则文件的作用域。
 
@@ -43,7 +43,7 @@ paths:
 ```
 当 Claude 需要加载规则时:
 
-1. 扫描 /rules 目录下所有 .md 文件
+1. 扫描 `.claude/rules/` 目录下所有 `.md` 文件
 2. 读取每个文件的 frontmatter
 3. 对于没有 paths 声明的文件 → 全局加载
 4. 对于有 paths 声明的文件:
@@ -107,15 +107,15 @@ paths:
 
 | 类型 | 放置位置 | 示例 |
 |------|----------|------|
-| 全局规则 | `/rules/` | `behaviors.md`, `anti-slop.md` |
-| 领域规则 | `/rules/` + paths | `api-rules.md`, `component-rules.md` |
-| 项目规则 | `/rules/project/` | `project-conventions.md` |
+| 全局规则 | `.claude/rules/` | `01-behaviors.md`, `02-memory-protocol.md`, `03-anti-slop.md` |
+| 领域规则 | `.claude/rules/` + paths | `api-rules.md`, `component-rules.md` |
+| 项目规则 | `.claude/rules/project/` | `project-conventions.md` |
 
 ### 2. 避免重复
 
 ```yaml
 # ❌ 避免: 在全局规则里写领域特定内容
-# behaviors.md 里写 "API 必须返回 JSON"
+# 01-behaviors.md 里写 "API 必须返回 JSON"
 
 # ✅ 推荐: 创建独立的领域规则
 # api-rules.md with paths: ["src/api/**"]
@@ -138,10 +138,9 @@ paths:
 
 | 规则文件 | 作用域 |
 |---------|--------|
-| `behaviors.md` | 全局 |
-| `anti-slop.md` | 全局 |
-| `skill-triggers.md` | 全局 |
-| `memory-sync.md` | 全局 |
+| `01-behaviors.md` | 全局 |
+| `02-memory-protocol.md` | 全局 |
+| `03-anti-slop.md` | 全局 |
 | `api-rules.md` | `src/api/**`, `src/handlers/**`, `src/server/**` |
 | `component-rules.md` | `src/components/**`, `src/ui/**`, `src/widgets/**` |
 

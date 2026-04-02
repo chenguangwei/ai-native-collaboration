@@ -72,7 +72,7 @@
 
 ### 场景二：研发工程师（传统后端/全栈）遇坑交接
 1. 研发用 AI 写完代码后，遇到一个棘手的组件渲染警告，但是要赶着去开会。
-2. 触发 AI 执行强制更新记忆流（规则 `.claude/rules/memory-sync.md` 会起作用），AI 会在 `memory/handoff.md` 留下这样一段：
+2. 触发 AI 执行强制更新记忆流（规则 `.claude/rules/02-memory-protocol.md` 会起作用），AI 会在 `memory/handoff.md` 留下这样一段：
    ```markdown
    **时间**: 2026-03-27_15:30
    - **刚干了什么**: 后端接口完全搞定，开始堆组件。

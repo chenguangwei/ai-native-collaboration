@@ -1,6 +1,6 @@
 # 🔄 AI 记忆流同步实战指引 (Memory Sync Guide)
 
-本文档是针对底层规则 `.claude/rules/memory-sync.md` 的实操补充。展示在 AI-Native 研发过程中，开发人员如何通过大白话（Prompt）指挥 AI 精准读写 `memory/` 目录。
+本文档是针对底层规则 `.claude/rules/02-memory-protocol.md` 的实操补充。展示在 AI-Native 研发过程中，开发人员如何通过大白话（Prompt）指挥 AI 精准读写 `memory/` 目录。
 
 ## 方式一：人工口令触发（显式指使）
 

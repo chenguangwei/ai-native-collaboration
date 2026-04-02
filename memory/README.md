@@ -67,4 +67,4 @@ memory/
 3. 新 AI 立刻明白：“哦！上一任写完了表设计，卡在了字典。现在人类给了字典，我应该马上接着 `下一步 (Next Steps)` 去写 API 逻辑。”
 4. **无需从头推理，上下文秒级恢复。**
 
-详见规则设定：`.claude/rules/memory-sync.md`
+详见规则设定：`.claude/rules/02-memory-protocol.md`

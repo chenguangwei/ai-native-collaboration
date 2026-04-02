@@ -13,18 +13,17 @@
 
 ## 行为规则
 
-- 遵循 `.Codex/rules/behaviors.md` 核心准则
-- 遵守 `.Codex/rules/anti-slop.md` 设计规范
-- 使用 `.Codex/rules/skill-triggers.md` 技能触发
-- 响应 `.Codex/rules/memory-sync.md` 执行短时记忆交接
+- 遵循 `.claude/rules/01-behaviors.md` 核心准则
+- 响应 `.claude/rules/02-memory-protocol.md` 执行短时记忆交接
+- 遵守 `.claude/rules/03-anti-slop.md` 设计规范
 
 ## 能力索引
 
 | 能力类型 | 位置 |
 |---------|------|
-| Commands | `.Codex/commands/` |
-| Agents | `.Codex/agents/` |
-| Skills | `.Codex/skills/` |
+| Commands | `.claude/commands/` |
+| Agents | `.claude/agents/` |
+| Skills | `.claude/skills/` |
 
 ## 角色与上下文记忆
 

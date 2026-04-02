@@ -54,7 +54,7 @@
 - [传统全栈/研发技能速查表](traditional/SKILLS_INDEX.md) — 适合旧有研发分工直接选用的技能大全 
 - [AI-Native 操作大纲 SOP](../00_AI_NATIVE_SOP.md) — 全局团队架构协作规范 
 - [AI 系统文档](../00_ai_system/) — Claude Code 技巧指南
-- [RAM 记忆机制（内存流转）](../../.claude/rules/memory-sync.md) — 跨会话的任务同步规定（必读）
+- [RAM 记忆机制（内存流转）](../../.claude/rules/02-memory-protocol.md) — 跨会话的任务同步规定（必读）
 
 ---
 
