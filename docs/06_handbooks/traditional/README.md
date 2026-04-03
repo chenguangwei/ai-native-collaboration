@@ -2,7 +2,7 @@
 
 > 适用于传统研发团队向 AI-Native 过渡阶段。按原有岗位职责划分，人人配备 AI 助手，协作方式不变，效率倍增。
 >
-> **过渡路径**：传统岗位 + AI 工具 → AI-Native 岗位体系（参见 [ROLE_SETUP.md](../../00_ai_system/roles/traditional/ROLE_SETUP.md)）
+> **过渡路径**：传统岗位 + AI 工具 → AI-Native 岗位体系（参见 [ROLE_SETUP.md](ROLE_SETUP.md)）
 
 ---
 
@@ -622,10 +622,10 @@ git worktree add ../feat-payment feature/payment
 
 | 文档 | 说明 |
 |------|------|
-| [handbook-product-workflow.md](handbook-product-workflow.md) | 产品全流程（阶段视角）|
-| [ROLE_SETUP.md](../../00_ai_system/roles/traditional/ROLE_SETUP.md) | AI-Native 岗位体系（目标态）|
-| [SKILLS_INDEX.md](../00_ai_system/roles/SKILLS_INDEX.md) | 全量技能索引 |
-| [Claude Code 使用指南](../00_ai_system/claude-code-40-best-practices.md) | 40+ 使用技巧 |
+| [product-workflow.md](../ai-native/product-workflow.md) | 产品全流程（阶段视角）|
+| [ROLE_SETUP.md](ROLE_SETUP.md) | AI-Native 岗位体系（目标态）|
+| [SKILLS_INDEX.md](SKILLS_INDEX.md) | 全量技能索引 |
+| [Claude Code 使用指南](../../00_ai_system/claude-code-40-best-practices.md) | 40+ 使用技巧 |
 
 ---
 
