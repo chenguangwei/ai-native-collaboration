@@ -9,6 +9,7 @@
 | [routing-matrix.md](routing-matrix.md) | 模型分发路由图 — 何种任务用 Claude、何种用 o3-mini/DeepSeek |
 | [subtree-guide.md](subtree-guide.md) | git subtree 接入手册 — 新项目引入脚手架的完整步骤 |
 | [scaffolding-checkpoint.md](scaffolding-checkpoint.md) | 架构防过度设计检查清单（YAGNI 原则） |
+| [chrome-devtools-mcp-guide.md](chrome-devtools-mcp-guide.md) | Chrome DevTools MCP 接入指南 — 让 Claude Code 控制本机 Chrome |
 
 ## 关联入口
 
