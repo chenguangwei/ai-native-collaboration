@@ -2,6 +2,19 @@
 
 所有版本变更记录遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
+## [2.1.1] - 2026-04-07
+
+### Added
+- `docs/00_ai_system/graphify-guide.md`：Graphify 接入与使用指南
+- `.graphifyignore`：Graphify 忽略配置文件
+
+### Changed
+- `README.md`：更新版本号与日期，补充 Graphify 相关导航
+- `docs/00_ai_system/README.md`：新增 Graphify 文档索引
+- `docs/06_handbooks/ai-native/SKILLS_INDEX.md`：补充 Graphify 相关技能索引
+
+---
+
 ## [2.1.0] - 2026-03-27
 
 ### Added
