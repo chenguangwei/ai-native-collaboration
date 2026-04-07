@@ -347,6 +347,7 @@ git sparse-checkout set ops docs/05_ops memory
 | [Agents 说明](.claude/agents/README.md) | 后台分析师/测试员/监控卫士列表 |
 | [AI 系统文档](docs/00_ai_system/) | 路由矩阵、subtree 接入手册 |
 | [Claude Code 使用技巧：从入门到精通](docs/00_ai_system/claude-code-40-best-practices.md) | 从配置到多 Agent，40+ 个提升工作流效率的技巧 |
+| [Graphify 使用手册](docs/00_ai_system/graphify-guide.md) | Graphify 知识图谱构建与查询：安装、索引、搜索、可视化 |
 | [Autoresearch 使用手册](docs/00_ai_system/autoresearch-guide.md) | 自主目标驱动迭代引擎：9 个子命令完整使用指南 |
 
 ### 操作手册
@@ -372,6 +373,8 @@ git sparse-checkout set ops docs/05_ops memory
 > [gstack](https://github.com/garrytan/gstack) — 将 Claude Code 转化为虚拟工程团队
 >
 > [autoresearch](https://github.com/uditgoenka/autoresearch) — 自主目标驱动迭代引擎，Karpathy autoresearch 理念的 Claude Code 实现
+>
+> [graphify](https://github.com/safishamsi/graphify) — 为代码库构建知识图谱，支持语义索引、关系查询与可视化
 >
 > [everything-claude-code](https://github.com/affaan-m/everything-claude-code) — 来自 Anthropic 黑客马拉松获胜者的完整 Claude Code 配置集合
 
