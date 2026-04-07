@@ -32,6 +32,7 @@
 
 | 技能 | 触发 | 来源 | 用途 |
 |------|------|------|------|
+| `graphify` | `/graphify` | 🔧 | **代码/文档 → 知识图谱**，揭示隐藏依赖与社区结构 |
 | `brainstorming` | `/brainstorming` | 🔧 | **创意工作前必须触发** |
 | `systematic-debugging` | `/systematic-debugging` | 🔧 | Bug/错误时系统化排障 |
 | `verification-before-completion` | `/verification-before-completion` | 🔧 | 声称完成前强制验证 |
@@ -426,4 +427,4 @@ QA 测试     → /qa | /qa-only | /ultraqa（循环至通过）
 
 ---
 
-*最后更新: 2026-03-31 by Claude Code — 共 95 个技能 | AI-Native 岗位体系 v2.0 + Codex 集成*
+*最后更新: 2026-04-07 by Claude Code — 共 96 个技能 | AI-Native 岗位体系 v2.0 + Codex 集成 + Graphify 知识图谱*

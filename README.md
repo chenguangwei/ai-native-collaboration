@@ -378,5 +378,5 @@ git sparse-checkout set ops docs/05_ops memory
 
 ---
 
-*最后更新: 2026-04-01 by Claude Code*
+*最后更新: 2026-04-07 by Claude Code*
 

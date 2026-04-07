@@ -1,0 +1,34 @@
+# graphify 忽略配置
+# 语法与 .gitignore 相同
+
+# 构建产物与依赖
+node_modules/
+dist/
+build/
+.next/
+target/
+*.pyc
+__pycache__/
+
+# 环境与密钥（绝不入图）
+.env
+.env.*
+*.pem
+*.key
+secrets/
+
+# 已生成的图输出（避免自引用）
+graphify-out/
+
+# 二进制与体积大的文件
+*.jar
+*.zip
+*.tar.gz
+*.mp4
+*.mov
+
+# 编辑器与系统文件
+.DS_Store
+.idea/
+.vscode/
+*.swp

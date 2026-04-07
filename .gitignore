@@ -66,3 +66,4 @@ temp/
 CLAUDE.local.md
 .claude/settings.local.json
 .gstack/
+graphify-out/

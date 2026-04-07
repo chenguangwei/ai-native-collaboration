@@ -10,6 +10,7 @@
 | [subtree-guide.md](subtree-guide.md) | git subtree 接入手册 — 新项目引入脚手架的完整步骤 |
 | [scaffolding-checkpoint.md](scaffolding-checkpoint.md) | 架构防过度设计检查清单（YAGNI 原则） |
 | [chrome-devtools-mcp-guide.md](chrome-devtools-mcp-guide.md) | Chrome DevTools MCP 接入指南 — 让 Claude Code 控制本机 Chrome |
+| [graphify-guide.md](graphify-guide.md) | Graphify 知识图谱工具 — 将文档/代码/图片转为可交互图谱，触发 `/graphify` |
 
 ## 关联入口
 
