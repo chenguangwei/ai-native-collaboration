@@ -67,7 +67,17 @@ cp -r .scaffold/.agents ./.agents
 > ```
 > 后续脚手架推送到 GitLab 后，通过 `git subtree pull` 即可自动同步，无需再手动复制。
 
-### 步骤 4：配置当前项目信息
+### 步骤 4：处理跨平台 Skills 环境（关键）
+
+如果在 **Windows** 系统下操作，Git 默认会将用于路径映射的软链接 (symlinks) 转为纯文本，从而导致 AI 扩展功能瘫痪。
+
+请务必在这个阶段于 Git Bash 执行重建脚本：
+```bash
+bash scripts/setup-skills.sh
+```
+*(注：macOS/Linux 平台下自动判断支持状态，放心执行)*
+
+### 步骤 5：配置当前项目信息
 
 编辑 `.claude/project-config.json`，设置项目名称、当前角色和 git 用户：
 
@@ -85,7 +95,7 @@ cp -r .scaffold/.agents ./.agents
 
 `app_insurance_cloud` 为纯 Java 后端项目，选择 `backend`。
 
-### 步骤 5：初始化角色记忆日志
+### 步骤 6：初始化角色记忆日志
 
 ```bash
 mkdir -p memory/roles/backend
@@ -103,7 +113,7 @@ cat > memory/roles/backend/today.md << 'EOF'
 EOF
 ```
 
-### 步骤 6：提交
+### 步骤 7：提交
 
 ```bash
 git add CLAUDE.md CLAUDE.local.md.template docs/ memory/ .claude/ .agents/ .scaffold/

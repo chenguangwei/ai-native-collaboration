@@ -36,4 +36,15 @@
 
 ---
 
+## Skill routing
+
+When the user types a slash command (e.g. `/qa`, `/plan-ceo-review`), ALWAYS invoke
+it using the Skill tool as your FIRST action. Do NOT answer directly, do NOT use
+other tools first. The skill has specialized workflows that produce better results.
+
+Available skills are auto-discovered from `.claude/skills/` and `.agents/skills/`.
+Each skill's YAML frontmatter contains its trigger commands and description.
+
+---
+
 *此文件定义 AI 的行为边界。任何修改需经人类确认。*
