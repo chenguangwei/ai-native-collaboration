@@ -238,17 +238,11 @@ tdd-workflow 技能 / tdd-guide Agent
 **Step 4：代码审查**
 
 ```
-# 前端代码改动后，自动触发
-frontend-reviewer Agent（后台运行）
-
-# Java 代码改动后
-java-reviewer Agent（后台运行）
-
-# Python 代码改动后
-python-reviewer Agent（后台运行）
+# 代码改动后，自动触发
+code-reviewer Agent（后台运行）
 
 # 安全敏感逻辑（认证、支付、权限）
-security-auditor Agent（后台运行）
+security-reviewer Agent（后台运行）
 ```
 
 **Step 5：完成验证**
@@ -291,8 +285,8 @@ verification-before-completion 技能
 2. api-design 技能 → REST 接口设计审查
 3. TDD：先写集成测试，再写实现
 4. springboot-patterns / backend-patterns → 架构模式合规
-5. security-auditor Agent → 安全扫描
-6. performance-analyzer Agent → 性能瓶颈检查
+5. security-reviewer Agent → 安全扫描
+6. analyst Agent → 性能瓶颈检查
 ```
 
 **后端常用指令：**
@@ -302,9 +296,9 @@ verification-before-completion 技能
 | Spring Boot 架构 | `springboot-patterns` |
 | Java 规范 | `java-coding-standards` |
 | API 设计审查 | `api-design` |
-| 安全扫描 | `security-auditor` Agent |
-| 性能分析 | `performance-analyzer` Agent |
-| 构建报错修复 | `build-error-resolver` Agent |
+| 安全扫描 | `security-reviewer` Agent |
+| 性能分析 | `analyst` Agent |
+| 构建报错修复 | `debugger` Agent |
 
 ### 2.7 Git 提交规范
 
@@ -403,7 +397,7 @@ cat docs/04_qa/                        # 查看已有测试用例
 | 视觉回归测试 | `browser-qa` 技能 |
 | 可访问性审计 | `audit` 技能 |
 | 设计稿还原度 | `/design-review` |
-| 安全测试 | `security-auditor` Agent |
+| 安全测试 | `security-reviewer` Agent |
 | 性能基准 | `/benchmark` |
 
 **浏览器自动化测试（gstack）：**
@@ -586,8 +580,8 @@ cat ops/monitoring/
 |------|----------|
 | 根因调查 | `/investigate` |
 | 结构化排障 | `systematic-debugging` 技能 |
-| 性能瓶颈 | `performance-analyzer` Agent |
-| 安全事件 | `security-auditor` Agent |
+| 性能瓶颈 | `analyst` Agent |
+| 安全事件 | `security-reviewer` Agent |
 | 复盘报告 | `/retro` |
 
 ### 4.6 发布后复盘
@@ -747,12 +741,10 @@ git worktree add ../feat-payment feature/payment
 |------|-------|------|
 | 复杂功能拆分 | `planner` | 研发/PM |
 | TDD 指导 | `tdd-guide` | 研发 |
-| 构建报错 | `build-error-resolver` | 研发 |
-| 前端代码审查 | `frontend-reviewer` | 研发/QA |
-| Java 代码审查 | `java-reviewer` | 研发/QA |
-| Python 代码审查 | `python-reviewer` | 研发/QA |
-| 安全漏洞扫描 | `security-auditor` | 研发/QA/运维 |
-| 性能瓶颈分析 | `performance-analyzer` | 研发/运维 |
+| 构建报错 | `debugger` | 研发 |
+| 代码审查 | `code-reviewer` | 研发/QA |
+| 安全漏洞扫描 | `security-reviewer` | 研发/QA/运维 |
+| 性能瓶颈分析 | `analyst` | 研发/运维 |
 
 ---
 

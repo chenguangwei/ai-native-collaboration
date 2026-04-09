@@ -78,4 +78,4 @@
 | `omc-qa-tester` | QA 测试方案设计 |
 | `omc-verifier` | 验收标准核查 |
 | `omc-security-reviewer` | 安全测试 |
-| `security-auditor`（内置）| 自动漏洞扫描 |
+| `security-reviewer`（内置）| 自动漏洞扫描 |
