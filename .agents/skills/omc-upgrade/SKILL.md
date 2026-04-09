@@ -93,6 +93,8 @@ fi
 > `sync-omc-skills.sh` 会同时做两件事：
 > 1. 同步 `.claude/skills/omc/skills/*` → `.agents/skills/*`（Codex）
 > 2. 维护 `.claude/skills/<skill> -> omc/skills/<skill>` 链接（Claude Code）
+> 3. 同步 `.claude/skills/omc/agents/*.md` → `.claude/agents/omc-*.md` 与 `.agents/agents/omc-*.md`
+> 4. 在不冲突时创建 agent 别名：`architect.md -> omc-architect.md`
 
 ### Step 5: 同步文档与验证
 
@@ -106,6 +108,7 @@ fi
   - .agents/skills/omc/
   - .agents/skills/*（通过 scripts/sync-omc-skills.sh）
   - .claude/skills/*（OMC skills 链接入口）
+  - .claude/agents/* 与 .agents/agents/*（OMC agent 入口）
 
 已同步文档：
   - .claude/skills/omc/README*.md

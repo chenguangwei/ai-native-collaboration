@@ -12,3 +12,10 @@
 - [x] 回归验证：37 个 OMC skill 链接已建立，`deep-interview`/`verify`/`wiki` 等入口可解析
 - [x] 更新 `.agents/skills/omc-upgrade/SKILL.md`，避免后续升级回归
 - [ ] 视需要提交 commit（等待人类确认）
+
+## OMC Agents 在 Claude/Codex 不生效（已修复）
+- [x] 复现并确认根因：缺少 `.claude/agents` 与 `.agents/agents` 入口目录
+- [x] 扩展 `scripts/sync-omc-skills.sh`：同步 19 个 OMC agents 到双入口并创建安全别名
+- [x] 回归验证：`omc-architect`/`architect`、`omc-debugger`/`debugger` 在双目录均可解析
+- [x] 更新 `.agents/skills/omc-upgrade/SKILL.md`，将 agents 同步纳入标准流程
+- [ ] 视需要提交 commit（等待人类确认）
