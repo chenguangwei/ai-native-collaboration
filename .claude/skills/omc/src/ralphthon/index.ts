@@ -14,14 +14,15 @@ export type {
   RalphthonStory,
   HardeningTask,
   RalphthonConfig,
+  RalphthonPlanningContext,
   RalphthonPRD,
   RalphthonState,
   OrchestratorEvent,
   OrchestratorEventHandler,
   RalphthonCliOptions,
-} from './types.js';
+} from "./types.js";
 
-export { RALPHTHON_DEFAULTS, PRD_FILENAME } from './types.js';
+export { RALPHTHON_DEFAULTS, PRD_FILENAME } from "./types.js";
 
 // PRD operations
 export {
@@ -37,13 +38,18 @@ export {
   addHardeningTasks,
   createRalphthonPrd,
   initRalphthonPrd,
+  normalizePlanningContext,
+  DEFAULT_PLANNING_CONTEXT,
   formatTaskPrompt,
   formatHardeningTaskPrompt,
   formatHardeningGenerationPrompt,
   formatRalphthonStatus,
-} from './prd.js';
+} from "./prd.js";
 
-export type { RalphthonPrdStatus } from './prd.js';
+export type { RalphthonPrdStatus } from "./prd.js";
+
+// Deep interview handoff
+export { buildRalphthonDeepInterviewPrompt } from './deep-interview-prompt.js';
 
 // Orchestrator
 export {
@@ -65,4 +71,4 @@ export {
   recordTaskSkip,
   orchestratorTick,
   startOrchestratorLoop,
-} from './orchestrator.js';
+} from "./orchestrator.js";

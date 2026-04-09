@@ -18,12 +18,15 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  renameSync,
   unlinkSync,
   writeFileSync,
 } from "fs";
 import { dirname, join } from "path";
 import { resolveToWorktreeRoot, getOmcRoot } from "../lib/worktree-paths.js";
+import { writeModeState } from "../lib/mode-state-io.js";
 import { formatOmcCliInvocation } from "../utils/omc-cli-rendering.js";
+import { createSwallowedErrorLogger } from "../lib/swallowed-error.js";
 
 // Hot-path imports: needed on every/most hook invocations (keyword-detector, pre/post-tool-use)
 import {
@@ -49,6 +52,18 @@ import {
 import { readHudState, writeHudState } from "../hud/state.js";
 import { compactOmcStartupGuidance, loadConfig } from "../config/loader.js";
 import {
+  activatePromptPrerequisiteState,
+  buildPromptPrerequisiteDenyReason,
+  buildPromptPrerequisiteReminder,
+  clearPromptPrerequisiteState,
+  getPromptPrerequisiteConfig,
+  isPromptPrerequisiteBlockingTool,
+  parsePromptPrerequisiteSections,
+  readPromptPrerequisiteState,
+  recordPromptPrerequisiteProgress,
+  shouldEnforcePromptPrerequisites,
+} from "./prompt-prerequisites/index.js";
+import {
   resolveAutopilotPlanPath,
   resolveOpenQuestionsPlanPath,
 } from "../config/plan-output.js";
@@ -68,7 +83,6 @@ import {
 import { getAgentDashboard } from "./subagent-tracker/index.js";
 // Session replay recordFileTouch is used in pre-tool-use hot path
 import { recordFileTouch } from "./subagent-tracker/session-replay.js";
-
 // Type-only imports for lazy-loaded modules (zero runtime cost)
 import type {
   SubagentStartInput,
@@ -88,8 +102,7 @@ import { wrapUntrustedFileContent } from "../agents/prompt-helpers.js";
 
 const PKILL_F_FLAG_PATTERN = /\bpkill\b.*\s-f\b/;
 const PKILL_FULL_FLAG_PATTERN = /\bpkill\b.*--full\b/;
-const WORKER_BLOCKED_TMUX_PATTERN =
-  /\btmux\s+(split-window|new-session|new-window|join-pane)\b/i;
+const WORKER_BLOCKED_TMUX_PATTERN = /\btmux\s+/i;
 const WORKER_BLOCKED_TEAM_CLI_PATTERN = /\bom[cx]\s+team\b(?!\s+api\b)/i;
 const WORKER_BLOCKED_SKILL_PATTERN = /\$(team|ultrawork|autopilot|ralph)\b/i;
 
@@ -210,13 +223,17 @@ function updateModeAwaitingConfirmation(
 
       if (awaitingConfirmation) {
         state.awaiting_confirmation = true;
+        state.awaiting_confirmation_set_at = new Date().toISOString();
       } else if (state.awaiting_confirmation === true) {
         delete state.awaiting_confirmation;
+        delete state.awaiting_confirmation_set_at;
       } else {
         continue;
       }
 
-      writeFileSync(statePath, JSON.stringify(state, null, 2));
+      const tmpPath = `${statePath}.${process.pid}.${Date.now()}.tmp`;
+      writeFileSync(tmpPath, JSON.stringify(state, null, 2));
+      renameSync(tmpPath, statePath);
     } catch {
       // Best-effort state sync only.
     }
@@ -237,6 +254,56 @@ function confirmSkillModeStates(directory: string, skillName: string, sessionId?
   for (const modeName of MODE_CONFIRMATION_SKILL_MAP[skillName] ?? []) {
     updateModeAwaitingConfirmation(directory, modeName, sessionId, false);
   }
+}
+
+function getSkillInvocationArgs(toolInput: unknown): string {
+  if (!toolInput || typeof toolInput !== "object") {
+    return "";
+  }
+
+  const input = toolInput as Record<string, unknown>;
+  const candidates = [
+    input.args,
+    input.arguments,
+    input.argument,
+    input.skill_args,
+    input.skillArgs,
+    input.prompt,
+    input.description,
+    input.input,
+  ];
+
+  return candidates.find((value): value is string => typeof value === "string" && value.trim().length > 0)?.trim() ?? "";
+}
+
+function isConsensusPlanningSkillInvocation(skillName: string | null, toolInput: unknown): boolean {
+  if (!skillName) {
+    return false;
+  }
+
+  if (skillName === "ralplan") {
+    return true;
+  }
+
+  if (skillName !== "omc-plan" && skillName !== "plan") {
+    return false;
+  }
+
+  return getSkillInvocationArgs(toolInput).toLowerCase().includes("--consensus");
+}
+
+function activateRalplanState(directory: string, sessionId?: string): void {
+  writeModeState(
+    "ralplan",
+    {
+      active: true,
+      session_id: sessionId,
+      current_phase: "ralplan",
+      started_at: new Date().toISOString(),
+    },
+    directory,
+    sessionId,
+  );
 }
 
 interface TeamStagedState {
@@ -547,6 +614,58 @@ export interface HookOutput {
   modifiedInput?: unknown;
 }
 
+type SerializableHookOutput = HookOutput & {
+  suppressOutput?: boolean;
+  systemMessage?: string;
+  hookSpecificOutput?: Record<string, unknown>;
+};
+
+function hasInjectableText(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+/**
+ * Strip empty hook text fields before serializing to Claude Code.
+ *
+ * Some hook handlers use empty strings as internal sentinels. Passing those
+ * through to the shell hook protocol can create empty system-message/context
+ * injections on the next turn, which is especially risky after Task/Agent
+ * completion when Claude is deciding whether to continue.
+ */
+export function sanitizeHookOutputForSerialization(
+  output: SerializableHookOutput,
+): SerializableHookOutput {
+  const sanitized: SerializableHookOutput = { ...output };
+
+  if (!hasInjectableText(sanitized.message)) {
+    delete sanitized.message;
+  }
+
+  if (!hasInjectableText(sanitized.systemMessage)) {
+    delete sanitized.systemMessage;
+  }
+
+  const hookSpecificOutput = sanitized.hookSpecificOutput;
+  if (hookSpecificOutput && typeof hookSpecificOutput === "object") {
+    const nextHookSpecificOutput = { ...hookSpecificOutput };
+
+    if (!hasInjectableText(nextHookSpecificOutput.additionalContext)) {
+      delete nextHookSpecificOutput.additionalContext;
+    }
+
+    sanitized.hookSpecificOutput =
+      Object.keys(nextHookSpecificOutput).length > 0
+        ? nextHookSpecificOutput
+        : undefined;
+
+    if (!sanitized.hookSpecificOutput) {
+      delete sanitized.hookSpecificOutput;
+    }
+  }
+
+  return sanitized;
+}
+
 function isDelegationToolName(toolName: string | undefined): boolean {
   const normalizedToolName = (toolName || "").toLowerCase();
   return normalizedToolName === "task" || normalizedToolName === "agent";
@@ -632,6 +751,7 @@ async function processKeywordDetector(input: HookInput): Promise<HookOutput> {
   // Load config for task-size detection settings
   const config = loadConfig();
   const taskSizeConfig = config.taskSizeDetection ?? {};
+  const promptPrerequisiteConfig = getPromptPrerequisiteConfig(config);
 
   // Get all keywords with optional task-size filtering (issue #790)
   const sizeCheckResult = getAllKeywordsWithSizeCheck(cleanedText, {
@@ -683,6 +803,24 @@ async function processKeywordDetector(input: HookInput): Promise<HookOutput> {
           `Use explicit mode keywords (e.g. \`ralph\`) only when you need full orchestration.`,
       );
     }
+  }
+
+  const promptPrerequisiteParse = parsePromptPrerequisiteSections(promptText, promptPrerequisiteConfig);
+  const executionKeywords = fullKeywords.filter((keywordType) =>
+    promptPrerequisiteConfig.executionKeywords.includes(keywordType),
+  );
+  if (shouldEnforcePromptPrerequisites(executionKeywords, promptPrerequisiteParse, promptPrerequisiteConfig)) {
+    const state = activatePromptPrerequisiteState(
+      directory,
+      sessionId,
+      executionKeywords,
+      promptPrerequisiteParse,
+    );
+    if (state) {
+      messages.push(buildPromptPrerequisiteReminder(state));
+    }
+  } else if (executionKeywords.length > 0) {
+    clearPromptPrerequisiteState(directory, sessionId);
   }
 
   const sanitizedText = sanitizeForKeywordDetection(cleanedText);
@@ -948,15 +1086,18 @@ async function processPersistentMode(input: HookInput): Promise<HookOutput> {
         const stateDir = join(getOmcRoot(directory), "state");
         if (shouldSendIdleNotification(stateDir, sessionId)) {
           recordIdleNotificationSent(stateDir, sessionId);
+          const logSessionIdleNotifyFailure = createSwallowedErrorLogger(
+            'hooks.bridge session-idle notification failed',
+          );
           import("../notifications/index.js")
             .then(({ notify }) =>
               notify("session-idle", {
                 sessionId,
                 projectPath: directory,
                 profileName: process.env.OMC_NOTIFY_PROFILE,
-              }).catch(() => {}),
+              }).catch(logSessionIdleNotifyFailure),
             )
-            .catch(() => {});
+            .catch(logSessionIdleNotifyFailure);
         }
       }
 
@@ -1040,15 +1181,18 @@ async function processSessionStart(input: HookInput): Promise<HookOutput> {
 
   // Send session-start notification (non-blocking, swallows errors)
   if (sessionId) {
+    const logSessionStartNotifyFailure = createSwallowedErrorLogger(
+      'hooks.bridge session-start notification failed',
+    );
     import("../notifications/index.js")
       .then(({ notify }) =>
         notify("session-start", {
           sessionId,
           projectPath: directory,
           profileName: process.env.OMC_NOTIFY_PROFILE,
-        }).catch(() => {}),
+        }).catch(logSessionStartNotifyFailure),
       )
-      .catch(() => {});
+      .catch(logSessionStartNotifyFailure);
     // Wake OpenClaw gateway for session-start (non-blocking)
     _openclaw.wake("session-start", { sessionId, projectPath: directory });
   }
@@ -1274,6 +1418,10 @@ export function dispatchAskUserQuestionNotification(
       .filter(Boolean)
       .join("; ") || "User input requested";
 
+  const logAskUserQuestionNotifyFailure = createSwallowedErrorLogger(
+    'hooks.bridge ask-user-question notification failed',
+  );
+
   import("../notifications/index.js")
     .then(({ notify }) =>
       notify("ask-user-question", {
@@ -1281,9 +1429,9 @@ export function dispatchAskUserQuestionNotification(
         projectPath: directory,
         question: questionText,
         profileName: process.env.OMC_NOTIFY_PROFILE,
-      }).catch(() => {}),
+      }).catch(logAskUserQuestionNotifyFailure),
     )
-    .catch(() => {});
+    .catch(logAskUserQuestionNotifyFailure);
 }
 
 /** @internal Object wrapper so tests can spy on the dispatch call. */
@@ -1305,9 +1453,12 @@ export const _openclaw = {
     context: import("../openclaw/types.js").OpenClawContext,
   ) => {
     if (process.env.OMC_OPENCLAW !== "1") return;
+    const logOpenClawWakeFailure = createSwallowedErrorLogger(
+      `hooks.bridge openclaw wake failed for ${event}`,
+    );
     import("../openclaw/index.js")
-      .then(({ wakeOpenClaw }) => wakeOpenClaw(event, context).catch(() => {}))
-      .catch(() => {});
+      .then(({ wakeOpenClaw }) => wakeOpenClaw(event, context).catch(logOpenClawWakeFailure))
+      .catch(logOpenClawWakeFailure);
   },
 };
 
@@ -1318,6 +1469,7 @@ export const _openclaw = {
 function processPreToolUse(input: HookInput): HookOutput {
   const directory = resolveToWorktreeRoot(input.directory);
   const teamWorkerIdentity = teamWorkerIdentityFromEnv();
+  const promptPrerequisiteConfig = getPromptPrerequisiteConfig(loadConfig());
 
   if (teamWorkerIdentity) {
     if (input.toolName === "Task") {
@@ -1372,6 +1524,37 @@ function processPreToolUse(input: HookInput): HookOutput {
     ? [enforcementResult.message]
     : [];
   let modifiedToolInput: Record<string, unknown> | undefined;
+
+  // Check blocking BEFORE recording progress — otherwise a denied tool
+  // (e.g. Edit) that also matches a prerequisite would have its progress
+  // persisted even though the tool never actually executed.
+  const promptPrerequisiteState = readPromptPrerequisiteState(directory, input.sessionId);
+  if (
+    promptPrerequisiteState?.active
+    && isPromptPrerequisiteBlockingTool(input.toolName, promptPrerequisiteConfig)
+  ) {
+    return {
+      continue: true,
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "deny",
+        permissionDecisionReason: buildPromptPrerequisiteDenyReason(promptPrerequisiteState, input.toolName),
+      },
+    } as HookOutput & { hookSpecificOutput: Record<string, unknown> };
+  }
+
+  const promptPrerequisiteProgress = recordPromptPrerequisiteProgress(
+    directory,
+    input.sessionId,
+    input.toolName,
+    input.toolInput,
+  );
+
+  if (promptPrerequisiteProgress?.isComplete) {
+    preToolMessages.push(
+      "[PROMPT PREREQUISITES COMPLETE] Required context tools/files were read. Editing and agent delegation are unblocked.",
+    );
+  }
 
   // Force-inherit: deny Task/Agent calls that carry a `model` parameter when
   // forceInherit is enabled (Bedrock, Vertex, CC Switch, etc.).
@@ -1495,6 +1678,9 @@ function processPreToolUse(input: HookInput): HookOutput {
       try {
         writeSkillActiveState(directory, skillName, input.sessionId, rawSkillName);
         confirmSkillModeStates(directory, skillName, input.sessionId);
+        if (isConsensusPlanningSkillInvocation(skillName, input.toolInput)) {
+          activateRalplanState(directory, input.sessionId);
+        }
       } catch {
         // Skill-state/state-sync writes are best-effort; don't fail the hook on error.
       }
@@ -1514,6 +1700,9 @@ function processPreToolUse(input: HookInput): HookOutput {
     const agentName = agentType?.includes(":")
       ? agentType.split(":").pop()
       : agentType;
+    const logAgentCallNotifyFailure = createSwallowedErrorLogger(
+      'hooks.bridge agent-call notification failed',
+    );
     import("../notifications/index.js")
       .then(({ notify }) =>
         notify("agent-call", {
@@ -1522,9 +1711,9 @@ function processPreToolUse(input: HookInput): HookOutput {
           agentName,
           agentType,
           profileName: process.env.OMC_NOTIFY_PROFILE,
-        }).catch(() => {}),
+        }).catch(logAgentCallNotifyFailure),
       )
-      .catch(() => {});
+      .catch(logAgentCallNotifyFailure);
   }
 
   // Warn about pkill -f self-termination risk (issue #210)
@@ -1753,8 +1942,17 @@ async function processPostToolUse(input: HookInput): Promise<HookOutput> {
 
     // Clear skill-active state on skill completion to prevent false-blocking.
     // Without this, every non-'none' skill falsely blocks stops until TTL expires.
-    const { clearSkillActiveState } = await import("./skill-state/index.js");
-    clearSkillActiveState(directory, input.sessionId);
+    // Guard: only clear if the completing skill owns the active state.
+    // When a parent skill (e.g. omc-setup) invokes a child skill (e.g. mcp-setup),
+    // the child's PostToolUse fires first — we must not delete the parent's state.
+    const { clearSkillActiveState, readSkillActiveState } = await import("./skill-state/index.js");
+    const currentState = readSkillActiveState(directory, input.sessionId);
+    const completingSkill = (getInvokedSkillName(input.toolInput) ?? "")
+      .toLowerCase()
+      .replace(/^oh-my-claudecode:/, "");
+    if (!currentState || !currentState.active || currentState.skill_name === completingSkill) {
+      clearSkillActiveState(directory, input.sessionId);
+    }
   }
 
   // Run orchestrator post-tool processing (remember tags, verification reminders, etc.)
@@ -2202,7 +2400,7 @@ export async function main(): Promise<void> {
   const output = await processHook(hookType, input);
 
   // Write output to stdout
-  console.log(JSON.stringify(output));
+  console.log(JSON.stringify(sanitizeHookOutputForSerialization(output)));
 }
 
 // Run if called directly (works in both ESM and bundled CJS)

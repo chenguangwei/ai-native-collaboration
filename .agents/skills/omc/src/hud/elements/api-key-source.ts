@@ -12,7 +12,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { dim, cyan } from '../colors.js';
-import { getClaudeConfigDir } from '../../utils/paths.js';
+import { getClaudeConfigDir } from '../../utils/config-dir.js';
 
 export type ApiKeySource = 'project' | 'global' | 'env';
 

@@ -10,7 +10,7 @@
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
-import { getClaudeConfigDir } from '../../utils/paths.js';
+import { getClaudeConfigDir } from '../../utils/config-dir.js';
 import { ConcurrencyManager } from './concurrency.js';
 import type {
   BackgroundTask,

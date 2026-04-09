@@ -9,7 +9,8 @@
 
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
-import { getClaudeConfigDir } from "../../utils/paths.js";
+import { getClaudeConfigDir } from "../../utils/config-dir.js";
+import { getHardMaxIterations } from "../../lib/security-config.js";
 import {
   resolveAutopilotPlanPath,
   resolveOpenQuestionsPlanPath,
@@ -149,12 +150,33 @@ export function detectAnySignal(sessionId: string): AutopilotSignal | null {
 // ENFORCEMENT
 // ============================================================================
 
+const AWAITING_CONFIRMATION_TTL_MS = 2 * 60 * 1000;
+
 function isAwaitingConfirmation(state: unknown): boolean {
-  return Boolean(
-    state &&
-    typeof state === 'object' &&
-    (state as Record<string, unknown>).awaiting_confirmation === true
-  );
+  if (!state || typeof state !== 'object') {
+    return false;
+  }
+
+  const stateRecord = state as Record<string, unknown>;
+  if (stateRecord.awaiting_confirmation !== true) {
+    return false;
+  }
+
+  const setAt =
+    (typeof stateRecord.awaiting_confirmation_set_at === 'string' && stateRecord.awaiting_confirmation_set_at) ||
+    (typeof stateRecord.started_at === 'string' && stateRecord.started_at) ||
+    null;
+
+  if (!setAt) {
+    return false;
+  }
+
+  const setAtMs = new Date(setAt).getTime();
+  if (!Number.isFinite(setAtMs)) {
+    return false;
+  }
+
+  return Date.now() - setAtMs < AWAITING_CONFIRMATION_TTL_MS;
 }
 
 /**
@@ -199,6 +221,17 @@ export async function checkAutopilot(
 
   if (isAwaitingConfirmation(state)) {
     return null;
+  }
+
+  // Check hard max iterations (global security limit)
+  const hardMax = getHardMaxIterations();
+  if (hardMax > 0 && state.iteration >= hardMax) {
+    transitionPhase(workingDir, "failed", sessionId);
+    return {
+      shouldBlock: false,
+      message: `[AUTOPILOT STOPPED] Hard max iterations (${hardMax}) reached. Security limit enforced.`,
+      phase: "failed",
+    };
   }
 
   // Check max iterations (safety limit)
@@ -515,7 +548,8 @@ function detectPipelineSignal(sessionId: string, signal: string): boolean {
     join(claudeDir, "transcripts", `${sessionId}.md`),
   ];
 
-  const pattern = new RegExp(signal, "i");
+  const escaped = signal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(escaped, "i");
 
   for (const transcriptPath of possiblePaths) {
     if (existsSync(transcriptPath)) {

@@ -88,6 +88,21 @@ World`);
       expect(result).not.toContain('<br');
     });
 
+    it('should strip HTML comments that contain keyword triggers', () => {
+      const result = sanitizeForKeywordDetection(`Please review this draft document for tone and clarity:
+
+<!-- ralph: rewrite intro section with more urgency -->
+<!-- autopilot note: Why Artificially Inflating GitHub Star Counts Is Harmful:
+popularity without merit misleads developers, distorts discovery, unfairly rewards dishonest projects, and erodes trust in GitHub stars as a community signal. -->
+
+Final draft.`);
+
+      expect(result).not.toContain('ralph');
+      expect(result).not.toContain('autopilot');
+      expect(result).toContain('Please review this draft document for tone and clarity:');
+      expect(result).toContain('Final draft.');
+    });
+
     it('should strip URLs', () => {
       const result = sanitizeForKeywordDetection('see https://example.com/codex/path');
       expect(result).not.toContain('codex');
@@ -233,6 +248,33 @@ World`);
       it('should NOT detect informational Chinese questions about ralph', () => {
         const result = detectKeywordsWithType('ralph 是什么？怎么用？');
         expect(result).toEqual([]);
+      });
+
+      it('Korean informational prompt does not trigger keyword', () => {
+        // "알려줘" (tell me about) is informational
+        expect(detectKeywordsWithType('오토파일럿 기능 알려줘')).toHaveLength(0);
+        expect(detectKeywordsWithType('랄프 뭐야')).toHaveLength(0);
+        expect(detectKeywordsWithType('울트라워크 사용법 설명해줘')).toHaveLength(0);
+        expect(detectKeywordsWithType('딥인터뷰 방법 소개해줘')).toHaveLength(0);
+      });
+
+      it('Korean expanded informational phrases do not trigger keyword', () => {
+        // "뭔데" (what is it), "어떤 기능이야", "소개 부탁", "알려줄래", "뭐가 달라" are informational
+        expect(detectKeywordsWithType('오토파일럿이 뭔데')).toHaveLength(0);
+        expect(detectKeywordsWithType('안티슬롭이 뭐야')).toHaveLength(0);
+        expect(detectKeywordsWithType('오토파일럿 어떤 기능이야')).toHaveLength(0);
+        expect(detectKeywordsWithType('랄프 소개 부탁해')).toHaveLength(0);
+        expect(detectKeywordsWithType('울트라워크 알려줄래')).toHaveLength(0);
+        expect(detectKeywordsWithType('오토파일럿이 랄프랑 뭐가 달라')).toHaveLength(0);
+      });
+
+      it('Korean imperative command with 기능/방법 SHOULD trigger keyword (not filtered)', () => {
+        // "기능 켜줘" / "기능으로 진행해줘" — 기능 alone without a question verb is NOT informational
+        const autopilotResult = detectKeywordsWithType('오토파일럿 기능 켜고 버그 고쳐줘');
+        expect(autopilotResult.find((r) => r.type === 'autopilot')).toBeDefined();
+
+        const ralphResult = detectKeywordsWithType('랄프 기능으로 끝까지 진행해줘');
+        expect(ralphResult.find((r) => r.type === 'ralph')).toBeDefined();
       });
 
       it('should NOT detect "don\'t stop" phrase', () => {
@@ -556,6 +598,25 @@ World`);
         const result = detectKeywordsWithType(text);
         const ralphMatch = result.find((r) => r.type === 'ralph');
         expect(ralphMatch).toBeUndefined();
+      });
+
+      it('should not detect keywords inside HTML comments', () => {
+        const text = `Please review this draft document for tone and clarity:
+
+<!-- ralph: rewrite intro section with more urgency -->
+<!-- autopilot note: Why Artificially Inflating GitHub Star Counts Is Harmful:
+popularity without merit misleads developers, distorts discovery, unfairly rewards dishonest projects, and erodes trust in GitHub stars as a community signal. -->
+
+Final draft:
+
+Why Artificially Inflating GitHub Star Counts Is Harmful
+=========================================================
+
+This article argues that fake popularity signals damage trust in open source.`;
+        const result = detectKeywordsWithType(text);
+
+        expect(result.find((r) => r.type === 'ralph')).toBeUndefined();
+        expect(result.find((r) => r.type === 'autopilot')).toBeUndefined();
       });
     });
 
@@ -1481,6 +1542,322 @@ World`);
         const sanitized = sanitizeForKeywordDetection(text);
         // Japanese text preserved, English keyword also preserved
         expect(NON_LATIN_SCRIPT_PATTERN.test(sanitized)).toBe(true);
+      });
+    });
+  });
+
+  describe('Korean cross-script keyword detection', () => {
+    describe('Korean keyword detection (basic matching)', () => {
+      it('should detect "오토파일럿" as autopilot', () => {
+        const result = detectKeywordsWithType('오토파일럿');
+        const match = result.find((r) => r.type === 'autopilot');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "오토파일럿 해줘" as autopilot', () => {
+        const result = detectKeywordsWithType('오토파일럿 해줘');
+        const match = result.find((r) => r.type === 'autopilot');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "랄프" as ralph', () => {
+        const result = detectKeywordsWithType('랄프');
+        const match = result.find((r) => r.type === 'ralph');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "랄프 모드" as ralph', () => {
+        const result = detectKeywordsWithType('랄프 모드');
+        const match = result.find((r) => r.type === 'ralph');
+        expect(match).toBeDefined();
+      });
+
+      it('should NOT detect "취소" as cancel (generic Korean word, too common)', () => {
+        const result = detectKeywordsWithType('취소');
+        const match = result.find((r) => r.type === 'cancel');
+        expect(match).toBeUndefined();
+      });
+
+      it('should NOT detect "캔슬" as cancel (generic Korean word, too common)', () => {
+        const result = detectKeywordsWithType('캔슬');
+        const match = result.find((r) => r.type === 'cancel');
+        expect(match).toBeUndefined();
+      });
+
+      it('should NOT detect "스톱" as cancel (generic Korean word, too common)', () => {
+        const result = detectKeywordsWithType('스톱');
+        const match = result.find((r) => r.type === 'cancel');
+        expect(match).toBeUndefined();
+      });
+
+      it('should NOT trigger cancel for "설정 취소 방법 알려줘" (false positive example)', () => {
+        const result = detectKeywordsWithType('설정 취소 방법 알려줘');
+        const match = result.find((r) => r.type === 'cancel');
+        expect(match).toBeUndefined();
+      });
+
+      it('should detect "울트라워크" as ultrawork', () => {
+        const result = detectKeywordsWithType('울트라워크');
+        const match = result.find((r) => r.type === 'ultrawork');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "랄플랜" as ralplan', () => {
+        const result = detectKeywordsWithType('랄플랜');
+        const match = result.find((r) => r.type === 'ralplan');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "코드리뷰 해줘" as code-review', () => {
+        const result = detectKeywordsWithType('코드리뷰 해줘');
+        const match = result.find((r) => r.type === 'code-review');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "코드 리뷰 해줘" (spaced) as code-review', () => {
+        const result = detectKeywordsWithType('코드 리뷰 해줘');
+        const match = result.find((r) => r.type === 'code-review');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "보안리뷰" as security-review', () => {
+        const result = detectKeywordsWithType('보안리뷰');
+        const match = result.find((r) => r.type === 'security-review');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "보안 리뷰" (spaced) as security-review', () => {
+        const result = detectKeywordsWithType('보안 리뷰');
+        const match = result.find((r) => r.type === 'security-review');
+        expect(match).toBeDefined();
+      });
+
+      it('should NOT detect "코드리뷰어 추천해줘" as code-review (reviewer false positive)', () => {
+        const result = detectKeywordsWithType('코드리뷰어 추천해줘');
+        const match = result.find((r) => r.type === 'code-review');
+        expect(match).toBeUndefined();
+      });
+
+      it('should NOT detect "보안리뷰어가 필요해" as security-review (reviewer false positive)', () => {
+        const result = detectKeywordsWithType('보안리뷰어가 필요해');
+        const match = result.find((r) => r.type === 'security-review');
+        expect(match).toBeUndefined();
+      });
+
+      it('should detect "울트라씽크" as ultrathink', () => {
+        const result = detectKeywordsWithType('울트라씽크');
+        const match = result.find((r) => r.type === 'ultrathink');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "딥서치" as deepsearch', () => {
+        const result = detectKeywordsWithType('딥서치');
+        const match = result.find((r) => r.type === 'deepsearch');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "딥 서치" (spaced) as deepsearch', () => {
+        const result = detectKeywordsWithType('딥 서치');
+        const match = result.find((r) => r.type === 'deepsearch');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "딥분석" as analyze', () => {
+        const result = detectKeywordsWithType('딥분석');
+        const match = result.find((r) => r.type === 'analyze');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "딥 분석" (spaced) as analyze', () => {
+        const result = detectKeywordsWithType('딥 분석');
+        const match = result.find((r) => r.type === 'analyze');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "딥인터뷰" as deep-interview', () => {
+        const result = detectKeywordsWithType('딥인터뷰');
+        const match = result.find((r) => r.type === 'deep-interview');
+        expect(match).toBeDefined();
+      });
+
+      it('should NOT detect "딥 인터뷰" (spaced) as deep-interview', () => {
+        const result = detectKeywordsWithType('딥 인터뷰');
+        const match = result.find((r) => r.type === 'deep-interview');
+        expect(match).toBeUndefined();
+      });
+
+      it('should NOT detect "고객 딥 인터뷰 질문지를 만들어줘" as deep-interview', () => {
+        const result = detectKeywordsWithType('고객 딥 인터뷰 질문지를 만들어줘');
+        const match = result.find((r) => r.type === 'deep-interview');
+        expect(match).toBeUndefined();
+      });
+
+      it('should detect "씨씨지" as ccg', () => {
+        const result = detectKeywordsWithType('씨씨지');
+        const match = result.find((r) => r.type === 'ccg');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "테스트퍼스트" as tdd', () => {
+        const result = detectKeywordsWithType('테스트퍼스트');
+        const match = result.find((r) => r.type === 'tdd');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "테스트 퍼스트" (spaced) as tdd', () => {
+        const result = detectKeywordsWithType('테스트 퍼스트');
+        const match = result.find((r) => r.type === 'tdd');
+        expect(match).toBeDefined();
+      });
+    });
+
+    describe('Regression — English keywords still work', () => {
+      it('should detect "autopilot mode" as autopilot (unchanged)', () => {
+        const result = detectKeywordsWithType('autopilot mode');
+        const match = result.find((r) => r.type === 'autopilot');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "ralph해줘" (English keyword + Korean particle)', () => {
+        const result = detectKeywordsWithType('ralph해줘');
+        const match = result.find((r) => r.type === 'ralph');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "autopilot으로" (English keyword + Korean particle)', () => {
+        const result = detectKeywordsWithType('autopilot으로');
+        const match = result.find((r) => r.type === 'autopilot');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "tdd로 해줘" (English keyword + Korean particle)', () => {
+        const result = detectKeywordsWithType('tdd로 해줘');
+        const match = result.find((r) => r.type === 'tdd');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "cancelomc" as cancel (unchanged)', () => {
+        const result = detectKeywordsWithType('cancelomc');
+        const match = result.find((r) => r.type === 'cancel');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "ultrawork mode" as ultrawork (unchanged)', () => {
+        const result = detectKeywordsWithType('ultrawork mode');
+        const match = result.find((r) => r.type === 'ultrawork');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "code review this" as code-review (unchanged)', () => {
+        const result = detectKeywordsWithType('code review this');
+        const match = result.find((r) => r.type === 'code-review');
+        expect(match).toBeDefined();
+      });
+
+      it('should detect "deepsearch the codebase" as deepsearch (unchanged)', () => {
+        const result = detectKeywordsWithType('deepsearch the codebase');
+        const match = result.find((r) => r.type === 'deepsearch');
+        expect(match).toBeDefined();
+      });
+    });
+
+    describe('Negative tests — no false positives', () => {
+      it('should NOT match unrelated Korean text "오늘 날씨가 좋네요"', () => {
+        const result = detectKeywordsWithType('오늘 날씨가 좋네요');
+        expect(result.length).toBe(0);
+      });
+
+      it('should NOT match "프로그래밍을 배우고 싶어요"', () => {
+        const result = detectKeywordsWithType('프로그래밍을 배우고 싶어요');
+        expect(result.length).toBe(0);
+      });
+
+      it('should NOT match "코드를 작성해주세요" (contains 코드 but not 코드리뷰)', () => {
+        const result = detectKeywordsWithType('코드를 작성해주세요');
+        const codeReviewMatch = result.find((r) => r.type === 'code-review');
+        expect(codeReviewMatch).toBeUndefined();
+      });
+
+      it('should NOT match empty string', () => {
+        const result = detectKeywordsWithType('');
+        expect(result.length).toBe(0);
+      });
+    });
+
+    describe('Korean in code blocks should NOT match', () => {
+      it('should NOT detect "오토파일럿" inside fenced code block', () => {
+        const result = detectKeywordsWithType('```오토파일럿```');
+        const match = result.find((r) => r.type === 'autopilot');
+        expect(match).toBeUndefined();
+      });
+
+      it('should NOT detect "랄프" inside inline code', () => {
+        const result = detectKeywordsWithType('Use `랄프` command');
+        const match = result.find((r) => r.type === 'ralph');
+        expect(match).toBeUndefined();
+      });
+    });
+
+    describe('Korean priority ordering', () => {
+      it('should return cancel over autopilot when "cancelomc 오토파일럿"', () => {
+        const result = getPrimaryKeyword('cancelomc 오토파일럿');
+        expect(result?.type).toBe('cancel');
+      });
+
+      it('should return ralph first when "랄프 울트라워크"', () => {
+        const result = getAllKeywords('랄프 울트라워크');
+        expect(result).toContain('ralph');
+        expect(result).toContain('ultrawork');
+        const ralphIdx = result.indexOf('ralph');
+        const ultraworkIdx = result.indexOf('ultrawork');
+        expect(ralphIdx).toBeLessThan(ultraworkIdx);
+      });
+
+      it('should detect both keywords for "오토파일럿 코드리뷰"', () => {
+        const result = detectKeywordsWithType('오토파일럿 코드리뷰');
+        const types = result.map((r) => r.type);
+        expect(types).toContain('autopilot');
+        expect(types).toContain('code-review');
+      });
+    });
+
+    describe('Korean + English mixed keywords', () => {
+      it('should return cancel as primary for "ralph cancelomc"', () => {
+        const result = getPrimaryKeyword('ralph cancelomc');
+        expect(result?.type).toBe('cancel');
+      });
+
+      it('should detect both keywords for "autopilot 코드리뷰"', () => {
+        const result = getAllKeywords('autopilot 코드리뷰');
+        expect(result).toContain('autopilot');
+        expect(result).toContain('code-review');
+      });
+
+      it('should detect both "랄프 ultrawork", ralph first', () => {
+        const result = getAllKeywords('랄프 ultrawork');
+        expect(result).toContain('ralph');
+        expect(result).toContain('ultrawork');
+        const ralphIdx = result.indexOf('ralph');
+        const ultraworkIdx = result.indexOf('ultrawork');
+        expect(ralphIdx).toBeLessThan(ultraworkIdx);
+      });
+    });
+
+    describe('getAllKeywords and getPrimaryKeyword with Korean', () => {
+      it('getAllKeywords("랄프 코드리뷰") should return ["ralph", "code-review"]', () => {
+        expect(getAllKeywords('랄프 코드리뷰')).toEqual(['ralph', 'code-review']);
+      });
+
+      it('getPrimaryKeyword("오토파일럿")?.type should be "autopilot"', () => {
+        expect(getPrimaryKeyword('오토파일럿')?.type).toBe('autopilot');
+      });
+
+      it('hasKeyword("울트라워크") should be true', () => {
+        expect(hasKeyword('울트라워크')).toBe(true);
+      });
+
+      it('hasKeyword("오토파일럿") should be true', () => {
+        expect(hasKeyword('오토파일럿')).toBe(true);
       });
     });
   });

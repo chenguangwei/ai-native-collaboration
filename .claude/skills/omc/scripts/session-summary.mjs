@@ -126,7 +126,12 @@ function readSummaryState(stateDir, sessionId) {
  * Write summary state to disk (scoped by sessionId).
  */
 function writeSummaryState(stateDir, sessionId, state) {
-  mkdirSync(stateDir, { recursive: true });
+  try {
+    mkdirSync(stateDir, { recursive: true });
+  } catch (err) {
+    // On Windows, concurrent hooks can throw EEXIST even with recursive:true
+    if (err?.code !== 'EEXIST') throw err;
+  }
   const statePath = join(stateDir, `session-summary-${sessionId}.json`);
   writeFileSync(statePath, JSON.stringify(state, null, 2));
 }
@@ -171,6 +176,13 @@ async function main() {
 
   if (!transcriptPath || !stateDir || !sessionId) {
     console.error('Usage: session-summary.mjs <transcript_path> <state_dir> <session_id> [--verbose]');
+    process.exit(1);
+  }
+
+  // Validate sessionId to prevent path traversal
+  const SESSION_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,255}$/;
+  if (!SESSION_ID_PATTERN.test(sessionId)) {
+    console.error('[session-summary] invalid sessionId');
     process.exit(1);
   }
 

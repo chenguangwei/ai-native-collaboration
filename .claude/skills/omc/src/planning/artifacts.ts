@@ -7,8 +7,8 @@
  * and extracts approved execution launch hints embedded in PRD markdown.
  */
 
-import { readdirSync, readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { readdirSync, readFileSync, existsSync } from "fs";
+import { join } from "path";
 
 export interface PlanningArtifacts {
   prdPaths: string[];
@@ -16,7 +16,7 @@ export interface PlanningArtifacts {
 }
 
 export interface ApprovedExecutionLaunchHint {
-  mode: 'team' | 'ralph';
+  mode: "team" | "ralph";
   command: string;
   task: string;
   workerCount?: number;
@@ -25,12 +25,45 @@ export interface ApprovedExecutionLaunchHint {
   sourcePath: string;
 }
 
+function readFileSafe(path: string): string | null {
+  try {
+    return readFileSync(path, "utf-8");
+  } catch {
+    return null;
+  }
+}
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function getSectionContent(markdown: string, heading: string): string | null {
+  const headingRe = new RegExp(
+    `^##\\s+${escapeRegex(heading)}[ \\t]*$`,
+    "im",
+  );
+  const headingMatch = headingRe.exec(markdown);
+  if (!headingMatch || headingMatch.index === undefined) return null;
+
+  const bodyStart = headingMatch.index + headingMatch[0].length;
+  const rest = markdown.slice(bodyStart).replace(/^\r?\n/, "");
+  const nextHeadingMatch = /\r?\n##\s+/.exec(rest);
+  const body = (nextHeadingMatch ? rest.slice(0, nextHeadingMatch.index) : rest).trim();
+  return body.length > 0 ? body : null;
+}
+
+function hasRequiredSections(markdown: string, headings: string[]): boolean {
+  return headings.every(
+    (heading) => getSectionContent(markdown, heading) !== null,
+  );
+}
+
 /**
  * Read planning artifacts from .omc/plans/ directory.
  * Returns paths to all PRD and test-spec files found.
  */
 export function readPlanningArtifacts(cwd: string): PlanningArtifacts {
-  const plansDir = join(cwd, '.omc', 'plans');
+  const plansDir = join(cwd, ".omc", "plans");
   if (!existsSync(plansDir)) {
     return { prdPaths: [], testSpecPaths: [] };
   }
@@ -46,9 +79,9 @@ export function readPlanningArtifacts(cwd: string): PlanningArtifacts {
   const testSpecPaths: string[] = [];
 
   for (const entry of entries) {
-    if (entry.startsWith('prd-') && entry.endsWith('.md')) {
+    if (entry.startsWith("prd-") && entry.endsWith(".md")) {
       prdPaths.push(join(plansDir, entry));
-    } else if (entry.startsWith('test-spec-') && entry.endsWith('.md')) {
+    } else if (entry.startsWith("test-spec-") && entry.endsWith(".md")) {
       testSpecPaths.push(join(plansDir, entry));
     }
   }
@@ -61,10 +94,30 @@ export function readPlanningArtifacts(cwd: string): PlanningArtifacts {
 }
 
 /**
- * Returns true when both a PRD and a test spec are present.
+ * Returns true when the latest PRD and latest test spec contain
+ * the required non-empty quality-gate sections.
  */
 export function isPlanningComplete(artifacts: PlanningArtifacts): boolean {
-  return artifacts.prdPaths.length > 0 && artifacts.testSpecPaths.length > 0;
+  if (artifacts.prdPaths.length === 0 || artifacts.testSpecPaths.length === 0) {
+    return false;
+  }
+
+  const latestPrd = readFileSafe(artifacts.prdPaths[0]);
+  const latestTestSpec = readFileSafe(artifacts.testSpecPaths[0]);
+  if (!latestPrd || !latestTestSpec) {
+    return false;
+  }
+
+  return (
+    hasRequiredSections(latestPrd, [
+      "Acceptance criteria",
+      "Requirement coverage map",
+    ]) &&
+    hasRequiredSections(latestTestSpec, [
+      "Unit coverage",
+      "Verification mapping",
+    ])
+  );
 }
 
 /**
@@ -77,8 +130,7 @@ export function isPlanningComplete(artifacts: PlanningArtifacts): boolean {
  */
 const TEAM_LAUNCH_RE =
   /\bomc\s+team\s+(?:(\d+):(\w+)\s+)?"([^"]+)"((?:\s+--[\w-]+)*)/;
-const RALPH_LAUNCH_RE =
-  /\bomc\s+ralph\s+"([^"]+)"((?:\s+--[\w-]+)*)/;
+const RALPH_LAUNCH_RE = /\bomc\s+ralph\s+"([^"]+)"((?:\s+--[\w-]+)*)/;
 
 function parseFlags(flagStr: string): { linkedRalph: boolean } {
   return {
@@ -92,29 +144,24 @@ function parseFlags(flagStr: string): { linkedRalph: boolean } {
  */
 export function readApprovedExecutionLaunchHint(
   cwd: string,
-  mode: 'team' | 'ralph'
+  mode: "team" | "ralph",
 ): ApprovedExecutionLaunchHint | null {
   const artifacts = readPlanningArtifacts(cwd);
   if (artifacts.prdPaths.length === 0) return null;
 
-  // Use the latest PRD (sorted descending, so index 0 is newest)
   const prdPath = artifacts.prdPaths[0];
-  let content: string;
-  try {
-    content = readFileSync(prdPath, 'utf-8');
-  } catch {
-    return null;
-  }
+  const content = readFileSafe(prdPath);
+  if (!content) return null;
 
-  if (mode === 'team') {
+  if (mode === "team") {
     const match = TEAM_LAUNCH_RE.exec(content);
     if (!match) return null;
 
     const [fullMatch, workerCountStr, agentType, task, flagStr] = match;
-    const { linkedRalph } = parseFlags(flagStr ?? '');
+    const { linkedRalph } = parseFlags(flagStr ?? "");
 
     return {
-      mode: 'team',
+      mode: "team",
       command: fullMatch.trim(),
       task,
       workerCount: workerCountStr ? parseInt(workerCountStr, 10) : undefined,
@@ -124,21 +171,17 @@ export function readApprovedExecutionLaunchHint(
     };
   }
 
-  if (mode === 'ralph') {
-    const match = RALPH_LAUNCH_RE.exec(content);
-    if (!match) return null;
+  const match = RALPH_LAUNCH_RE.exec(content);
+  if (!match) return null;
 
-    const [fullMatch, task, flagStr] = match;
-    const { linkedRalph } = parseFlags(flagStr ?? '');
+  const [fullMatch, task, flagStr] = match;
+  const { linkedRalph } = parseFlags(flagStr ?? "");
 
-    return {
-      mode: 'ralph',
-      command: fullMatch.trim(),
-      task,
-      linkedRalph,
-      sourcePath: prdPath,
-    };
-  }
-
-  return null;
+  return {
+    mode: "ralph",
+    command: fullMatch.trim(),
+    task,
+    linkedRalph,
+    sourcePath: prdPath,
+  };
 }

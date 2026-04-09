@@ -1,7 +1,7 @@
+import { randomUUID } from 'crypto';
 import { spawn } from 'child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { readFile, rm } from 'fs/promises';
-import { homedir } from 'os';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { executeTeamApiOperation as executeCanonicalTeamApiOperation, resolveTeamApiOperation } from '../team/api-interop.js';
@@ -10,8 +10,10 @@ import { killWorkerPanes, killTeamSession } from '../team/tmux-session.js';
 import { validateTeamName } from '../team/team-name.js';
 import { monitorTeam, resumeTeam, shutdownTeam } from '../team/runtime.js';
 import { readTeamConfig } from '../team/monitor.js';
+import { isProcessAlive } from '../platform/index.js';
+import { getGlobalOmcStatePath } from '../utils/paths.js';
 
-const JOB_ID_PATTERN = /^omc-[a-z0-9]{1,12}$/;
+const JOB_ID_PATTERN = /^omc-[a-z0-9]{1,16}$/;
 const VALID_CLI_AGENT_TYPES = new Set(['claude', 'codex', 'gemini']);
 const SUBCOMMANDS = new Set(['start', 'status', 'wait', 'cleanup', 'resume', 'shutdown', 'api', 'help', '--help', '-h']);
 
@@ -175,7 +177,7 @@ async function assertTeamSpawnAllowed(cwd: string, env: NodeJS.ProcessEnv = proc
 }
 
 function resolveJobsDir(env: NodeJS.ProcessEnv = process.env): string {
-  return env.OMC_JOBS_DIR || join(homedir(), '.omc', 'team-jobs');
+  return env.OMC_JOBS_DIR || getGlobalOmcStatePath('team-jobs');
 }
 
 function resolveRuntimeCliPath(env: NodeJS.ProcessEnv = process.env): string {
@@ -237,15 +239,6 @@ function writeJobToDisk(jobId: string, job: TeamJobRecord, jobsDir: string): voi
   writeFileSync(jobPath(jobsDir, jobId), JSON.stringify(job), 'utf-8');
 }
 
-function isPidAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 function parseJobResult(raw?: string): unknown {
   if (!raw) return undefined;
   const parsed = parseJsonSafe<unknown>(raw);
@@ -262,8 +255,8 @@ function buildStatus(jobId: string, job: TeamJobRecord): TeamJobStatus {
   };
 }
 
-function generateJobId(now = Date.now()): string {
-  return `omc-${now.toString(36)}`;
+export function generateJobId(now = Date.now()): string {
+  return `omc-${now.toString(36)}${randomUUID().slice(0, 8)}`;
 }
 
 function convergeWithResultArtifact(jobId: string, job: TeamJobRecord, jobsDir: string): TeamJobRecord {
@@ -281,7 +274,7 @@ function convergeWithResultArtifact(jobId: string, job: TeamJobRecord, jobsDir: 
     // no artifact yet
   }
 
-  if (job.status === 'running' && job.pid != null && !isPidAlive(job.pid)) {
+  if (job.status === 'running' && job.pid != null && !isProcessAlive(job.pid)) {
     return {
       ...job,
       status: 'failed',

@@ -1,60 +1,94 @@
-# oh-my-claudecode v4.9.0: Team reliability, autoresearch setup, and safety hardening
+# oh-my-claudecode v4.11.1: add gitStatus working-tree, add hostname element, cwd folder format
 
 ## Release Notes
 
-Release 4.9.0 focuses on **team/runtime reliability**, **autoresearch onboarding and launch flow improvements**, and **safety hardening** across keyword/regex-sensitive paths and background process cleanup.
+Release with **3 new features**, **8 security improvements**, **33 bug fixes**, **1 other change** across **45 merged PRs**.
 
 ### Highlights
 
-- **feat(team): harden shutdown cleanup for split-pane workers** — strengthens cleanup when pane metadata drifts and improves cmux-compatible team launches. (#1752, #1750, #1743)
-- **feat(autoresearch): improve setup and launch flow** — adds guided intake, launch-from-interview artifacts, and zero-learning-curve Claude session setup. (#1740, #1734, #1723, #1693)
-- **fix(safety): harden regex- and state-sensitive paths** — filters informational keyword-detector queries, avoids risky regex behavior, and reduces stale state interactions. (#1737, #1741)
-- **fix(runtime): clean up orphaned background processes** — reduces lingering bridge/MCP child processes and related runtime residue. (#1724)
+- **feat(hud): add gitStatus working-tree indicator element** (#2247)
+- **feat(hud): add hostname element for multi-host SSH workflows** (#2246)
+- **feat(hud): cwd folder format shows parent/leaf instead of just leaf** (#2238)
+- **fix(security): clamp hardMaxIterations and enforce in autopilot** (#2331)
+- **fix(security): delegate gitea URL validation to validateUrlForSSRF** (#2336)
+- **fix(security): enforce disableExternalLLM in omc ask command** (#2324)
 
-### Team & Runtime Reliability
+### New Features
 
-- **fix(team): ensure shutdown removes split-pane workers after metadata drift** — improves team shutdown cleanup reliability. (#1752)
-- **fix(team): support team mode launches from cmux surfaces** — expands compatibility for cmux-driven flows. (#1750)
-- **fix(cli): skip tmux wrapping in cmux terminals** — prevents orphaned/incorrect nested session behavior. (#1743)
-- **fix(bridge): clean up orphaned bridge and MCP child processes** — hardens runtime cleanup behavior. (#1724)
+- **feat(hud): add gitStatus working-tree indicator element** (#2247)
+- **feat(hud): add hostname element for multi-host SSH workflows** (#2246)
+- **feat(hud): cwd folder format shows parent/leaf instead of just leaf** (#2238)
 
-### Autoresearch Improvements
+### Security & Hardening
 
-- **feat(autoresearch): launch from interview artifacts** — enables smoother launch flow from planning artifacts. (#1740)
-- **fix(autoresearch): port intake flow from OMX and clean up setup path** — improves guided intake reliability. (#1734)
-- **feat: add zero-learning-curve autoresearch setup flow** — simplifies Claude session setup for lightweight use. (#1723)
-- **feat(autoresearch): backport autoresearch from OMX to OMC (Phase 1)** — expands the autoresearch surface. (#1693)
+- **fix(security): clamp hardMaxIterations and enforce in autopilot** (#2331)
+- **fix(security): delegate gitea URL validation to validateUrlForSSRF** (#2336)
+- **fix(security): enforce disableExternalLLM in omc ask command** (#2324)
+- **fix(security): sanitize trigger_message control characters before tmux send-keys** (#2323)
+- **fix(security): check iteration directly against hardMax independent of max_iterations** (#2322)
+- **fix(security): reject non-positive hardMaxIterations in strict mode** (#2321)
+- **fix(security): enforce hardMaxIterations for ultrawork persistent mode** (#2320)
+- **fix(security): block all tmux subcommands in worker context** (#2316)
 
-### Safety & Correctness
+### Bug Fixes
 
-- **fix(keyword-detector): skip informational queries and clear legacy state** — reduces false activations and stale-state issues. (#1737)
-- **fix: prevent skill-active-state collision between OMC and project custom skills** — improves reload/sync safety around active state handling. (#1741)
-- **fix(planning): remove unnecessary global flag from module-level regex** — avoids unsafe regex statefulness in planning-related flows.
-- **fix(team): pass Bedrock/Vertex model IDs to workers without normalization** — preserves provider-specific identifiers. (#1697)
+- **fix(installer): use getPackageDir() instead of __dirname for HUD helper copies** (#2347)
+- **fix(team): lock unregisterMcpWorker and registerInConfig read-modify-write paths** (#2333)
+- **fix(shared-memory): add retry timeout to writeEntry lock acquisition** (#2342)
+- **fix: guard against fd leak in tryAcquireSync on write failure** (#2341)
+- **fix(team): use randomUUID in MCP team-server job ID generation** (#2340)
+- **fix(cancel,team): add skill-active cleanup to bash fallback and guard startTeamV2 events** (#2339)
+- **fix(i18n): prevent Korean keyword false positives for 설명서 and 랄프로렌** (#2337)
+- **fix(state-tools): correct cancel signal path and add legacy fallback** (#2335)
+- **fix: guard Atomics.wait with try/catch in session-registry and subagent-tracker** (#2334)
+- **fix(cancel): write legacy cancel signal to .omc/state/ instead of worktree root** (#2332)
+- **fix(worktree-paths): include dot in project path encoding regex** (#2329)
+- **fix(team): add locking to teamUpdateTask for concurrent safety** (#2330)
+- **fix(hud): apply wrap mode when terminal width is auto-detected** (#2338)
+- **fix(hud): handle ST-terminated OSC 8 sequences in ANSI regex** (#2319)
+- **fix(prompt-prerequisites): use suffix matching for file path comparison** (#2314)
+- **fix(prompt-prerequisites): require path prefix or file extension in isLikelyPath** (#2313)
+- **fix(prompt-prerequisites): move progress recording after blocking check** (#2312)
+- **fix(setup): clean up preserve-mode artifacts on overwrite** (#2298)
+- **fix(launch): mirror keybindings.json and rules/ to runtime config dir** (#2297)
+- **fix(team): sync worker_count after canonicalization dedup** (#2296)
+- **fix(team): skip past colliding worker names in scaleUp** (#2295)
+- **fix(skill-state): add recency check to orchestrator idle bypass** (#2287)
+- **fix(wiki): normalize CRLF in parseFrontmatter for Windows compatibility** (#2285)
+- **fix(wiki): escape newlines in title to prevent frontmatter corruption** (#2284)
+- **fix(wiki): guard writePageUnsafe against reserved filenames** (#2283)
+- **fix(pre-tool-enforcer): strip UTF-8 BOM before frontmatter parsing** (#2276)
+- **fix(wiki): titleToSlug produces bare .md for non-ASCII titles** (#2270)
+- **fix(wiki): keyword search returns 0 results for CJK text** (#2263)
+- **fix(skills): clarify ralph step 7 chaining and ai-slop-cleaner skill invocation** (#2245)
+- **fix(persistent-mode): relax overly-strict ralph/ultrawork session-id check** (#2244)
+- **fix(hud): correctly mark background agents as completed in transcript parser** (#2243)
+- **fix: ignore HTML comments in keyword detector** (#2249)
+- **fix(launch): forward env vars into tmux sessions & respect CLAUDE_CONFIG_DIR** (#2204)
 
-### Workflow & Platform
+### Other Changes
 
-- **feat: add mandatory deslop pass to ralph workflow** — improves cleanup discipline in execution flows. (#1736)
-- **feat(docs): add Lore commit knowledge protocol to CLAUDE.md template** — formalizes commit knowledge capture. (#1733)
-- **feat(deepinit): add manifest-based incremental deepinit tool** — extends onboarding/setup capabilities. (#1719)
-- **feat(skill): add deep-dive skill (trace -> deep-interview pipeline)** — adds a new investigation workflow. (#1681)
+- **Make artifact-first handoffs explicit for interop and prompt persistence** (#2257)
+
+### Stats
+
+- **45 PRs merged** | **3 new features** | **33 bug fixes** | **8 security/hardening improvements** | **1 other change**
 
 ### Install / Update
 
 ```bash
-npm install -g oh-my-claude-sisyphus@4.9.0
+npm install -g oh-my-claude-sisyphus@4.11.1
 ```
 
 Or reinstall the plugin:
-
 ```bash
 claude /install-plugin oh-my-claudecode
 ```
 
-**Full Changelog**: https://github.com/Yeachan-Heo/oh-my-claudecode/compare/v4.8.2...v4.9.0
+**Full Changelog**: https://github.com/Yeachan-Heo/oh-my-claudecode/compare/v4.11.0...v4.11.1
 
 ## Contributors
 
 Thank you to all contributors who made this release possible!
 
-@Yeachan-Heo @alohays
+@pgagarinov @shaun0927 @Yeachan-Heo

@@ -8,7 +8,7 @@
 
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join, basename } from 'path';
-import { getClaudeConfigDir } from '../../utils/paths.js';
+import { getClaudeConfigDir } from '../../utils/config-dir.js';
 import type {
   ParsedSlashCommand,
   CommandInfo,
@@ -22,6 +22,7 @@ import { formatOmcCliInvocation, rewriteOmcCliInvocations } from '../../utils/om
 import { parseSkillPipelineMetadata, renderSkillPipelineGuidance } from '../../utils/skill-pipeline.js';
 import { renderSkillResourcesGuidance } from '../../utils/skill-resources.js';
 import { renderSkillRuntimeGuidance } from '../../features/builtin-skills/runtime-guidance.js';
+import { getSkillsDir } from '../../features/builtin-skills/skills.js';
 
 /** Claude config directory */
 const CLAUDE_CONFIG_DIR = getClaudeConfigDir();
@@ -199,14 +200,16 @@ export function discoverAllCommands(): CommandInfo[] {
   const projectOmcSkills = discoverSkillsFromDir(projectOmcSkillsDir);
   const projectAgentSkills = discoverSkillsFromDir(projectAgentSkillsDir);
   const userSkills = discoverSkillsFromDir(userSkillsDir);
+  const builtinSkills = discoverSkillsFromDir(getSkillsDir());
 
-  // Priority: project commands > user commands > project OMC skills > project compatibility skills > user skills
+  // Priority: project commands > user commands > project OMC skills > project compatibility skills > user skills > builtin skills
   const prioritized = [
     ...projectCommands,
     ...userCommands,
     ...projectOmcSkills,
     ...projectAgentSkills,
     ...userSkills,
+    ...builtinSkills,
   ];
   const seen = new Set<string>();
 
@@ -350,7 +353,7 @@ export function executeSlashCommand(parsed: ParsedSlashCommand): ExecuteResult {
   if (!command) {
     return {
       success: false,
-      error: `Command "/${parsed.command}" not found. Available commands are in $CLAUDE_CONFIG_DIR/commands/ (or ~/.claude/commands/ by default) or .claude/commands/`,
+      error: `Command "/${parsed.command}" not found. Available commands are in ${CLAUDE_CONFIG_DIR}/commands/ or .claude/commands/`,
     };
   }
 

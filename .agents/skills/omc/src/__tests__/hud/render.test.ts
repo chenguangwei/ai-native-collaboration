@@ -542,3 +542,238 @@ describe('token usage rendering', () => {
     expect(result).not.toContain('tok:');
   });
 });
+
+
+describe('layout element ordering', () => {
+  const createMockContext = (): HudRenderContext => ({
+    contextPercent: 50,
+    modelName: 'claude-sonnet-4-5',
+    ralph: null,
+    ultrawork: null,
+    prd: null,
+    autopilot: null,
+    activeAgents: [],
+    todos: [],
+    backgroundTasks: [],
+    cwd: '/home/user/project',
+    lastSkill: null,
+    rateLimitsResult: null,
+    customBuckets: null,
+    pendingPermission: null,
+    thinkingState: null,
+    sessionHealth: { durationMinutes: 10, messageCount: 5, health: 'healthy' },
+    omcVersion: '4.5.4',
+    updateAvailable: null,
+    toolCallCount: 5,
+    agentCallCount: 1,
+    skillCallCount: 0,
+    promptTime: null,
+    apiKeySource: null,
+    profileName: null,
+    sessionSummary: null,
+  });
+
+  const createLayoutConfig = (layout?: HudConfig['layout']): HudConfig => ({
+    preset: 'focused',
+    elements: {
+      ...DEFAULT_HUD_CONFIG.elements,
+      omcLabel: true,
+      contextBar: true,
+      gitBranch: true,
+      rateLimits: false,
+      ralph: false,
+      autopilot: false,
+      prdStory: false,
+      activeSkills: false,
+      agents: false,
+      backgroundTasks: false,
+      todos: false,
+      promptTime: false,
+      sessionHealth: true,
+      showCallCounts: true,
+      maxOutputLines: 6,
+    },
+    thresholds: DEFAULT_HUD_CONFIG.thresholds,
+    staleTaskThresholdMinutes: 30,
+    contextLimitWarning: { ...DEFAULT_HUD_CONFIG.contextLimitWarning, threshold: 101 },
+    usageApiPollIntervalMs: DEFAULT_HUD_CONFIG.usageApiPollIntervalMs,
+    layout,
+  });
+
+  it('uses DEFAULT_ELEMENT_ORDER when no layout is configured', async () => {
+    const context = createMockContext();
+    const config = createLayoutConfig(); // no layout
+
+    const result = await render(context, config);
+    const lines = result.split('\n');
+
+    // line1 has gitBranch, main has [OMC]
+    expect(lines[0]).toContain('branch:');
+    expect(lines[1]).toContain('[OMC');
+  });
+
+  it('reorders main elements according to layout.main', async () => {
+    const context = createMockContext();
+    // Put contextBar before omcLabel
+    const config = createLayoutConfig({
+      main: ['contextBar', 'omcLabel', 'session', 'callCounts'],
+    });
+
+    const result = await render(context, config);
+    const lines = result.split('\n');
+
+    // Find the main line (has [OMC])
+    const mainLine = lines.find(l => l.includes('[OMC'));
+    expect(mainLine).toBeDefined();
+
+    // contextBar should appear before [OMC]
+    const ctxIdx = mainLine!.indexOf('ctx:');
+    const omcIdx = mainLine!.indexOf('[OMC');
+    expect(ctxIdx).toBeLessThan(omcIdx);
+  });
+
+  it('moves elements between groups via layout', async () => {
+    const context = createMockContext();
+    // Move omcLabel to line1, gitBranch stays in line1 too
+    const config = createLayoutConfig({
+      line1: ['omcLabel', 'gitBranch'],
+      main: ['contextBar', 'session', 'callCounts'],
+    });
+
+    const result = await render(context, config);
+    const lines = result.split('\n');
+
+    // line1 should have both [OMC] and branch:
+    expect(lines[0]).toContain('[OMC');
+    expect(lines[0]).toContain('branch:');
+
+    // main should have contextBar but not [OMC]
+    expect(lines[1]).toContain('ctx:');
+    expect(lines[1]).not.toContain('[OMC');
+  });
+
+  it('skips elements not in layout silently', async () => {
+    const context = createMockContext();
+    // Only include omcLabel in main, skip everything else
+    const config = createLayoutConfig({
+      line1: [],
+      main: ['omcLabel'],
+      detail: [],
+    });
+
+    const result = await render(context, config);
+
+    // Should only have the OMC label, no other elements
+    expect(result).toContain('[OMC');
+    expect(result).not.toContain('ctx:');
+    expect(result).not.toContain('branch:');
+  });
+
+  it('ignores unknown element names in layout', async () => {
+    const context = createMockContext();
+    const config = createLayoutConfig({
+      main: ['nonExistentElement', 'omcLabel'],
+    });
+
+    const result = await render(context, config);
+
+    // Should still render omcLabel without error
+    expect(result).toContain('[OMC');
+  });
+
+  it('produces no line1 output when line1 layout is empty', async () => {
+    const context = createMockContext();
+    const config = createLayoutConfig({
+      line1: [],
+      main: ['omcLabel'],
+    });
+
+    const result = await render(context, config);
+    const lines = result.split('\n');
+
+    // First line should be main (OMC), no git info line
+    expect(lines[0]).toContain('[OMC');
+    expect(lines).toHaveLength(1);
+  });
+
+  it('falls back to DEFAULT_ELEMENT_ORDER for omitted groups', async () => {
+    const context = createMockContext();
+    // Only specify main order; line1 and detail use defaults
+    const config = createLayoutConfig({
+      main: ['contextBar', 'omcLabel'],
+    });
+
+    const result = await render(context, config);
+    const lines = result.split('\n');
+
+    // line1 should use default order (gitBranch)
+    expect(lines[0]).toContain('branch:');
+
+    // main should use custom order (ctx before OMC)
+    const mainLine = lines.find(l => l.includes('[OMC'));
+    expect(mainLine).toBeDefined();
+    const ctxIdx = mainLine!.indexOf('ctx:');
+    const omcIdx = mainLine!.indexOf('[OMC');
+    expect(ctxIdx).toBeLessThan(omcIdx);
+  });
+});
+
+describe('optional HUD line defaults', () => {
+  it('does not emit a blank header line when all top-line elements are disabled', async () => {
+    const context: HudRenderContext = {
+      contextPercent: 30,
+      modelName: 'claude-sonnet-4-5',
+      ralph: null,
+      ultrawork: null,
+      prd: null,
+      autopilot: null,
+      activeAgents: [],
+      todos: [],
+      backgroundTasks: [],
+      cwd: '/home/user/project',
+      lastSkill: null,
+      rateLimitsResult: null,
+      customBuckets: null,
+      pendingPermission: null,
+      thinkingState: null,
+      sessionHealth: { durationMinutes: 10, messageCount: 5, health: 'healthy' },
+      omcVersion: '4.5.4',
+      updateAvailable: null,
+      toolCallCount: 0,
+      agentCallCount: 0,
+      skillCallCount: 0,
+      promptTime: null,
+      apiKeySource: null,
+      profileName: null,
+      sessionSummary: null,
+    };
+
+    const config: HudConfig = {
+      ...DEFAULT_HUD_CONFIG,
+      elements: {
+        ...DEFAULT_HUD_CONFIG.elements,
+        omcLabel: false,
+        rateLimits: false,
+        permissionStatus: false,
+        thinking: false,
+        promptTime: false,
+        sessionHealth: false,
+        ralph: false,
+        autopilot: false,
+        prdStory: false,
+        activeSkills: false,
+        lastSkill: false,
+        contextBar: false,
+        agents: false,
+        backgroundTasks: false,
+        todos: false,
+        showCallCounts: false,
+        cwd: true,
+        gitRepo: false,
+        gitBranch: false,
+      },
+    };
+
+    await expect(render(context, config)).resolves.toBe('~/workspace/project');
+  });
+});

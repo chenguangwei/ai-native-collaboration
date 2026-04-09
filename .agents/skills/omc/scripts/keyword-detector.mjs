@@ -24,9 +24,28 @@
  */
 
 import { writeFileSync, readFileSync, mkdirSync, existsSync, unlinkSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { homedir } from 'os';
+import { fileURLToPath } from 'url';
+import { getClaudeConfigDir } from './lib/config-dir.mjs';
 import { readStdin } from './lib/stdin.mjs';
+
+// Resolve OMC package root: CLAUDE_PLUGIN_ROOT (plugin system) or derive from this script's location
+const _omcRoot = process.env.CLAUDE_PLUGIN_ROOT ||
+  join(dirname(fileURLToPath(import.meta.url)), '..');
+
+/**
+ * Load skill content directly from SKILL.md on disk.
+ * Works for both npm installs and plugin marketplace installs.
+ * Returns null if the skill file is not found.
+ */
+function loadSkillContent(skillName) {
+  const skillPath = join(_omcRoot, 'skills', skillName, 'SKILL.md');
+  if (existsSync(skillPath)) {
+    try { return readFileSync(skillPath, 'utf8'); } catch { /* fall through */ }
+  }
+  return null;
+}
 
 const ULTRATHINK_MESSAGE = `<think-mode>
 
@@ -41,6 +60,17 @@ You are now in deep thinking mode. Take your time to:
 Use your extended thinking capabilities to provide the most thorough and well-reasoned response.
 
 </think-mode>
+
+---
+`;
+
+const SEARCH_MESSAGE = `<search-mode>
+MAXIMIZE SEARCH EFFORT. Launch multiple background agents IN PARALLEL:
+- explore agents (codebase patterns, file structures)
+- document-specialist agents (remote repos, official docs, GitHub examples)
+Plus direct tools: Grep, Glob
+NEVER stop at first result - be exhaustive.
+</search-mode>
 
 ---
 `;
@@ -79,6 +109,15 @@ Perform a focused security review of the relevant changes or target area. Check 
 ---
 `;
 
+const MODE_MESSAGE_KEYWORDS = new Map([
+  ['ultrathink', ULTRATHINK_MESSAGE],
+  ['deepsearch', SEARCH_MESSAGE],
+  ['analyze', ANALYZE_MESSAGE],
+  ['tdd', TDD_MESSAGE],
+  ['code-review', CODE_REVIEW_MESSAGE],
+  ['security-review', SECURITY_REVIEW_MESSAGE],
+]);
+
 // Extract prompt from various JSON structures
 function extractPrompt(input) {
   try {
@@ -110,6 +149,8 @@ function isAntiSlopCleanupRequest(text) {
 
 function sanitizeForKeywordDetection(text) {
   return text
+    // 0. Strip HTML/markdown comments before tag stripping
+    .replace(/<!--[\s\S]*?-->/g, '')
     // 1. Strip XML-style tag blocks: <tag-name ...>...</tag-name> (multi-line, greedy on tag name)
     .replace(/<(\w[\w-]*)[\s>][\s\S]*?<\/\1>/g, '')
     // 2. Strip self-closing XML tags: <tag-name />, <tag-name attr="val" />
@@ -127,7 +168,7 @@ function sanitizeForKeywordDetection(text) {
 
 const INFORMATIONAL_INTENT_PATTERNS = [
   /\b(?:what(?:'s|\s+is)|what\s+are|how\s+(?:to|do\s+i)\s+use|explain|explanation|tell\s+me\s+about|describe)\b/i,
-  /(?:뭐야|무엇(?:이야|인가요)?|어떻게|설명|사용법)/u,
+  /(?:뭐야|뭔데|무엇(?:이야|인가요)?|어떻게|설명(?!서\s*(?:작성|만들|생성|추가|업데이트|수정|편집|쓰))|사용법|알려\s?줘|알려줄래|소개해?\s?줘|소개\s*부탁|설명해\s?줘|뭐가\s*달라|어떤\s*기능|기능\s*(?:알려|설명|뭐)|방법\s*(?:알려|설명|뭐))/u,
   /(?:とは|って何|使い方|説明)/u,
   /(?:什么是|什麼是|怎(?:么|樣)用|如何使用|解释|說明|说明)/u,
 ];
@@ -271,13 +312,14 @@ function linkRalphTeam(directory, sessionId) {
 
 /**
  * Check if the team feature is enabled in Claude Code settings.
- * Reads ~/.claude/settings.json and checks for CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS env var.
+ * Reads settings.json from [$CLAUDE_CONFIG_DIR|~/.claude] and checks for
+ * CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS env var.
  * @returns {boolean} true if team feature is enabled
  */
 function isTeamEnabled() {
   try {
     // Check settings.json first (authoritative, user-controlled)
-    const cfgDir = process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude');
+    const cfgDir = getClaudeConfigDir();
     const settingsPath = join(cfgDir, 'settings.json');
     if (existsSync(settingsPath)) {
       const settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
@@ -298,10 +340,16 @@ function isTeamEnabled() {
 }
 
 /**
- * Create a skill invocation message that tells Claude to use the Skill tool
+ * Create a skill invocation message.
+ * Prefers direct SKILL.md content injection (works for npm and plugin installs).
+ * Falls back to Skill tool invocation (requires plugin marketplace install).
  */
 function createSkillInvocation(skillName, originalPrompt, args = '') {
   const argsSection = args ? `\nArguments: ${args}` : '';
+  const skillContent = loadSkillContent(skillName);
+  if (skillContent) {
+    return `[MAGIC KEYWORD: ${skillName.toUpperCase()}]\n\n${skillContent}\n\n---\nUser request:\n${originalPrompt}${argsSection}`;
+  }
   return `[MAGIC KEYWORD: ${skillName.toUpperCase()}]
 
 You MUST invoke the skill using the Skill tool:
@@ -325,20 +373,24 @@ function createMultiSkillInvocation(skills, originalPrompt) {
 
   const skillBlocks = skills.map((s, i) => {
     const argsSection = s.args ? `\nArguments: ${s.args}` : '';
-    return `### Skill ${i + 1}: ${s.name.toUpperCase()}
-Skill: oh-my-claudecode:${s.name}${argsSection}`;
+    const content = loadSkillContent(s.name);
+    if (content) {
+      return `### Skill ${i + 1}: ${s.name.toUpperCase()}\n\n${content}${argsSection}`;
+    }
+    return `### Skill ${i + 1}: ${s.name.toUpperCase()}\nSkill: oh-my-claudecode:${s.name}${argsSection}`;
   }).join('\n\n');
 
+  const hasDirectContent = skills.some(s => loadSkillContent(s.name));
   return `[MAGIC KEYWORDS DETECTED: ${skills.map(s => s.name.toUpperCase()).join(', ')}]
 
-You MUST invoke ALL of the following skills using the Skill tool, in order:
+${hasDirectContent ? 'Execute ALL of the following skills in order:' : 'You MUST invoke ALL of the following skills using the Skill tool, in order:'}
 
 ${skillBlocks}
 
 User request:
 ${originalPrompt}
 
-IMPORTANT: Invoke ALL skills listed above. Start with the first skill IMMEDIATELY. After it completes, invoke the next skill in order. Do not skip any skill.`;
+IMPORTANT: Complete ALL skills listed above in order. Start with the first skill IMMEDIATELY.`;
 }
 
 /**
@@ -436,12 +488,12 @@ async function main() {
     }
 
     // Ralph keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(ralph|don't stop|must complete|until done)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(ralph|don't stop|must complete|until done)\b|(랄프)(?!로렌)/i)) {
       matches.push({ name: 'ralph', args: '' });
     }
 
     // Autopilot keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(autopilot|auto pilot|auto-pilot|autonomous|full auto|fullsend)\b/i) ||
+    if (hasActionableKeyword(cleanPrompt, /\b(autopilot|auto pilot|auto-pilot|autonomous|full auto|fullsend)\b|(오토파일럿)/i) ||
         hasActionableKeyword(cleanPrompt, /\b(build|create|make)\s+me\s+(an?\s+)?(app|feature|project|tool|plugin|website|api|server|cli|script|system|service|dashboard|bot|extension)\b/i) ||
         hasActionableKeyword(cleanPrompt, /\bi\s+want\s+a\s+/i) ||
         hasActionableKeyword(cleanPrompt, /\bi\s+want\s+an\s+/i) ||
@@ -454,7 +506,7 @@ async function main() {
     // Ultrapilot keywords removed — routed to team which is now explicit-only (/team).
 
     // Ultrawork keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(ultrawork|ulw|uw)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(ultrawork|ulw|uw)\b|(울트라워크)/i)) {
       matches.push({ name: 'ultrawork', args: '' });
     }
 
@@ -464,17 +516,17 @@ async function main() {
 
 
     // CCG keywords (Claude-Codex-Gemini tri-model orchestration)
-    if (hasActionableKeyword(cleanPrompt, /\b(ccg|claude-codex-gemini)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(ccg|claude-codex-gemini)\b|(씨씨지)/i)) {
       matches.push({ name: 'ccg', args: '' });
     }
 
     // Ralplan keyword
-    if (hasActionableKeyword(cleanPrompt, /\b(ralplan)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(ralplan)\b|(랄플랜)/i)) {
       matches.push({ name: 'ralplan', args: '' });
     }
 
     // Deep interview keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(deep[\s-]interview|ouroboros)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(deep[\s-]interview|ouroboros)\b|(딥인터뷰)/i)) {
       matches.push({ name: 'deep-interview', args: '' });
     }
 
@@ -484,37 +536,42 @@ async function main() {
     }
 
     // TDD keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(tdd)\b/i) ||
+    if (hasActionableKeyword(cleanPrompt, /\b(tdd)\b|(테스트\s?퍼스트)/i) ||
         hasActionableKeyword(cleanPrompt, /\btest\s+first\b/i) ||
         hasActionableKeyword(cleanPrompt, /\bred\s+green\b/i)) {
       matches.push({ name: 'tdd', args: '' });
     }
 
     // Code review keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(code\s+review|review\s+code)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(code\s+review|review\s+code)\b|(코드\s?리뷰)(?!어)/i)) {
       matches.push({ name: 'code-review', args: '' });
     }
 
     // Security review keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(security\s+review|review\s+security)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(security\s+review|review\s+security)\b|(보안\s?리뷰)(?!어)/i)) {
       matches.push({ name: 'security-review', args: '' });
     }
 
     // Ultrathink keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(ultrathink|think hard|think deeply)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(ultrathink|think hard|think deeply)\b|(울트라씽크)/i)) {
       matches.push({ name: 'ultrathink', args: '' });
     }
 
     // Deepsearch keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(deepsearch)\b/i) ||
+    if (hasActionableKeyword(cleanPrompt, /\b(deepsearch)\b|(딥\s?서치)/i) ||
         hasActionableKeyword(cleanPrompt, /\bsearch\s+(the\s+)?(codebase|code|files?|project)\b/i) ||
         hasActionableKeyword(cleanPrompt, /\bfind\s+(in\s+)?(codebase|code|all\s+files?)\b/i)) {
       matches.push({ name: 'deepsearch', args: '' });
     }
 
     // Analyze keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(deep[\s-]?analyze|deepanalyze)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(deep[\s-]?analyze|deepanalyze)\b|(딥\s?분석)/i)) {
       matches.push({ name: 'analyze', args: '' });
+    }
+
+    // Wiki keywords
+    if (hasActionableKeyword(cleanPrompt, /\b(wiki(?:\s+(?:this|add|lint|query))?)\b/i)) {
+      matches.push({ name: 'wiki', args: '' });
     }
 
     // No matches - pass through
@@ -611,13 +668,7 @@ async function main() {
     }
 
     const additionalContextParts = [];
-    for (const [keywordName, message] of [
-      ['ultrathink', ULTRATHINK_MESSAGE],
-      ['analyze', ANALYZE_MESSAGE],
-      ['tdd', TDD_MESSAGE],
-      ['code-review', CODE_REVIEW_MESSAGE],
-      ['security-review', SECURITY_REVIEW_MESSAGE],
-    ]) {
+    for (const [keywordName, message] of MODE_MESSAGE_KEYWORDS) {
       const index = resolved.findIndex(m => m.name === keywordName);
       if (index !== -1) {
         resolved.splice(index, 1);

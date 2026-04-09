@@ -13,8 +13,11 @@ NC='\033[0m'
 echo -e "${BLUE}Oh-My-ClaudeCode Uninstaller${NC}"
 echo ""
 
-# Claude Code config directory (always ~/.claude)
-CLAUDE_CONFIG_DIR="$HOME/.claude"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+. "$SCRIPT_DIR/lib/config-dir.sh"
+
+# Claude Code config directory (defaults to ~/.claude)
+CLAUDE_CONFIG_DIR="$(resolve_claude_config_dir)"
 
 echo "This will remove ALL OMC components from:"
 echo "  $CLAUDE_CONFIG_DIR"

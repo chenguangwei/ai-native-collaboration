@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mkdirSync, rmSync, existsSync, mkdtempSync } from 'fs';
 import { execSync } from 'child_process';
-import { join } from 'path';
+import { join, basename } from 'path';
 import {
   validatePath,
   resolveOmcPath,
@@ -395,6 +395,101 @@ describe('worktree-paths', () => {
         expect(id).not.toContain('#');
       } finally {
         rmSync(specialDir, { recursive: true, force: true });
+      }
+    });
+
+    it('should produce identical identifiers for linked worktrees of the same repo', () => {
+      const primaryDir = mkdtempSync('/tmp/worktree-paths-primary-');
+      const worktreeDir = `${primaryDir}-linked`;
+      try {
+        // Set up a primary repo with a commit so worktree creation works
+        execSync('git init', { cwd: primaryDir, stdio: 'pipe' });
+        execSync('git remote add origin https://github.com/test/worktree-id-test.git', {
+          cwd: primaryDir,
+          stdio: 'pipe',
+        });
+        execSync('git commit --allow-empty -m "init"', {
+          cwd: primaryDir,
+          stdio: 'pipe',
+          env: { ...process.env, GIT_AUTHOR_NAME: 'test', GIT_AUTHOR_EMAIL: 'test@test.com', GIT_COMMITTER_NAME: 'test', GIT_COMMITTER_EMAIL: 'test@test.com' },
+        });
+
+        // Create a linked worktree (sibling directory, different basename)
+        execSync(`git worktree add "${worktreeDir}" -b linked-branch`, {
+          cwd: primaryDir,
+          stdio: 'pipe',
+        });
+        clearWorktreeCache();
+
+        const primaryId = getProjectIdentifier(primaryDir);
+        const worktreeId = getProjectIdentifier(worktreeDir);
+
+        // Both should produce the same identifier — same repo, same remote
+        expect(primaryId).toBe(worktreeId);
+      } finally {
+        try {
+          execSync(`git worktree remove "${worktreeDir}" --force`, {
+            cwd: primaryDir,
+            stdio: 'pipe',
+          });
+        } catch { /* may not exist */ }
+        rmSync(primaryDir, { recursive: true, force: true });
+        rmSync(worktreeDir, { recursive: true, force: true });
+      }
+    });
+
+    it('should not change identifier for submodules (avoid .git/modules resolution)', () => {
+      const parentDir = mkdtempSync('/tmp/worktree-paths-submod-parent-');
+      const subDir = mkdtempSync('/tmp/worktree-paths-submod-child-');
+      try {
+        // Create a repo to use as the submodule source
+        execSync('git init', { cwd: subDir, stdio: 'pipe' });
+        execSync('git commit --allow-empty -m "sub init"', {
+          cwd: subDir,
+          stdio: 'pipe',
+          env: { ...process.env, GIT_AUTHOR_NAME: 'test', GIT_AUTHOR_EMAIL: 'test@test.com', GIT_COMMITTER_NAME: 'test', GIT_COMMITTER_EMAIL: 'test@test.com' },
+        });
+
+        // Create the parent repo and add the submodule
+        execSync('git init', { cwd: parentDir, stdio: 'pipe' });
+        execSync('git commit --allow-empty -m "init"', {
+          cwd: parentDir,
+          stdio: 'pipe',
+          env: { ...process.env, GIT_AUTHOR_NAME: 'test', GIT_AUTHOR_EMAIL: 'test@test.com', GIT_COMMITTER_NAME: 'test', GIT_COMMITTER_EMAIL: 'test@test.com' },
+        });
+        execSync(`git -c protocol.file.allow=always submodule add "${subDir}" mysub`, {
+          cwd: parentDir,
+          stdio: 'pipe',
+        });
+        clearWorktreeCache();
+
+        const submodulePath = `${parentDir}/mysub`;
+        const id = getProjectIdentifier(submodulePath);
+
+        // The identifier should use the submodule's own basename, not the
+        // parent's .git/modules directory
+        expect(id).toContain('mysub-');
+        expect(id).not.toContain('modules');
+      } finally {
+        rmSync(parentDir, { recursive: true, force: true });
+        rmSync(subDir, { recursive: true, force: true });
+      }
+    });
+
+    it('should not change identifier for bare repos (avoid dirname going to parent)', () => {
+      const parentDir = mkdtempSync('/tmp/worktree-paths-bare-parent-');
+      const bareDir = `${parentDir}/my-bare-repo.git`;
+      try {
+        execSync(`git init --bare "${bareDir}"`, { stdio: 'pipe' });
+        clearWorktreeCache();
+
+        const id = getProjectIdentifier(bareDir);
+
+        // Should use the bare repo's own name, not the parent directory
+        expect(id).toContain('my-bare-repo');
+        expect(id).not.toContain(basename(parentDir));
+      } finally {
+        rmSync(parentDir, { recursive: true, force: true });
       }
     });
   });

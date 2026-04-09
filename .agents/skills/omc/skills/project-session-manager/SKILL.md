@@ -1,6 +1,6 @@
 ---
 name: project-session-manager
-description: Manage isolated dev environments with git worktrees and tmux sessions
+description: Worktree-first dev environment manager for issues, PRs, and features with optional tmux sessions
 aliases: [psm]
 level: 2
 ---
@@ -9,7 +9,7 @@ level: 2
 
 `psm` is the compatibility alias for this canonical skill entrypoint.
 
-> **Quick Start:** For simple worktree creation without tmux sessions, use `omc teleport`:
+> **Quick Start (worktree-first):** Start with `omc teleport` when you want an isolated issue/PR/feature worktree before adding any tmux/session orchestration:
 > ```bash
 > omc teleport #123          # Create worktree for issue/PR
 > omc teleport my-feature    # Create worktree for feature
@@ -17,9 +17,9 @@ level: 2
 > ```
 > See [Teleport Command](#teleport-command) below for details.
 
-Automate isolated development environments using git worktrees and tmux sessions with Codex. Enables parallel work across multiple tasks, projects, and repositories.
+Automate isolated development environments using git worktrees and tmux sessions with Claude Code. Enables parallel work across multiple tasks, projects, and repositories.
 
-Canonical slash command: `/oh-my-Codex:project-session-manager` (alias: `/oh-my-Codex:psm`).
+Canonical slash command: `/oh-my-claudecode:project-session-manager` (alias: `/oh-my-claudecode:psm`).
 
 ## Commands
 
@@ -50,8 +50,8 @@ Supported formats:
 {
   "aliases": {
     "omc": {
-      "repo": "Yeachan-Heo/oh-my-Codex",
-      "local": "~/Workspace/oh-my-Codex",
+      "repo": "Yeachan-Heo/oh-my-claudecode",
+      "local": "~/Workspace/oh-my-claudecode",
       "default_base": "main"
     }
   },
@@ -171,7 +171,7 @@ When the user invokes a PSM command, follow this protocol:
 Parse `{{ARGUMENTS}}` to determine:
 1. **Subcommand**: review, fix, feature, list, attach, kill, cleanup, status
 2. **Reference**: project#number, URL, or session ID
-3. **Options**: --branch, --base, --no-Codex, --no-tmux, etc.
+3. **Options**: --branch, --base, --no-claude, --no-tmux, etc.
 
 ### Subcommand: `review <ref>`
 
@@ -248,9 +248,9 @@ Parse `{{ARGUMENTS}}` to determine:
    tmux new-session -d -s "psm:$project_alias:pr-$pr_number" -c "$worktree_path"
    ```
 
-8. **Launch Codex** (unless --no-Codex):
+8. **Launch Claude Code** (unless --no-claude):
    ```bash
-   tmux send-keys -t "psm:$project_alias:pr-$pr_number" "Codex" Enter
+   tmux send-keys -t "psm:$project_alias:pr-$pr_number" "claude" Enter
    ```
 
 9. **Output session info**:
@@ -293,7 +293,7 @@ Parse `{{ARGUMENTS}}` to determine:
 
 5. **Create session metadata** (similar to review, type="fix")
 
-6. **Update registry, create tmux, launch Codex** (same as review)
+6. **Update registry, create tmux, launch claude** (same as review)
 
 ### Subcommand: `feature <project> <name>`
 
@@ -317,7 +317,7 @@ Parse `{{ARGUMENTS}}` to determine:
    git worktree add "$worktree_path" "$branch_name"
    ```
 
-4. **Create session, tmux, launch Codex** (same pattern)
+4. **Create session, tmux, launch claude** (same pattern)
 
 ### Subcommand: `list [project]`
 
@@ -511,7 +511,7 @@ omc teleport remove --force feat/my-repo-my-feature
 |---------|-----|----------|
 | Git worktree | Yes | Yes |
 | Tmux session | Yes | No |
-| Codex launch | Yes | No |
+| Claude Code launch | Yes | No |
 | Session registry | Yes | No |
 | Auto-cleanup | Yes | No |
 | Project aliases | Yes | No (uses current repo) |
@@ -544,8 +544,8 @@ if [[ ! -f ~/.psm/projects.json ]]; then
 {
   "aliases": {
     "omc": {
-      "repo": "Yeachan-Heo/oh-my-Codex",
-      "local": "~/Workspace/oh-my-Codex",
+      "repo": "Yeachan-Heo/oh-my-claudecode",
+      "local": "~/Workspace/oh-my-claudecode",
       "default_base": "main"
     }
   },

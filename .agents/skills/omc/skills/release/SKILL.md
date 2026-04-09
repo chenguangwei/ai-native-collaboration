@@ -1,20 +1,20 @@
 ---
 name: release
-description: Automated release workflow for oh-my-Codex
+description: Automated release workflow for oh-my-claudecode
 level: 3
 ---
 
 # Release Skill
 
-Automate the release process for oh-my-Codex.
+Automate the release process for oh-my-claudecode.
 
 ## Usage
 
 ```
-/oh-my-Codex:release <version>
+/oh-my-claudecode:release <version>
 ```
 
-Example: `/oh-my-Codex:release 2.4.0` or `/oh-my-Codex:release patch` or `/oh-my-Codex:release minor`
+Example: `/oh-my-claudecode:release 2.4.0` or `/oh-my-claudecode:release patch` or `/oh-my-claudecode:release minor`
 
 ## Release Checklist
 
@@ -25,9 +25,9 @@ Update version in all locations:
 - `package.json`
 - `src/installer/index.ts` (VERSION constant)
 - `src/__tests__/installer.test.ts` (expected version)
-- `.Codex-plugin/plugin.json`
-- `.Codex-plugin/marketplace.json` (both `plugins[0].version` and root `version`)
-- `docs/AGENTS.md` (`<!-- OMC:VERSION:X.Y.Z -->` marker)
+- `.claude-plugin/plugin.json`
+- `.claude-plugin/marketplace.json` (both `plugins[0].version` and root `version`)
+- `docs/CLAUDE.md` (`<!-- OMC:VERSION:X.Y.Z -->` marker)
 - `README.md` (version badge and title)
 
 ### 2. Run Tests
@@ -60,8 +60,8 @@ gh release create v<version> --title "v<version> - <title>" --notes "<release no
 ```
 
 ### 7. Verify
-- [ ] npm: https://www.npmjs.com/package/oh-my-Codex
-- [ ] GitHub: https://github.com/Yeachan-Heo/oh-my-Codex/releases
+- [ ] npm: https://www.npmjs.com/package/oh-my-claudecode
+- [ ] GitHub: https://github.com/Yeachan-Heo/oh-my-claudecode/releases
 
 ## Version Files Reference
 
@@ -70,9 +70,9 @@ gh release create v<version> --title "v<version> - <title>" --notes "<release no
 | `package.json` | `"version": "X.Y.Z"` |
 | `src/installer/index.ts` | `export const VERSION = 'X.Y.Z'` |
 | `src/__tests__/installer.test.ts` | `expect(VERSION).toBe('X.Y.Z')` |
-| `.Codex-plugin/plugin.json` | `"version": "X.Y.Z"` |
-| `.Codex-plugin/marketplace.json` | `plugins[0].version` + root `version` |
-| `docs/AGENTS.md` | `<!-- OMC:VERSION:X.Y.Z -->` |
+| `.claude-plugin/plugin.json` | `"version": "X.Y.Z"` |
+| `.claude-plugin/marketplace.json` | `plugins[0].version` + root `version` |
+| `docs/CLAUDE.md` | `<!-- OMC:VERSION:X.Y.Z -->` |
 | `README.md` | Title + version badge |
 
 ## Semantic Versioning

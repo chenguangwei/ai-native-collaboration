@@ -16,6 +16,7 @@
 import { readFile, writeFile, mkdir, readdir, appendFile, rename, rm, stat } from 'fs/promises';
 import { existsSync } from 'fs';
 import { dirname, join, resolve } from 'path';
+import { createSwallowedErrorLogger } from '../lib/swallowed-error.js';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -392,7 +393,11 @@ async function defaultInjector(request: DispatchRequest, config: TeamConfig, _cw
       await runProcess('tmux', ['send-keys', '-t', paneTarget, 'C-u'], 1000).catch(() => {});
       await new Promise((r) => setTimeout(r, 50));
     }
-    await runProcess('tmux', ['send-keys', '-t', paneTarget, '-l', request.trigger_message], 3000);
+    // Strip control characters (including newlines) from trigger_message to prevent
+    // keystroke injection — tmux send-keys -l sends literal keystrokes, so a \n
+    // in the message would execute as Enter in the target pane's shell.
+    const sanitizedMessage = request.trigger_message.replace(/[\x00-\x1f\x7f]/g, '');
+    await runProcess('tmux', ['send-keys', '-t', paneTarget, '-l', sanitizedMessage], 3000);
   }
 
   for (let i = 0; i < submitKeyPresses; i++) {
@@ -563,6 +568,9 @@ export async function drainPendingTeamDispatch(options: {
   let processed = 0;
   let skipped = 0;
   let failed = 0;
+  const logMailboxSyncFailure = createSwallowedErrorLogger(
+    'hooks.team-dispatch drainPendingTeamDispatch mailbox notification sync failed',
+  );
   const issueCooldownMs = resolveIssueDispatchCooldownMs();
   const triggerCooldownMs = resolveDispatchTriggerCooldownMs();
 
@@ -697,7 +705,7 @@ export async function drainPendingTeamDispatch(options: {
           request.notified_at = nowIso;
           request.last_reason = result.reason;
           if (request.kind === 'mailbox' && request.message_id) {
-            await updateMailboxNotified(stateDir, teamName, request.to_worker, request.message_id).catch(() => {});
+            await updateMailboxNotified(stateDir, teamName, request.to_worker, request.message_id).catch(logMailboxSyncFailure);
           }
           processed += 1;
           mutated = true;

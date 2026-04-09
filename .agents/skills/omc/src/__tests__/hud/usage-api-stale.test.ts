@@ -70,13 +70,14 @@ function createFsMock(initialFiles: Record<string, string>) {
 }
 
 function setupMocks(fsModule: ReturnType<typeof createFsMock>['fsModule'], httpStatus: number, httpBody: string) {
-  vi.doMock('../../utils/paths.js', () => ({
+  vi.doMock('../../utils/config-dir.js', () => ({
     getClaudeConfigDir: () => CLAUDE_CONFIG_DIR,
   }));
   vi.doMock('../../utils/ssrf-guard.js', () => ({
     validateAnthropicBaseUrl: () => ({ allowed: true }),
   }));
-  vi.doMock('child_process', () => ({
+  vi.doMock('child_process', async () => ({
+    ...(await vi.importActual<typeof import('child_process')>('child_process')),
     execSync: vi.fn(),
   }));
   vi.doMock('fs', () => fsModule);
@@ -116,7 +117,7 @@ describe('usage API stale data handling', () => {
 
   afterEach(() => {
     process.env = { ...originalEnv };
-    vi.unmock('../../utils/paths.js');
+    vi.unmock('../../utils/config-dir.js');
     vi.unmock('../../utils/ssrf-guard.js');
     vi.unmock('fs');
     vi.unmock('child_process');
@@ -232,7 +233,8 @@ describe('usage API stale data handling', () => {
     vi.doMock('../../utils/ssrf-guard.js', () => ({
       validateAnthropicBaseUrl: () => ({ allowed: true }),
     }));
-    vi.doMock('child_process', () => ({
+    vi.doMock('child_process', async () => ({
+      ...(await vi.importActual<typeof import('child_process')>('child_process')),
       execSync: vi.fn(),
     }));
     vi.doMock('fs', () => fsModule);

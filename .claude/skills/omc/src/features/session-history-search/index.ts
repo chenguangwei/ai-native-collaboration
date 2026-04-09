@@ -1,6 +1,5 @@
 import { execSync } from 'child_process';
 import { createReadStream, existsSync, readdirSync, statSync } from 'fs';
-import { homedir } from 'os';
 import { dirname, join, normalize, resolve } from 'path';
 import { createInterface } from 'readline';
 import {
@@ -9,6 +8,7 @@ import {
   validateWorkingDirectory,
   getOmcRoot,
 } from '../../lib/worktree-paths.js';
+import { getClaudeConfigDir } from '../../utils/config-dir.js';
 import type {
   SessionHistoryMatch,
   SessionHistorySearchOptions,
@@ -31,10 +31,6 @@ interface SearchableEntry {
   role?: string;
   entryType?: string;
   texts: string[];
-}
-
-function getClaudeConfigDir(): string {
-  return process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude');
 }
 
 function compactWhitespace(text: string): string {
@@ -71,7 +67,7 @@ function parseSinceSpec(since?: string): number | undefined {
 }
 
 function encodeProjectPath(projectPath: string): string {
-  return projectPath.replace(/[\\/]/g, '-');
+  return projectPath.replace(/[/\\.]/g, '-');
 }
 
 function getMainRepoRoot(projectRoot: string): string | null {

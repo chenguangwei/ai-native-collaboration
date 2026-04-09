@@ -150,6 +150,9 @@ export function buildDefaultConfig(): PluginConfig {
       directory: ".omc/plans",
       filenameTemplate: "{{name}}.md",
     },
+    teleport: {
+      symlinkNodeModules: true,
+    },
     startupCodebaseMap: {
       enabled: true,
       maxFiles: 200,
@@ -160,6 +163,17 @@ export function buildDefaultConfig(): PluginConfig {
       smallWordLimit: 50,
       largeWordLimit: 200,
       suppressHeavyModesForSmallTasks: true,
+    },
+    promptPrerequisites: {
+      enabled: true,
+      sectionNames: {
+        memory: ["MÉMOIRE", "MEMOIRE", "MEMORY"],
+        skills: ["SKILLS"],
+        verifyFirst: ["VERIFY-FIRST", "VERIFY FIRST", "VERIFY_FIRST"],
+        context: ["CONTEXT"],
+      },
+      blockingTools: ["Edit", "MultiEdit", "Write", "Agent", "Task"],
+      executionKeywords: ["ralph", "ultrawork", "autopilot"],
     },
   };
 }
@@ -690,6 +704,17 @@ export function generateConfigSchema(): object {
           search: { type: "array", items: { type: "string" } },
           analyze: { type: "array", items: { type: "string" } },
           ultrathink: { type: "array", items: { type: "string" } },
+        },
+      },
+      teleport: {
+        type: "object",
+        description: "Teleport worktree bootstrap settings",
+        properties: {
+          symlinkNodeModules: {
+            type: "boolean",
+            default: true,
+            description: "Symlink node_modules from the parent repo when teleport-created worktrees have a matching package.json",
+          },
         },
       },
       routing: {

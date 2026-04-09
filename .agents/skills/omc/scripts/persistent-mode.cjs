@@ -15,9 +15,14 @@ const {
   readdirSync,
   mkdirSync,
   unlinkSync,
+  openSync,
+  readSync,
+  closeSync,
+  renameSync,
+  statSync,
 } = require("fs");
 const { join, dirname, resolve, normalize } = require("path");
-const { homedir } = require("os");
+const { getClaudeConfigDir } = require("./lib/config-dir.cjs");
 
 async function readStdin(timeoutMs = 2000) {
   return new Promise((resolve) => {
@@ -49,11 +54,17 @@ function writeJsonFile(path, data) {
     if (dir && dir !== "." && !existsSync(dir)) {
       mkdirSync(dir, { recursive: true });
     }
-    writeFileSync(path, JSON.stringify(data, null, 2));
+    const tmp = `${path}.${process.pid}.${Date.now()}.tmp`;
+    writeFileSync(tmp, JSON.stringify(data, null, 2));
+    renameSync(tmp, path);
     return true;
   } catch {
     return false;
   }
+}
+
+function shouldWriteStateBack(path) {
+  return Boolean(path && existsSync(path));
 }
 
 /**
@@ -197,8 +208,28 @@ function getSafeReinforcementCount(value) {
     : 0;
 }
 
+const AWAITING_CONFIRMATION_TTL_MS = 2 * 60 * 1000;
+
 function isAwaitingConfirmation(state) {
-  return state?.awaiting_confirmation === true;
+  if (!state || state.awaiting_confirmation !== true) {
+    return false;
+  }
+
+  const setAt =
+    state.awaiting_confirmation_set_at ||
+    state.started_at ||
+    null;
+
+  if (!setAt) {
+    return false;
+  }
+
+  const setAtMs = new Date(setAt).getTime();
+  if (!Number.isFinite(setAtMs)) {
+    return false;
+  }
+
+  return Date.now() - setAtMs < AWAITING_CONFIRMATION_TTL_MS;
 }
 
 // ---------------------------------------------------------------------------
@@ -250,30 +281,41 @@ function writeStopBreaker(stateDir, name, count, sessionId) {
  */
 function isSessionCancelInProgress(stateDir, sessionId) {
   const CANCEL_SIGNAL_TTL_MS = 30000; // 30 seconds
+  const isActiveSignal = (signalPath) => {
+    const signal = readJsonFile(signalPath);
+    if (!signal) {
+      return false;
+    }
+
+    const now = Date.now();
+    const expiresAt = signal.expires_at ? new Date(signal.expires_at).getTime() : NaN;
+    const requestedAt = signal.requested_at ? new Date(signal.requested_at).getTime() : NaN;
+    const fallbackExpiry = Number.isFinite(requestedAt) ? requestedAt + CANCEL_SIGNAL_TTL_MS : NaN;
+    const effectiveExpiry = Number.isFinite(expiresAt) ? expiresAt : fallbackExpiry;
+
+    if (Number.isFinite(effectiveExpiry) && effectiveExpiry > now) {
+      return true;
+    }
+
+    if (existsSync(signalPath)) {
+      try {
+        unlinkSync(signalPath);
+      } catch {}
+    }
+    return false;
+  };
 
   // Try session-scoped path first
   if (sessionId) {
     const sessionSignalPath = join(stateDir, 'sessions', sessionId, 'cancel-signal-state.json');
-    const signal = readJsonFile(sessionSignalPath);
-    if (signal && signal.expires_at) {
-      const expiresAt = new Date(signal.expires_at).getTime();
-      if (Date.now() < expiresAt) {
-        return true;
-      }
+    if (isActiveSignal(sessionSignalPath)) {
+      return true;
     }
   }
 
   // Fall back to legacy path
   const legacySignalPath = join(stateDir, 'cancel-signal-state.json');
-  const signal = readJsonFile(legacySignalPath);
-  if (signal && signal.expires_at) {
-    const expiresAt = new Date(signal.expires_at).getTime();
-    if (Date.now() < expiresAt) {
-      return true;
-    }
-  }
-
-  return false;
+  return isActiveSignal(legacySignalPath);
 }
 
 /**
@@ -391,7 +433,7 @@ function countIncompleteTasks(sessionId) {
   if (!sessionId || typeof sessionId !== "string") return 0;
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,255}$/.test(sessionId)) return 0;
 
-  const cfgDir = process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude");
+  const cfgDir = getClaudeConfigDir();
   const taskDir = join(cfgDir, "tasks", sessionId);
   if (!existsSync(taskDir)) return 0;
 
@@ -425,8 +467,7 @@ function countIncompleteTodos(sessionId, projectDir) {
     /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,255}$/.test(sessionId)
   ) {
     const sessionTodoPath = join(
-      homedir(),
-      ".claude",
+      getClaudeConfigDir(),
       "todos",
       `${sessionId}.json`,
     );
@@ -507,8 +548,18 @@ const CRITICAL_CONTEXT_STOP_PERCENT = 95;
 function estimateContextPercent(transcriptPath) {
   if (!transcriptPath || !existsSync(transcriptPath)) return 0;
 
+  let fd = -1;
   try {
-    const content = readFileSync(transcriptPath, "utf-8");
+    const size = statSync(transcriptPath).size;
+    const readSize = 4096;
+    const offset = Math.max(0, size - readSize);
+    const buf = Buffer.alloc(Math.min(readSize, size));
+    fd = openSync(transcriptPath, "r");
+    readSync(fd, buf, 0, buf.length, offset);
+    closeSync(fd);
+    fd = -1;
+    const content = buf.toString("utf-8");
+
     const windowMatch = content.match(/"context_window"\s{0,5}:\s{0,5}(\d+)/g);
     const inputMatch = content.match(/"input_tokens"\s{0,5}:\s{0,5}(\d+)/g);
     if (!windowMatch || !inputMatch) return 0;
@@ -519,6 +570,8 @@ function estimateContextPercent(transcriptPath) {
     return Math.round((lastInput / lastWindow) * 100);
   } catch {
     return 0;
+  } finally {
+    if (fd !== -1) try { closeSync(fd); } catch { /* best-effort */ }
   }
 }
 
@@ -652,6 +705,10 @@ async function main() {
       if (iteration < maxIter) {
         ralph.state.iteration = iteration + 1;
         ralph.state.last_checked_at = new Date().toISOString();
+        if (!shouldWriteStateBack(ralph.path)) {
+          console.log(JSON.stringify({ continue: true, suppressOutput: true }));
+          return;
+        }
         writeJsonFile(ralph.path, ralph.state);
 
         // Fire-and-forget notification
@@ -670,6 +727,10 @@ async function main() {
         ralph.state.max_iterations = maxIter + 10;
         ralph.state.iteration = maxIter + 1;
         ralph.state.last_checked_at = new Date().toISOString();
+        if (!shouldWriteStateBack(ralph.path)) {
+          console.log(JSON.stringify({ continue: true, suppressOutput: true }));
+          return;
+        }
         writeJsonFile(ralph.path, ralph.state);
         const extendReason = `[RALPH LOOP - EXTENDED] Max iterations reached; extending to ${ralph.state.max_iterations} and continuing. When FULLY complete (after Architect verification), run /oh-my-claudecode:cancel (or --force).`;
         console.log(JSON.stringify({ decision: "block", reason: extendReason }));

@@ -1,6 +1,7 @@
 ---
 name: hud
 description: Configure HUD display options (layout, presets, display elements)
+argument-hint: "[setup|minimal|focused|full|status]"
 role: config-writer  # DOCUMENTATION ONLY - This skill writes to ~/.claude/ paths
 scope: ~/.claude/**  # DOCUMENTATION ONLY - Allowed write scope
 level: 2
@@ -52,7 +53,7 @@ First, create the directory:
 node -e "require('fs').mkdirSync(require('path').join(process.env.CLAUDE_CONFIG_DIR||require('path').join(require('os').homedir(),'.claude'),'hud'),{recursive:true})"
 ```
 
-Then, use the Write tool to create `~/.claude/hud/omc-hud.mjs` with this exact content:
+Then, use the Write tool to create `${CLAUDE_CONFIG_DIR:-~/.claude}/hud/omc-hud.mjs` with this exact content:
 
 ```javascript
 #!/usr/bin/env node
@@ -150,7 +151,7 @@ node -e "if(process.platform==='win32'){console.log('Skipped (Windows)')}else{re
 
 **Step 4:** Update settings.json to use the HUD:
 
-Read `~/.claude/settings.json`, then update/add the `statusLine` field.
+Read `${CLAUDE_CONFIG_DIR:-~/.claude}/settings.json`, then update/add the `statusLine` field.
 
 **IMPORTANT:** Do not use `~` in the command. On Unix, use `$HOME` to keep the path portable across machines. On Windows, use an absolute path because Windows does not expand `~` in shell commands.
 
@@ -166,7 +167,7 @@ Then set the `statusLine` field. On Unix it should stay portable and look like:
 {
   "statusLine": {
     "type": "command",
-    "command": "node $HOME/.claude/hud/omc-hud.mjs"
+    "command": "node ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hud/omc-hud.mjs"
   }
 }
 ```
@@ -277,6 +278,7 @@ You can manually edit the config file. Each option can be set individually - any
     "sessionHealth": true,
     "useBars": true,
     "showCallCounts": true,
+    "callCountsFormat": "auto",
     "safeMode": true,
     "maxOutputLines": 4
   },
@@ -293,6 +295,13 @@ You can manually edit the config file. Each option can be set individually - any
   }
 }
 ```
+
+### callCountsFormat
+
+Controls the call-count badge icon style:
+- `"auto"` (default): emoji on macOS/Linux, ASCII on Windows/WSL
+- `"emoji"`: force `🔧 🤖 ⚡`
+- `"ascii"`: force `T: A: S:`
 
 ### safeMode
 
@@ -320,7 +329,7 @@ If the HUD is not showing:
 {
   "statusLine": {
     "type": "command",
-    "command": "node $HOME/.claude/hud/omc-hud.mjs"
+    "command": "node ${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hud/omc-hud.mjs"
   }
 }
 ```

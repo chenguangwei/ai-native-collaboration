@@ -24,6 +24,9 @@ import {
 // Mock fs and os modules
 vi.mock('fs');
 vi.mock('os');
+vi.mock('../utils/config-dir.js', () => ({
+  getClaudeConfigDir: () => '/home/testuser/.claude',
+}));
 
 describe('Task System Support', () => {
   const mockHomedir = '/home/testuser';

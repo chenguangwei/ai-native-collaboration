@@ -6,7 +6,7 @@
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
-import { getClaudeConfigDir } from '../../utils/paths.js';
+import { getClaudeConfigDir } from '../../utils/config-dir.js';
 import { DEBUG_ENABLED } from './constants.js';
 
 export interface LearnerConfig {

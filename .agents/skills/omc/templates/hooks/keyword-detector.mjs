@@ -33,6 +33,8 @@ const __dirname = dirname(__filename);
 
 // Dynamic import for the shared stdin module (use pathToFileURL for Windows compatibility, #524)
 const { readStdin } = await import(pathToFileURL(join(__dirname, 'lib', 'stdin.mjs')).href);
+const { atomicWriteFileSync } = await import(pathToFileURL(join(__dirname, 'lib', 'atomic-write.mjs')).href);
+const { getClaudeConfigDir } = await import(pathToFileURL(join(__dirname, 'lib', 'config-dir.mjs')).href);
 
 const ULTRATHINK_MESSAGE = `<think-mode>
 
@@ -144,7 +146,7 @@ function sanitizeForKeywordDetection(text) {
 
 const INFORMATIONAL_INTENT_PATTERNS = [
   /\b(?:what(?:'s|\s+is)|what\s+are|how\s+(?:to|do\s+i)\s+use|explain|explanation|tell\s+me\s+about|describe)\b/i,
-  /(?:뭐야|무엇(?:이야|인가요)?|어떻게|설명|사용법)/u,
+  /(?:뭐야|뭔데|무엇(?:이야|인가요)?|어떻게|설명(?!서\s*(?:작성|만들|생성|추가|업데이트|수정|편집|쓰))|사용법|알려\s?줘|알려줄래|소개해?\s?줘|소개\s*부탁|설명해\s?줘|뭐가\s*달라|어떤\s*기능|기능\s*(?:알려|설명|뭐)|방법\s*(?:알려|설명|뭐))/u,
   /(?:とは|って何|使い方|説明)/u,
   /(?:什么是|什麼是|怎(?:么|樣)用|如何使用|解释|說明|说明)/u,
 ];
@@ -177,30 +179,56 @@ function hasActionableKeyword(text, pattern) {
 }
 
 // Create state file for a mode
+const SESSION_ID_ALLOWLIST = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,255}$/;
+
 function activateState(directory, prompt, stateName, sessionId) {
-  const state = {
-    active: true,
-    started_at: new Date().toISOString(),
-    original_prompt: prompt,
-    session_id: sessionId || undefined,
-    reinforcement_count: 0,
-    awaiting_confirmation: true,
-    last_checked_at: new Date().toISOString()
-  };
+  let state;
 
-  // Write to local .omc/state directory
-  const localDir = join(directory, '.omc', 'state');
-  if (!existsSync(localDir)) {
-    try { mkdirSync(localDir, { recursive: true }); } catch {}
+  if (stateName === 'ralph') {
+    // Ralph needs 'prompt' field (not 'original_prompt') — persistent-mode.mjs reads ralph.state.prompt
+    state = {
+      active: true,
+      iteration: 1,
+      max_iterations: 100,
+      started_at: new Date().toISOString(),
+      prompt: prompt,
+      session_id: sessionId || undefined,
+      project_path: directory,
+      reinforcement_count: 0,
+      awaiting_confirmation: true,
+      last_checked_at: new Date().toISOString()
+    };
+  } else {
+    state = {
+      active: true,
+      started_at: new Date().toISOString(),
+      original_prompt: prompt,
+      session_id: sessionId || undefined,
+      project_path: directory,
+      reinforcement_count: 0,
+      awaiting_confirmation: true,
+      last_checked_at: new Date().toISOString()
+    };
   }
-  try { writeFileSync(join(localDir, `${stateName}-state.json`), JSON.stringify(state, null, 2)); } catch {}
 
-  // Write to global .omc/state directory
+  // Write to session-scoped local path when sessionId is available (must match persistent-mode.mjs reads)
+  const stateDir = join(directory, '.omc', 'state');
+  const safeSessionId = sessionId && SESSION_ID_ALLOWLIST.test(sessionId) ? sessionId : '';
+  const targetDir = safeSessionId
+    ? join(stateDir, 'sessions', safeSessionId)
+    : stateDir;
+
+  try {
+    if (!existsSync(targetDir)) mkdirSync(targetDir, { recursive: true });
+    atomicWriteFileSync(join(targetDir, `${stateName}-state.json`), JSON.stringify(state, null, 2));
+  } catch {}
+
+  // Also write to global fallback
   const globalDir = join(homedir(), '.omc', 'state');
-  if (!existsSync(globalDir)) {
-    try { mkdirSync(globalDir, { recursive: true }); } catch {}
-  }
-  try { writeFileSync(join(globalDir, `${stateName}-state.json`), JSON.stringify(state, null, 2)); } catch {}
+  try {
+    if (!existsSync(globalDir)) mkdirSync(globalDir, { recursive: true });
+    atomicWriteFileSync(join(globalDir, `${stateName}-state.json`), JSON.stringify(state, null, 2));
+  } catch {}
 }
 
 /**
@@ -343,13 +371,14 @@ function createHookOutput(additionalContext) {
 
 /**
  * Check if the team feature is enabled in Claude Code settings.
- * Reads ~/.claude/settings.json and checks for CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS env var.
+ * Reads settings.json from [$CLAUDE_CONFIG_DIR|~/.claude] and checks for
+ * CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS env var.
  * @returns {boolean} true if team feature is enabled
  */
 function isTeamEnabled() {
   try {
     // Check settings.json first (authoritative, user-controlled)
-    const cfgDir = process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude');
+    const cfgDir = getClaudeConfigDir();
     const settingsPath = join(cfgDir, 'settings.json');
     if (existsSync(settingsPath)) {
       const settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
@@ -411,12 +440,12 @@ async function main() {
     }
 
     // Ralph keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(ralph)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(ralph)\b|(랄프)(?!로렌)/i)) {
       matches.push({ name: 'ralph', args: '' });
     }
 
     // Autopilot keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(autopilot|auto[\s-]?pilot|fullsend|full\s+auto)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(autopilot|auto[\s-]?pilot|fullsend|full\s+auto)\b|(오토파일럿)/i)) {
       matches.push({ name: 'autopilot', args: '' });
     }
 
@@ -424,23 +453,23 @@ async function main() {
     // This prevents infinite spawning when Claude workers receive prompts containing "team".
 
     // Ultrawork keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(ultrawork|ulw)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(ultrawork|ulw)\b|(울트라워크)/i)) {
       matches.push({ name: 'ultrawork', args: '' });
     }
 
 
     // CCG keywords (Claude-Codex-Gemini tri-model orchestration)
-    if (hasActionableKeyword(cleanPrompt, /\b(ccg|claude-codex-gemini)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(ccg|claude-codex-gemini)\b|(씨씨지)/i)) {
       matches.push({ name: 'ccg', args: '' });
     }
 
     // Ralplan keyword
-    if (hasActionableKeyword(cleanPrompt, /\b(ralplan)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(ralplan)\b|(랄플랜)/i)) {
       matches.push({ name: 'ralplan', args: '' });
     }
 
     // Deep interview keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(deep[\s-]interview|ouroboros)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(deep[\s-]interview|ouroboros)\b|(딥인터뷰)/i)) {
       matches.push({ name: 'deep-interview', args: '' });
     }
 
@@ -450,36 +479,36 @@ async function main() {
     }
 
     // TDD keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(tdd)\b/i) ||
+    if (hasActionableKeyword(cleanPrompt, /\b(tdd)\b|(테스트\s?퍼스트)/i) ||
         hasActionableKeyword(cleanPrompt, /\btest\s+first\b/i) ||
         hasActionableKeyword(cleanPrompt, /\bred\s+green\b/i)) {
       matches.push({ name: 'tdd', args: '' });
     }
 
     // Code review keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(code\s+review|review\s+code)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(code\s+review|review\s+code)\b|(코드\s?리뷰)(?!어)/i)) {
       matches.push({ name: 'code-review', args: '' });
     }
 
     // Security review keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(security\s+review|review\s+security)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(security\s+review|review\s+security)\b|(보안\s?리뷰)(?!어)/i)) {
       matches.push({ name: 'security-review', args: '' });
     }
 
     // Ultrathink keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(ultrathink)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(ultrathink)\b|(울트라씽크)/i)) {
       matches.push({ name: 'ultrathink', args: '' });
     }
 
     // Deepsearch keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(deepsearch)\b/i) ||
+    if (hasActionableKeyword(cleanPrompt, /\b(deepsearch)\b|(딥\s?서치)/i) ||
         hasActionableKeyword(cleanPrompt, /\bsearch\s+the\s+codebase\b/i) ||
         hasActionableKeyword(cleanPrompt, /\bfind\s+in\s+(the\s+)?codebase\b/i)) {
       matches.push({ name: 'deepsearch', args: '' });
     }
 
     // Analyze keywords
-    if (hasActionableKeyword(cleanPrompt, /\b(deep[\s-]?analyze|deepanalyze)\b/i)) {
+    if (hasActionableKeyword(cleanPrompt, /\b(deep[\s-]?analyze|deepanalyze)\b|(딥\s?분석)/i)) {
       matches.push({ name: 'analyze', args: '' });
     }
 

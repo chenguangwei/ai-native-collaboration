@@ -63,6 +63,7 @@ describe('session-start.mjs — plugin cache cleanup uses symlinks', () => {
           ...process.env,
           HOME: fakeHome,
           USERPROFILE: fakeHome, // Windows compat
+          CLAUDE_CONFIG_DIR: join(fakeHome, '.claude'), // Override to use fake home
           CLAUDE_PLUGIN_ROOT: join(fakeCacheBase, '4.4.3'),
           ...env,
         },

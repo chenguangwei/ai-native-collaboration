@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { execFileSync } from 'child_process';
@@ -435,6 +435,10 @@ describe('team pipeline standalone stop enforcement', () => {
 // Ralplan Standalone Tests
 // ===========================================================================
 
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 describe('ralplan standalone stop enforcement', () => {
   it('blocks stop when ralplan state is active', async () => {
     const sessionId = 'session-ralplan-block-1';
@@ -624,6 +628,10 @@ describe('ralplan standalone stop enforcement', () => {
   it('allows orchestrator idle when ralplan is active but delegated subagents are still running', async () => {
     const sessionId = 'session-ralplan-active-subagents';
     const tempDir = makeTempProject();
+    const now = new Date('2026-03-28T18:00:00.000Z');
+
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
 
     try {
       writeRalplanState(tempDir, sessionId);
@@ -640,6 +648,41 @@ describe('ralplan standalone stop enforcement', () => {
       const result = await checkPersistentModes(sessionId, tempDir);
       expect(result.shouldBlock).toBe(false);
       expect(result.mode).toBe('ralplan');
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it('blocks stop when the active subagent count is stale beyond the recency window', async () => {
+    const sessionId = 'session-ralplan-stale-subagent-count';
+    const tempDir = makeTempProject();
+    const now = new Date('2026-03-28T18:05:00.000Z');
+
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+
+    try {
+      writeRalplanState(tempDir, sessionId);
+      writeSubagentTrackingState(tempDir, [
+        {
+          agent_id: 'agent-1930-stale',
+          agent_type: 'architect',
+          started_at: new Date(now.getTime() - 60_000).toISOString(),
+          parent_mode: 'ralplan',
+          status: 'running',
+        },
+      ]);
+
+      const staleUpdatedAt = new Date(now.getTime() - 10_000).toISOString();
+      const trackingPath = join(tempDir, '.omc', 'state', 'subagent-tracking.json');
+      const tracking = JSON.parse(readFileSync(trackingPath, 'utf-8')) as { last_updated?: string };
+      tracking.last_updated = staleUpdatedAt;
+      writeFileSync(trackingPath, JSON.stringify(tracking, null, 2));
+
+      const result = await checkPersistentModes(sessionId, tempDir);
+      expect(result.shouldBlock).toBe(true);
+      expect(result.mode).toBe('ralplan');
+      expect(result.message).toContain('ralplan-continuation');
     } finally {
       rmSync(tempDir, { recursive: true, force: true });
     }

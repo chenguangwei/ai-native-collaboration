@@ -11,7 +11,7 @@ Persistent memory system designed for creative writers, with first-class support
 
 ## Overview
 
-Writer Memory maintains context across Codex sessions for fiction writers. It tracks:
+Writer Memory maintains context across Claude sessions for fiction writers. It tracks:
 
 - **Characters (캐릭터)**: Emotional arcs (감정궤도), attitudes (태도), dialogue tone (대사톤), speech levels
 - **World (세계관)**: Settings, rules, atmosphere, constraints
@@ -25,25 +25,25 @@ All data persists in `.writer-memory/memory.json` for git-friendly collaboration
 
 | Command | Action |
 |---------|--------|
-| `/oh-my-Codex:writer-memory init <project-name>` | Initialize new project memory |
-| `/oh-my-Codex:writer-memory status` | Show memory overview (character count, scene count, etc) |
-| `/oh-my-Codex:writer-memory char add <name>` | Add new character |
-| `/oh-my-Codex:writer-memory char <name>` | View character details |
-| `/oh-my-Codex:writer-memory char update <name> <field> <value>` | Update character field |
-| `/oh-my-Codex:writer-memory char list` | List all characters |
-| `/oh-my-Codex:writer-memory rel add <char1> <char2> <type>` | Add relationship |
-| `/oh-my-Codex:writer-memory rel <char1> <char2>` | View relationship |
-| `/oh-my-Codex:writer-memory rel update <char1> <char2> <event>` | Add relationship event |
-| `/oh-my-Codex:writer-memory scene add <title>` | Add new scene |
-| `/oh-my-Codex:writer-memory scene <id>` | View scene details |
-| `/oh-my-Codex:writer-memory scene list` | List all scenes |
-| `/oh-my-Codex:writer-memory theme add <name>` | Add theme |
-| `/oh-my-Codex:writer-memory world set <field> <value>` | Set world attribute |
-| `/oh-my-Codex:writer-memory query <question>` | Query memory naturally (Korean supported) |
-| `/oh-my-Codex:writer-memory validate <character> <dialogue>` | Check if dialogue matches character tone |
-| `/oh-my-Codex:writer-memory synopsis` | Generate emotion-focused synopsis |
-| `/oh-my-Codex:writer-memory export` | Export full memory as readable markdown |
-| `/oh-my-Codex:writer-memory backup` | Create manual backup |
+| `/oh-my-claudecode:writer-memory init <project-name>` | Initialize new project memory |
+| `/oh-my-claudecode:writer-memory status` | Show memory overview (character count, scene count, etc) |
+| `/oh-my-claudecode:writer-memory char add <name>` | Add new character |
+| `/oh-my-claudecode:writer-memory char <name>` | View character details |
+| `/oh-my-claudecode:writer-memory char update <name> <field> <value>` | Update character field |
+| `/oh-my-claudecode:writer-memory char list` | List all characters |
+| `/oh-my-claudecode:writer-memory rel add <char1> <char2> <type>` | Add relationship |
+| `/oh-my-claudecode:writer-memory rel <char1> <char2>` | View relationship |
+| `/oh-my-claudecode:writer-memory rel update <char1> <char2> <event>` | Add relationship event |
+| `/oh-my-claudecode:writer-memory scene add <title>` | Add new scene |
+| `/oh-my-claudecode:writer-memory scene <id>` | View scene details |
+| `/oh-my-claudecode:writer-memory scene list` | List all scenes |
+| `/oh-my-claudecode:writer-memory theme add <name>` | Add theme |
+| `/oh-my-claudecode:writer-memory world set <field> <value>` | Set world attribute |
+| `/oh-my-claudecode:writer-memory query <question>` | Query memory naturally (Korean supported) |
+| `/oh-my-claudecode:writer-memory validate <character> <dialogue>` | Check if dialogue matches character tone |
+| `/oh-my-claudecode:writer-memory synopsis` | Generate emotion-focused synopsis |
+| `/oh-my-claudecode:writer-memory export` | Export full memory as readable markdown |
+| `/oh-my-claudecode:writer-memory backup` | Create manual backup |
 
 ## Memory Types
 
@@ -235,7 +235,7 @@ Writer Memory integrates with `.omc/notepad.md`:
 ### With Architect Agent
 For complex character analysis:
 ```
-Task(subagent_type="oh-my-Codex:architect",
+Task(subagent_type="oh-my-claudecode:architect",
      model="opus",
      prompt="Analyze 새랑's arc across all scenes...")
 ```

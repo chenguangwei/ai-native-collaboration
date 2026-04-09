@@ -119,11 +119,11 @@ After confirmation, update state to `current_phase: "trace-executing"`.
 
 ## Phase 3: Trace Execution
 
-Run the trace autonomously using the `oh-my-Codex:trace` skill's behavioral contract.
+Run the trace autonomously using the `oh-my-claudecode:trace` skill's behavioral contract.
 
 ### Team Mode Orchestration
 
-Use **Codex built-in team mode** to run 3 parallel tracer lanes:
+Use **Claude built-in team mode** to run 3 parallel tracer lanes:
 
 1. **Restate the observed result** or "why" question precisely
 2. **Spawn 3 tracer lanes** — one per confirmed hypothesis
@@ -197,7 +197,7 @@ After saving:
 
 ### Architecture: Reference-not-Copy
 
-Phase 4 follows the `oh-my-Codex:deep-interview` SKILL.md Phases 2-4 (Interview Loop, Challenge Agents, Crystallize Spec) as the base behavioral contract. The executor MUST read the deep-interview SKILL.md to understand the full interview protocol. Deep-dive does NOT duplicate the interview protocol — it specifies exactly **3 initialization overrides**:
+Phase 4 follows the `oh-my-claudecode:deep-interview` SKILL.md Phases 2-4 (Interview Loop, Challenge Agents, Crystallize Spec) as the base behavioral contract. The executor MUST read the deep-interview SKILL.md to understand the full interview protocol. Deep-dive does NOT duplicate the interview protocol — it specifies exactly **3 initialization overrides**:
 
 ### 3-Point Injection (the core differentiator)
 
@@ -238,7 +238,8 @@ If the trace produces no clear "most likely explanation" (all lanes low-confiden
 
 Follow deep-interview SKILL.md Phases 2-4 exactly:
 - Ambiguity scoring across all dimensions (same weights as deep-interview)
-- One question at a time targeting the weakest dimension
+- One question at a time targeting the weakest dimension, with the same explicit weakest-dimension rationale reporting required by deep-interview
+- Brownfield confirmation questions inherit deep-interview's repo-evidence citation requirement before asking the user to choose a direction
 - Challenge agents activate at the same round thresholds as deep-interview
 - Soft/hard caps at the same round limits as deep-interview
 - Score display after every round
@@ -268,20 +269,20 @@ Present execution options via `AskUserQuestion`:
 
 1. **Ralplan → Autopilot (Recommended)**
    - Description: "3-stage pipeline: consensus-refine this spec with Planner/Architect/Critic, then execute with full autopilot. Maximum quality."
-   - Action: Invoke `Skill("oh-my-Codex:omc-plan")` with `--consensus --direct` flags and the spec file path (`spec_path` from state) as context. The `--direct` flag skips the omc-plan skill's interview phase (the deep-dive interview already gathered requirements), while `--consensus` triggers the Planner/Architect/Critic loop. When consensus completes and produces a plan in `.omc/plans/`, invoke `Skill("oh-my-Codex:autopilot")` with the consensus plan as Phase 0+1 output — autopilot skips both Expansion and Planning, starting directly at Phase 2 (Execution).
+   - Action: Invoke `Skill("oh-my-claudecode:omc-plan")` with `--consensus --direct` flags and the spec file path (`spec_path` from state) as context. The `--direct` flag skips the omc-plan skill's interview phase (the deep-dive interview already gathered requirements), while `--consensus` triggers the Planner/Architect/Critic loop. When consensus completes and produces a plan in `.omc/plans/`, invoke `Skill("oh-my-claudecode:autopilot")` with the consensus plan as Phase 0+1 output — autopilot skips both Expansion and Planning, starting directly at Phase 2 (Execution).
    - Pipeline: `deep-dive spec → omc-plan --consensus --direct → autopilot execution`
 
 2. **Execute with autopilot (skip ralplan)**
    - Description: "Full autonomous pipeline — planning, parallel implementation, QA, validation. Faster but without consensus refinement."
-   - Action: Invoke `Skill("oh-my-Codex:autopilot")` with the spec file path as context. The spec replaces autopilot's Phase 0 — autopilot starts at Phase 1 (Planning).
+   - Action: Invoke `Skill("oh-my-claudecode:autopilot")` with the spec file path as context. The spec replaces autopilot's Phase 0 — autopilot starts at Phase 1 (Planning).
 
 3. **Execute with ralph**
    - Description: "Persistence loop with architect verification — keeps working until all acceptance criteria pass."
-   - Action: Invoke `Skill("oh-my-Codex:ralph")` with the spec file path as the task definition.
+   - Action: Invoke `Skill("oh-my-claudecode:ralph")` with the spec file path as the task definition.
 
 4. **Execute with team**
    - Description: "N coordinated parallel agents — fastest execution for large specs."
-   - Action: Invoke `Skill("oh-my-Codex:team")` with the spec file path as the shared plan.
+   - Action: Invoke `Skill("oh-my-claudecode:team")` with the spec file path as the shared plan.
 
 5. **Refine further**
    - Description: "Continue interviewing to improve clarity (current: {score}%)."
@@ -307,8 +308,8 @@ Output: spec.md            Output: consensus-plan.md        Output: working code
 
 <Tool_Usage>
 - Use `AskUserQuestion` for lane confirmation (Phase 2) and each interview question (Phase 4)
-- Use `Agent(subagent_type="oh-my-Codex:explore", model="haiku")` for brownfield codebase exploration (Phase 1)
-- Use Codex built-in team mode for 3 parallel tracer lanes (Phase 3)
+- Use `Agent(subagent_type="oh-my-claudecode:explore", model="haiku")` for brownfield codebase exploration (Phase 1)
+- Use Claude built-in team mode for 3 parallel tracer lanes (Phase 3)
 - Use `state_write(mode="deep-interview")` with `state.source = "deep-dive"` for all state persistence
 - Use `state_read(mode="deep-interview")` for resume — check `state.source === "deep-dive"` to distinguish
 - Use `Write` tool to save trace result and final spec to `.omc/specs/`
@@ -423,7 +424,7 @@ Why bad: Duplicates deep-interview's behavioral contract. These values should be
 <Advanced>
 ## Configuration
 
-Optional settings in `.Codex/settings.json`:
+Optional settings in `.claude/settings.json`:
 
 ```json
 {

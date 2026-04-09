@@ -13,9 +13,10 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
+import { join } from 'path';
 import { writeFileSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { getClaudeConfigDir } from '../utils/config-dir.js';
+import { OMC_PLUGIN_ROOT_ENV } from '../lib/env-vars.js';
 import {
   loadConfig,
   getConfigPaths,
@@ -57,10 +58,8 @@ import { launchCommand } from './launch.js';
 import { interopCommand } from './interop.js';
 import { askCommand, ASK_USAGE } from './ask.js';
 import { warnIfWin32 } from './win32-warning.js';
-import { autoresearchCommand, AUTORESEARCH_HELP } from './autoresearch.js';
+import { autoresearchCommand } from './autoresearch.js';
 import { runHudWatchLoop } from './hud-watch.js';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const version = getRuntimePackageVersion();
 
@@ -248,7 +247,7 @@ Profile types (use with --profile):
   webhook      Generic webhook (POST with JSON body)
 
 Examples:
-  $ omc config-stop-callback file --enable --path ~/.claude/logs/{date}.md
+  $ omc config-stop-callback file --enable --path ${join(getClaudeConfigDir(), 'logs/{date}.md')}
   $ omc config-stop-callback telegram --enable --token <token> --chat <id>
   $ omc config-stop-callback discord --enable --webhook <url>
   $ omc config-stop-callback file --disable
@@ -466,7 +465,7 @@ Examples:
         const current = config.stopHookCallbacks.file;
         config.stopHookCallbacks.file = {
           enabled: enabled ?? current?.enabled ?? false,
-          path: options.path ?? current?.path ?? '~/.claude/session-logs/{session_id}.md',
+          path: options.path ?? current?.path ?? join(getClaudeConfigDir(), 'session-logs/{session_id}.md'),
           format: (options.format as 'markdown' | 'json') ?? current?.format ?? 'markdown',
         };
         break;
@@ -845,19 +844,20 @@ Examples:
   });
 
 /**
- * Install command - Install agents and commands to ~/.claude/
+ * Install command - Install agents and commands (default: ~/.claude/)
  */
 program
   .command('install')
-  .description('Install OMC agents and commands to Claude Code config (~/.claude/)')
+  .description('Install OMC agents and commands to Claude Code config directory (default: ~/.claude/)')
   .option('-f, --force', 'Overwrite existing files')
   .option('-q, --quiet', 'Suppress output except for errors')
   .option('--skip-claude-check', 'Skip checking if Claude Code is installed')
   .addHelpText('after', `
 Examples:
-  $ omc install                  Install to ~/.claude/
+  $ omc install                  Install to config directory (default: ~/.claude/)
   $ omc install --force          Reinstall, overwriting existing files
-  $ omc install --quiet          Silent install for scripts`)
+  $ omc install --quiet          Silent install for scripts
+  $ CLAUDE_CONFIG_DIR=$HOME/.claude-isolated-workspace omc install  Isolated config directory`)
   .action(async (options) => {
     if (!options.quiet) {
       console.log(chalk.blue('╔═══════════════════════════════════════════════════════════╗'));
@@ -895,7 +895,7 @@ Examples:
         console.log(chalk.green('║         Installation Complete!                            ║'));
         console.log(chalk.green('╚═══════════════════════════════════════════════════════════╝'));
         console.log('');
-        console.log(chalk.gray(`Installed to: ~/.claude/`));
+        console.log(chalk.gray(`Installed to: ${getClaudeConfigDir()}`));
         console.log('');
         console.log(chalk.yellow('Usage:'));
         console.log('  claude                        # Start Claude Code normally');
@@ -1173,12 +1173,16 @@ program
   .description('Run OMC setup to sync all components (hooks, agents, skills)')
   .option('-f, --force', 'Force reinstall even if already up to date')
   .option('-q, --quiet', 'Suppress output except for errors')
+  .option('--no-plugin', 'Install bundled skills from the current package instead of relying on plugin-provided skills')
+  .option('--plugin-dir-mode', 'Treat OMC as launched via --plugin-dir at runtime (skip agent/skill copy; HUD + hooks + CLAUDE.md still installed)')
   .option('--skip-hooks', 'Skip hook installation')
   .option('--force-hooks', 'Force reinstall hooks even if unchanged')
   .addHelpText('after', `
 Examples:
   $ omc setup                     Sync all OMC components
   $ omc setup --force             Force reinstall everything
+  $ omc setup --no-plugin         Force local bundled skill installation
+  $ omc setup --plugin-dir-mode   Skip agent/skill copy (used with claude --plugin-dir)
   $ omc setup --quiet             Silent setup for scripts
   $ omc setup --skip-hooks        Install without hooks
   $ omc setup --force-hooks       Force reinstall hooks`)
@@ -1192,11 +1196,37 @@ Examples:
       console.log(chalk.gray('Syncing OMC components...'));
     }
 
+    // Commander exposes negated flags like `--no-plugin` as `options.plugin === false`
+    // rather than `options.noPlugin`. Keep the installer API explicit.
+    const useLocalBundledSkills = options.plugin === false;
+
+    // Dev plugin-dir mode: skip agent/skill copy because the plugin already
+    // provides them at runtime via `claude --plugin-dir <path>` (or `omc --plugin-dir`).
+    // Auto-detected from OMC_PLUGIN_ROOT (set by `omc --plugin-dir` in src/cli/launch.ts).
+    let pluginDirMode = !!options.pluginDirMode;
+    if (!pluginDirMode && process.env[OMC_PLUGIN_ROOT_ENV]) {
+      pluginDirMode = true;
+      if (!options.quiet) {
+        console.log(chalk.gray(`Detected ${OMC_PLUGIN_ROOT_ENV} — entering dev plugin-dir mode`));
+      }
+    }
+    if (pluginDirMode && useLocalBundledSkills) {
+      if (!options.quiet) {
+        console.log(chalk.yellow('Warning: --plugin-dir-mode and --no-plugin conflict; --no-plugin takes precedence'));
+      }
+      pluginDirMode = false;
+    }
+    if (pluginDirMode && !options.quiet) {
+      console.log(chalk.gray('Dev plugin-dir mode: skipping agent/skill sync (plugin provides them via --plugin-dir)'));
+    }
+
     const result = installOmc({
       force: !!options.force,
       verbose: !options.quiet,
       skipClaudeCheck: true,
       forceHooks: !!options.forceHooks,
+      noPlugin: useLocalBundledSkills,
+      pluginDirMode,
     });
 
     if (!result.success) {
@@ -1361,5 +1391,24 @@ program
     await ralphthonCommand(args);
   });
 
-// Parse arguments
-program.parse();
+/**
+ * Returns the fully-configured commander program.
+ *
+ * Exported so tests can drive the real CLI pipeline (e.g.
+ * `await buildProgram().parseAsync(['node','omc','setup','--plugin-dir-mode'], { from: 'user' })`)
+ * without spawning a subprocess. The program is built once at module load
+ * (commander does not support re-registration), so this just returns the
+ * singleton.
+ */
+export function buildProgram(): Command {
+  return program;
+}
+
+// Parse arguments — skipped only when an importing test explicitly opts out
+// via OMC_CLI_SKIP_PARSE. We do NOT key off process.env.VITEST because the
+// CLI is also spawned as a child process from tests (e.g. cli-boot.test.ts),
+// and child processes inherit VITEST from the parent vitest worker, which
+// would cause the CLI to silently exit with no output.
+if (!process.env.OMC_CLI_SKIP_PARSE) {
+  program.parse();
+}

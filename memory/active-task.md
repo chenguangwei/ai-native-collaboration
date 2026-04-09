@@ -1,8 +1,8 @@
 # 🎯 当前主线任务 (Active Tasks)
 
-*(由 AI 根据最新人类指令拆解填写的阶段性清单)*
-
-## [Example] 初始化脚手架功能 (进行中)
-- [x] 重构 `.claude/rules` 及 rules 体系
-- [x] 重新设计并清理 `memory/` 为扁平结构
-- [ ] 测试新版 `handoff.md` 交接流程
+## OMC 对齐升级（已完成）
+- [x] 对齐上游 `oh-my-claudecode` 最新版本（`4.11.2`）
+- [x] 同步 `.claude/skills/omc/` 与 `.agents/skills/omc/` vendored 内容
+- [x] 执行 `scripts/sync-omc-skills.sh` 刷新 `.agents/skills/` 顶层 OMC skills
+- [x] 同步 OMC 相关文档（`README.md`、`docs/06_handbooks/ai-native/SKILLS_INDEX.md`、`.agents/skills/omc-upgrade/SKILL.md`）
+- [ ] 视需要提交 commit（等待人类确认）

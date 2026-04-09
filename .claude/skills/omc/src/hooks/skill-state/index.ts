@@ -17,7 +17,7 @@
  */
 
 import { writeModeState, readModeState, clearModeStateFile } from '../../lib/mode-state-io.js';
-import { getActiveAgentCount } from '../subagent-tracker/index.js';
+import { readTrackingState, getStaleAgents } from '../subagent-tracker/index.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -116,6 +116,7 @@ const SKILL_PROTECTION: Record<string, SkillProtectionLevel> = {
 
   // === Heavy protection (long-running, 10 reinforcements) ===
   deepinit: 'heavy',
+  'self-improve': 'heavy',
 };
 
 // ---------------------------------------------------------------------------
@@ -192,6 +193,21 @@ export function writeSkillActiveState(
   const config = PROTECTION_CONFIGS[protection];
   const now = new Date().toISOString();
   const normalized = skillName.toLowerCase().replace(/^oh-my-claudecode:/, '');
+
+  // Nesting guard: when a skill (e.g. omc-setup) invokes a child skill
+  // (e.g. mcp-setup), the child must not overwrite the parent's active state.
+  // If a DIFFERENT skill is already active in this session, skip writing —
+  // the parent's stop-hook protection already covers the session.
+  // If the SAME skill is re-invoked, allow the overwrite (idempotent refresh).
+  //
+  // NOTE: This read-check-write sequence has a TOCTOU race condition
+  // (non-atomic), but this is acceptable because Claude Code sessions are
+  // single-threaded — only one tool call executes at a time within a session.
+  const existingState = readSkillActiveState(directory, sessionId);
+  if (existingState && existingState.active && existingState.skill_name !== normalized) {
+    // A different skill already owns the active state — do not overwrite.
+    return null;
+  }
 
   const state: SkillActiveState = {
     active: true,
@@ -272,7 +288,24 @@ export function checkSkillActiveState(
   // Orchestrators are allowed to go idle while delegated work is still active.
   // Do not consume a reinforcement here; the skill is still active and should
   // resume enforcement only after the running subagents finish.
-  if (getActiveAgentCount(directory) > 0) {
+  // Read tracking state and exclude stale agents (>5 min without updates)
+  // to prevent phantom "running" entries from blocking enforcement.
+  // Uses read-only filtering instead of cleanupStaleAgents() to avoid
+  // destructively marking legitimate long-running agents as failed.
+  const trackingState = readTrackingState(directory);
+  const staleIds = new Set(getStaleAgents(trackingState).map(a => a.agent_id));
+  const nonStaleRunning = trackingState.agents.filter(
+    a => a.status === 'running' && !staleIds.has(a.agent_id),
+  );
+  if (nonStaleRunning.length > 0) {
+    // Reset reinforcement counter so accumulations during brief idle gaps
+    // don't cause premature skill-active clearance.
+    // Mirrors ralplan's writeStopBreaker(0) at persistent-mode/index.ts:984.
+    if (state.reinforcement_count > 0) {
+      state.reinforcement_count = 0;
+      state.last_checked_at = new Date().toISOString();
+      writeModeState('skill-active', state as unknown as Record<string, unknown>, directory, sessionId);
+    }
     return { shouldBlock: false, message: '', skillName: state.skill_name };
   }
 

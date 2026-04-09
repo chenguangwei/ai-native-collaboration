@@ -6,11 +6,11 @@ user-invocable: false
 
 # OMC Reference
 
-Use this built-in reference when you need detailed OMC catalog information that does not need to live in every `AGENTS.md` session.
+Use this built-in reference when you need detailed OMC catalog information that does not need to live in every `CLAUDE.md` session.
 
 ## Agent Catalog
 
-Prefix: `oh-my-Codex:`. See `agents/*.md` for full prompts.
+Prefix: `oh-my-claudecode:`. See `agents/*.md` for full prompts.
 
 - `explore` (haiku) — fast codebase search and mapping
 - `analyst` (opus) — requirements clarity and hidden constraints
@@ -43,7 +43,7 @@ Prefix: `oh-my-Codex:`. See `agents/*.md` for full prompts.
 ### External AI / orchestration
 - `/team N:executor "task"`
 - `omc team N:codex|gemini "..."`
-- `omc ask <Codex|codex|gemini>`
+- `omc ask <claude|codex|gemini>`
 - `/ccg`
 
 ### OMC state
@@ -65,7 +65,7 @@ Prefix: `oh-my-Codex:`. See `agents/*.md` for full prompts.
 
 ## Skills Registry
 
-Invoke built-in workflows via `/oh-my-Codex:<name>`.
+Invoke built-in workflows via `/oh-my-claudecode:<name>`.
 
 ### Workflow skills
 - `autopilot` — full autonomous execution from idea to working code
@@ -73,7 +73,7 @@ Invoke built-in workflows via `/oh-my-Codex:<name>`.
 - `ultrawork` — high-throughput parallel execution
 - `visual-verdict` — structured visual QA verdicts
 - `team` — coordinated team orchestration
-- `ccg` — Codex + Gemini + Codex synthesis lane
+- `ccg` — Codex + Gemini + Claude synthesis lane
 - `ultraqa` — QA cycle: test, verify, fix, repeat
 - `omc-plan` — planning workflow and `/plan`-safe alias
 - `ralplan` — consensus planning workflow
@@ -86,7 +86,7 @@ Invoke built-in workflows via `/oh-my-Codex:<name>`.
 ### Utility skills
 - `ask`, `cancel`, `note`, `learner`, `omc-setup`, `mcp-setup`, `hud`, `omc-doctor`, `trace`, `release`, `project-session-manager`, `skill`, `writer-memory`, `configure-notifications`
 
-### Keyword triggers kept compact in AGENTS.md
+### Keyword triggers kept compact in CLAUDE.md
 - `"autopilot"→autopilot`
 - `"ralph"→ralph`
 - `"ulw"→ultrawork`
@@ -130,12 +130,12 @@ Use git trailers to preserve decision context in every commit message.
 ```text
 feat(docs): reduce always-loaded OMC instruction footprint
 
-Move reference-only orchestration content into a native Codex skill so
+Move reference-only orchestration content into a native Claude skill so
 session-start guidance stays small while detailed OMC reference remains available.
 
-Constraint: Preserve AGENTS.md marker-based installation flow
+Constraint: Preserve CLAUDE.md marker-based installation flow
 Rejected: Sync all built-in skills in legacy install | broader behavior change than issue requires
 Confidence: high
 Scope-risk: narrow
-Not-tested: End-to-end plugin marketplace install in a fresh Codex profile
+Not-tested: End-to-end plugin marketplace install in a fresh Claude profile
 ```

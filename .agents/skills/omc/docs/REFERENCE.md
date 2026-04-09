@@ -74,7 +74,8 @@ Configure omc for all Claude Code sessions:
 
 - Creates `~/.claude/CLAUDE.md` globally
 - Configuration applies to all projects
-- **Warning**: Completely overwrites existing `~/.claude/CLAUDE.md`
+- **Default**: explicitly overwrites existing `~/.claude/CLAUDE.md`
+- **Optional preserve mode**: keeps the base file, writes OMC to `~/.claude/CLAUDE-omc.md`, and lets `omc` force-load that companion config at launch while plain `claude` stays unchanged
 
 ### What Configuration Enables
 
@@ -304,6 +305,36 @@ Optional compatibility enablement (manual only):
 - **Deterministic parse-failure handling**: malformed result artifacts are treated as terminal `failed`.
 - **Cleanup scope**: shutdown/cleanup only clears `.omc/state/team/{teamName}` for the target team (never sibling teams).
 
+### Artifact descriptors and bounded handoff
+
+OMC handoffs follow an artifact-first discipline:
+
+- **Control plane** data stays small and operational: queue state, worker claims, session state, and interop task/message envelopes.
+- **Data plane** artifacts stay durable: plans, prompts, specs, traces, and result files.
+- Large payloads should be referenced by descriptor instead of copied into control-plane state.
+- Current low-risk call sites follow this split explicitly:
+  - shared interop state writes oversized task descriptions, task results, and shared messages to `.omc/state/interop/artifacts/**`
+  - prompt persistence keeps durable prompt/response files in `.omc/prompts/**` and exposes descriptor metadata through job status records
+
+Canonical descriptor fields:
+
+| Field | Meaning |
+|------|---------|
+| `kind` | Artifact type such as `plan`, `prompt`, `result`, or `trace` |
+| `path` | Durable artifact path |
+| `contentHash?` | Optional integrity hint |
+| `createdAt` | Artifact creation timestamp |
+| `producer` | Owning worker/tool/skill |
+| `sizeBytes?` | Optional size for threshold checks |
+| `retention` | Retention/ownership hint |
+| `expiresAt?` | Optional expiry for short-lived artifacts |
+
+Bounded handoff policy:
+
+1. Keep small payloads inline only when the call site's explicit threshold allows it.
+2. For larger payloads, pass a short summary plus the descriptor.
+3. Keep durable content in artifact paths such as `.omc/plans/`, `.omc/prompts/`, and related artifact stores rather than embedding full bodies into queue or status records.
+
 ## Agents (29 Total)
 
 Always use `oh-my-claudecode:` prefix when calling via Task tool.
@@ -329,6 +360,8 @@ Always use `oh-my-claudecode:` prefix when calling via Task tool.
 | **TDD**          | -                       | `test-engineer`       | -                   |
 | **Code Review**  | -                       | -                     | `code-reviewer`     |
 | **Data Science** | -                       | `scientist`           | `scientist-high`    |
+| **Git**          | -                       | `git-master`          | -                   |
+| **Simplification** | -                     | -                     | `code-simplifier`   |
 
 ### Agent Selection Guide
 
@@ -352,7 +385,7 @@ Always use `oh-my-claudecode:` prefix when calling via Task tool.
 | Pre-planning analysis        | `analyst`                     | opus   |
 | Test CLI interactively       | `qa-tester`                   | sonnet |
 | Evidence-driven causal tracing | `tracer`                    | sonnet |
-| Security review              | `security-reviewer`           | opus   |
+| Security review              | `security-reviewer`           | sonnet |
 | Quick security scan          | `security-reviewer-low`       | haiku  |
 | Fix build errors             | `debugger`                    | sonnet |
 | Simple build fix             | `debugger` (model=haiku)      | haiku  |
@@ -363,6 +396,8 @@ Always use `oh-my-claudecode:` prefix when calling via Task tool.
 | Data analysis/stats          | `scientist`                   | sonnet |
 | Quick data inspection        | `scientist` (model=haiku)     | haiku  |
 | Complex ML/hypothesis        | `scientist-high`              | opus   |
+| Git operations               | `git-master`                  | sonnet |
+| Code simplification          | `code-simplifier`             | opus   |
 
 ---
 
@@ -462,57 +497,37 @@ For builtin and slash-loaded skills, OMC also appends a standardized **Skill Res
 
 ## Hooks System
 
-Oh-my-claudecode includes 31 lifecycle hooks that enhance Claude Code's behavior.
+OMC registers 20 hook scripts across 11 Claude Code lifecycle events. For detailed documentation, see [HOOKS.md](./HOOKS.md).
 
-### Execution Mode Hooks
+### Hooks by Lifecycle Event
 
-| Hook              | Description                                                                 |
-| ----------------- | --------------------------------------------------------------------------- |
-| `autopilot`       | Full autonomous execution from idea to working code                         |
-| `ultrawork`       | Maximum parallel agent execution                                            |
-| `ralph`           | Persistence until verified complete                                         |
-| `team-pipeline`   | Native team staged pipeline orchestration                                   |
-| `ultraqa`         | QA cycling until goal met                                                   |
-| `mode-registry`   | Tracks active execution mode state (including team/ralph/ultrawork/ralplan) |
-| `persistent-mode` | Maintains mode state across sessions                                        |
+| Event | Scripts | Timeout |
+|-------|---------|---------|
+| **UserPromptSubmit** | `keyword-detector.mjs`, `skill-injector.mjs` | 5s, 3s |
+| **SessionStart** | `session-start.mjs`, `project-memory-session.mjs`, `setup-init.mjs` (init), `setup-maintenance.mjs` (maintenance) | 5s, 5s, 30s, 60s |
+| **PreToolUse** | `pre-tool-enforcer.mjs` | 3s |
+| **PermissionRequest** | `permission-handler.mjs` (Bash only) | 5s |
+| **PostToolUse** | `post-tool-verifier.mjs`, `project-memory-posttool.mjs` | 3s, 3s |
+| **PostToolUseFailure** | `post-tool-use-failure.mjs` | 3s |
+| **SubagentStart** | `subagent-tracker.mjs start` | 3s |
+| **SubagentStop** | `subagent-tracker.mjs stop`, `verify-deliverables.mjs` | 5s, 5s |
+| **PreCompact** | `pre-compact.mjs`, `project-memory-precompact.mjs` | 10s, 5s |
+| **Stop** | `context-guard-stop.mjs`, `persistent-mode.cjs`, `code-simplifier.mjs` | 5s, 10s, 5s |
+| **SessionEnd** | `session-end.mjs` | 30s |
 
-### Core Hooks
+> **Note**: autopilot, ralph, ultrawork, and ultraqa are **skills** (activated via keyword-detector), not hooks. The `persistent-mode.cjs` hook enforces their continuation by blocking the Stop event.
 
-| Hook                 | Description                                           |
-| -------------------- | ----------------------------------------------------- |
-| `rules-injector`     | Dynamic rules injection with YAML frontmatter parsing |
-| `omc-orchestrator`   | Enforces orchestrator behavior and delegation         |
-| `auto-slash-command` | Automatic slash command detection and execution       |
-| `keyword-detector`   | Magic keyword detection (ultrawork, ralph, etc.)      |
-| `todo-continuation`  | Ensures todo list completion                          |
-| `notepad`            | Compaction-resilient memory system                    |
-| `learner`            | Skill extraction from conversations                   |
-
-### Context & Recovery
-
-| Hook                        | Description                                      |
-| --------------------------- | ------------------------------------------------ |
-| `recovery`                  | Edit error, session, and context window recovery |
-| `preemptive-compaction`     | Context usage monitoring to prevent limits       |
-| `pre-compact`               | Pre-compaction processing                        |
-| `directory-readme-injector` | README context injection                         |
-
-### Quality & Validation
-
-| Hook                       | Description                                            |
-| -------------------------- | ------------------------------------------------------ |
-| `comment-checker`          | BDD detection and directive filtering                  |
-| `thinking-block-validator` | Extended thinking validation                           |
-| `empty-message-sanitizer`  | Empty message handling                                 |
-| `permission-handler`       | Permission requests and validation                     |
-| `think-mode`               | Extended thinking detection                            |
-| `code-simplifier`          | Auto-simplify recently modified files on Stop (opt-in) |
+### Code Simplifier Hook
 
 ### Code Simplifier Hook
 
 The `code-simplifier` Stop hook automatically delegates recently modified source files to the
 `code-simplifier` agent after each Claude turn. It is **disabled by default** and must be
-explicitly enabled via `~/.omc/config.json`.
+explicitly enabled via the global OMC config file:
+
+- Linux/Unix default: `${XDG_CONFIG_HOME:-~/.config}/omc/config.json`
+- macOS/Windows legacy/default path: `~/.omc/config.json`
+- Existing legacy `~/.omc/config.json` continues to be read as a fallback where applicable.
 
 **Enable:**
 
@@ -549,18 +564,6 @@ explicitly enabled via `~/.omc/config.json`.
 3. The agent simplifies the files for clarity and consistency without changing behavior
 4. A turn-scoped marker prevents the hook from triggering more than once per turn cycle
 
-### Coordination & Environment
-
-| Hook                      | Description                              |
-| ------------------------- | ---------------------------------------- |
-| `subagent-tracker`        | Tracks spawned sub-agents                |
-| `session-end`             | Session termination handling             |
-| `non-interactive-env`     | CI/non-interactive environment handling  |
-| `agent-usage-reminder`    | Reminder to use specialized agents       |
-| `background-notification` | Background task completion notifications |
-| `plugin-patterns`         | Plugin pattern detection                 |
-| `setup`                   | Initial setup and configuration          |
-
 ---
 
 ## Magic Keywords
@@ -569,17 +572,19 @@ Use these trigger phrases in natural language prompts to activate enhanced modes
 
 | Keyword                                                 | Effect                                                                                        |
 | ------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `ultrawork`, `ulw`                                      | Activates parallel agent orchestration                                                        |
-| `autopilot`, `build me`, `I want a`                     | Full autonomous execution                                                                     |
+| `ultrawork`, `ulw`, `uw`                                | Activates parallel agent orchestration                                                        |
+| `autopilot`, `build me`, `I want a`, `handle it all`, `end to end`, `e2e this` | Full autonomous execution                                              |
 | `deslop`, `anti-slop`, cleanup/refactor + slop smells         | Anti-slop cleanup workflow (`ai-slop-cleaner`)                                               |
-| `ralph`, `don't stop`, `must complete`                  | Persistence until verified complete                                                           |
+| `ralph`, `don't stop`, `must complete`, `until done`    | Persistence until verified complete                                                           |
 | `ccg`, `claude-codex-gemini`                            | Claude-Codex-Gemini orchestration                                                             |
 | `ralplan`                                               | Iterative planning consensus with structured deliberation (`--deliberate` for high-risk mode) |
 | `deep interview`, `ouroboros`                           | Deep Socratic interview with mathematical clarity gating                                      |
 | `deepsearch`, `search the codebase`, `find in codebase` | Codebase-focused search mode                                                                  |
 | `deepanalyze`, `deep-analyze`                           | Deep analysis mode                                                                            |
-| `ultrathink`                                            | Deep reasoning mode                                                                           |
+| `ultrathink`, `think hard`, `think deeply`              | Deep reasoning mode                                                                           |
 | `tdd`, `test first`, `red green`                        | TDD workflow enforcement                                                                      |
+| `code review`, `review code`                            | Comprehensive code review mode                                                                |
+| `security review`, `review security`                    | Security-focused review mode                                                                  |
 | `cancelomc`, `stopomc`                                  | Unified cancellation                                                                          |
 
 ### Examples

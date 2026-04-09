@@ -250,19 +250,22 @@ skill 会自动完成完整升级流程：
 /retro             # 生成复盘报告
 /switch-role       # 切换工作角色
 /scaffold-upgrade  # 升级 AI Native 脚手架到最新版本
-/omc-upgrade       # 升级 oh-my-claudecode 插件
+/omc-upgrade       # 升级内置 oh-my-claudecode vendored 组件并同步 skills
 ```
 
-**OMC 内置命令**（[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) 已内置，无需单独安装）：
+**OMC 内置命令**（[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) vendored 版本已升级到 `4.11.2`）：
 ```bash
-/deep-interview   # Socratic 需求澄清，歧义 <20% 才执行
-/ralph            # PRD 驱动的持续执行，不完成不停止
-/ultrawork        # 并行执行引擎（Haiku/Sonnet/Opus 分层路由）
-/autopilot        # idea → 规格 → 实现 → QA 全自动流水线
-/ai-slop-cleaner  # 行为安全优先的 AI 代码味清理（deslop）
-/learner          # 提取项目级调试知识为可复用 skill
-/ultraqa          # QA 循环直到全部测试通过
-/ralplan          # Planner→Architect→Critic 共识规划
+# 核心执行与编排
+/deep-interview /ralplan /team /omc-teams /autopilot /ralph /ultrawork /ccg /ask
+
+# 调试与验证
+/debug /trace /verify /ultraqa /visual-verdict
+
+# 技能沉淀与知识管理
+/learner /remember /skill /skillify /wiki /deepinit
+
+# 环境与集成
+/setup /omc-setup /omc-doctor /hud /configure-notifications /mcp-setup /cancel
 ```
 
 **Autoresearch**（[autoresearch](https://github.com/uditgoenka/autoresearch) 自主目标驱动迭代引擎，已内置）：
@@ -400,4 +403,4 @@ git sparse-checkout set ops docs/05_ops memory
 
 ---
 
-*最后更新: 2026-04-07 by Claude Code*
+*最后更新: 2026-04-08 by Claude Code*

@@ -8,14 +8,14 @@
 
 import { existsSync, readFileSync, readdirSync, rmSync, mkdirSync, writeFileSync, symlinkSync, lstatSync, readlinkSync, unlinkSync, renameSync } from 'fs';
 import { join, dirname } from 'path';
-import { homedir } from 'os';
 import { fileURLToPath, pathToFileURL } from 'url';
+import { getClaudeConfigDir } from './lib/config-dir.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 /** Claude config directory (respects CLAUDE_CONFIG_DIR env var) */
-const configDir = process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude');
+const configDir = getClaudeConfigDir();
 
 // Import timeout-protected stdin reader (prevents hangs on Linux/Windows, see issue #240, #524)
 let readStdin;
@@ -256,13 +256,12 @@ async function checkNpmUpdate(currentVersion) {
   } catch {}
 
   // Fetch from npm registry with 2s timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2000);
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
     const response = await fetch('https://registry.npmjs.org/oh-my-claude-sisyphus/latest', {
       signal: controller.signal
     });
-    clearTimeout(timeoutId);
     if (!response.ok) return null;
 
     const data = await response.json();
@@ -277,7 +276,7 @@ async function checkNpmUpdate(currentVersion) {
     } catch {}
 
     return updateAvailable ? { currentVersion, latestVersion } : null;
-  } catch { return null; }
+  } catch { return null; } finally { clearTimeout(timeoutId); }
 }
 
 // Check if HUD is properly installed (with retry for race conditions)
@@ -399,6 +398,17 @@ async function main() {
       }
     } catch {}
 
+    // Warn if silentAutoUpdate is enabled but running in plugin mode (#1773)
+    if (process.env.CLAUDE_PLUGIN_ROOT) {
+      try {
+        const omcConfigPath = join(configDir, '.omc-config.json');
+        const omcConfig = readJsonFile(omcConfigPath);
+        if (omcConfig?.silentAutoUpdate) {
+          messages.push(`<session-restore>\n\n[OMC] silentAutoUpdate is enabled in .omc-config.json but has no effect in plugin mode.\nTo update, use: /plugin marketplace update omc && /omc-setup\nOr run manually: omc update\n\n</session-restore>\n\n---\n`);
+        }
+      } catch {}
+    }
+
     // Check HUD installation (one-time setup guidance)
     const hudCheck = await checkHudInstallation();
     if (!hudCheck.installed) {
@@ -472,8 +482,10 @@ Treat this as prior-session context only. Prioritize the user's newest request, 
 `);
     }
 
-    // Check for incomplete todos (project-local only, not global ~/.claude/todos/)
-    // NOTE: We intentionally do NOT scan the global ~/.claude/todos/ directory.
+    // Check for incomplete todos (project-local only, not global
+    // [$CLAUDE_CONFIG_DIR|~/.claude]/todos/)
+    // NOTE: We intentionally do NOT scan the global
+    // [$CLAUDE_CONFIG_DIR|~/.claude]/todos/ directory.
     // That directory accumulates todo files from ALL past sessions across all
     // projects, causing phantom task counts in fresh sessions (see issue #354).
     const localTodoPaths = [

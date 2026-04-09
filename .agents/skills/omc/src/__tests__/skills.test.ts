@@ -1,9 +1,16 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
 import { createBuiltinSkills, getBuiltinSkill, listBuiltinSkillNames, clearSkillsCache } from '../features/builtin-skills/skills.js';
 
 describe('Builtin Skills', () => {
   const originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
   const originalPath = process.env.PATH;
+  const originalUserType = process.env.USER_TYPE;
+  const originalClaudeConfigDir = process.env.CLAUDE_CONFIG_DIR;
+  const originalCwd = process.cwd();
+  let tempDirs: string[] = [];
 
   // Clear cache before each test to ensure fresh loads
   beforeEach(() => {
@@ -17,6 +24,18 @@ describe('Builtin Skills', () => {
     } else {
       process.env.PATH = originalPath;
     }
+    if (originalUserType === undefined) {
+      delete process.env.USER_TYPE;
+    } else {
+      process.env.USER_TYPE = originalUserType;
+    }
+    if (originalClaudeConfigDir === undefined) {
+      delete process.env.CLAUDE_CONFIG_DIR;
+    } else {
+      process.env.CLAUDE_CONFIG_DIR = originalClaudeConfigDir;
+    }
+    process.chdir(originalCwd);
+    tempDirs = [];
     clearSkillsCache();
   });
 
@@ -31,14 +50,29 @@ describe('Builtin Skills', () => {
     } else {
       process.env.PATH = originalPath;
     }
+    if (originalUserType === undefined) {
+      delete process.env.USER_TYPE;
+    } else {
+      process.env.USER_TYPE = originalUserType;
+    }
+    if (originalClaudeConfigDir === undefined) {
+      delete process.env.CLAUDE_CONFIG_DIR;
+    } else {
+      process.env.CLAUDE_CONFIG_DIR = originalClaudeConfigDir;
+    }
+    process.chdir(originalCwd);
+    for (const dir of tempDirs) {
+      rmSync(dir, { recursive: true, force: true });
+    }
+    tempDirs = [];
     clearSkillsCache();
   });
 
   describe('createBuiltinSkills()', () => {
-    it('should return correct number of skills (31 canonical + 1 alias)', () => {
+    it('should return correct number of skills (33 canonical + 1 alias)', () => {
       const skills = createBuiltinSkills();
-      // 32 entries: 31 canonical skills + 1 deprecated alias (psm)
-      expect(skills).toHaveLength(32);
+      // 34 entries: 33 canonical skills + 1 deprecated alias (psm)
+      expect(skills).toHaveLength(34);
     });
 
     it('should return an array of BuiltinSkill objects', () => {
@@ -112,6 +146,7 @@ describe('Builtin Skills', () => {
         'ralplan',
         'release',
         'sciomc',
+        'self-improve',
         'setup',
         'skill',
         'team',
@@ -119,6 +154,7 @@ describe('Builtin Skills', () => {
         'ultraqa',
         'ultrawork',
         'visual-verdict',
+        'wiki',
         'writer-memory',
       ];
 
@@ -155,6 +191,31 @@ describe('Builtin Skills', () => {
       expect(skill?.template).toContain('skills/project-session-manager');
       expect(skill?.template).toContain('`lib/`');
       expect(skill?.template).toContain('`psm.sh`');
+    });
+
+    it('should emphasize process-first install routing in the setup skill', () => {
+      const skill = getBuiltinSkill('setup');
+      expect(skill).toBeDefined();
+      expect(skill?.description).toContain('install/update routing');
+      expect(skill?.template).toContain('Process the request by the **first argument only**');
+      expect(skill?.template).toContain('/oh-my-claudecode:setup doctor --json');
+      expect(skill?.template).not.toContain('{{ARGUMENTS_AFTER_DOCTOR}}');
+    });
+
+    it('should emphasize worktree-first guidance in project session manager skill text', () => {
+      const skill = getBuiltinSkill('project-session-manager');
+      expect(skill).toBeDefined();
+      expect(skill?.description).toContain('Worktree-first');
+      expect(skill?.template).toContain('Quick Start (worktree-first)');
+      expect(skill?.template).toContain('`omc teleport`');
+    });
+
+    it('should keep ask as the canonical process-first advisor wrapper', () => {
+      const skill = getBuiltinSkill('ask');
+      expect(skill).toBeDefined();
+      expect(skill?.description).toContain('Process-first advisor routing');
+      expect(skill?.template).toContain('omc ask {{ARGUMENTS}}');
+      expect(skill?.template).toContain('Do NOT manually construct raw provider CLI commands');
     });
 
     it('should retrieve the trace skill by name', () => {
@@ -194,6 +255,8 @@ describe('Builtin Skills', () => {
       expect(skill?.template).toContain('interview_id');
       expect(skill?.template).toContain('challenge_modes_used');
       expect(skill?.template).toContain('ontology_snapshots');
+      expect(skill?.template).toContain('explicit weakest-dimension rationale reporting');
+      expect(skill?.template).toContain('repo-evidence citation requirement');
     });
 
 
@@ -211,9 +274,44 @@ describe('Builtin Skills', () => {
       expect(skill?.template).toContain('Skill("oh-my-claudecode:omc-plan")');
       expect(skill?.template).toContain('`--consensus --direct`');
       expect(skill?.template).toContain('`.omc/specs/deep-interview-{slug}.md`');
+      expect(skill?.template).toContain('Why now: {one_sentence_targeting_rationale}');
+      expect(skill?.template).toContain('cite the repo evidence');
+      expect(skill?.template).toContain('Ontology-style question for scope-fuzzy tasks');
+      expect(skill?.template).toContain('Every round explicitly names the weakest dimension and why it is the next target');
       expect(skill?.argumentHint).toContain('--autoresearch');
       expect(skill?.template).toContain('zero-learning-curve setup lane for `omc autoresearch`');
       expect(skill?.template).toContain('autoresearch --mission "<mission>" --eval "<evaluator>"');
+    });
+
+    it('loads deep-interview ambiguityThreshold from settings before state init and updates the announcement copy', () => {
+      const profileDir = mkdtempSync(join(tmpdir(), 'omc-skill-profile-'));
+      const projectDir = mkdtempSync(join(tmpdir(), 'omc-skill-project-'));
+      tempDirs.push(profileDir, projectDir);
+
+      process.env.CLAUDE_CONFIG_DIR = profileDir;
+      writeFileSync(
+        join(profileDir, 'settings.json'),
+        JSON.stringify({ omc: { deepInterview: { ambiguityThreshold: 0.15 } } }),
+      );
+
+      mkdirSync(join(projectDir, '.claude'), { recursive: true });
+      writeFileSync(
+        join(projectDir, '.claude', 'settings.json'),
+        JSON.stringify({ omc: { deepInterview: { ambiguityThreshold: 0.12 } } }),
+      );
+
+      process.chdir(projectDir);
+      clearSkillsCache();
+
+      const skill = getBuiltinSkill('deep-interview');
+      expect(skill).toBeDefined();
+      expect(skill?.template).toContain('Load runtime settings');
+      expect(skill?.template).toContain('ambiguityThreshold = 0.12');
+      expect(skill?.template).toContain('"threshold": 0.12,');
+      expect(skill?.template).toContain('drops below 12%.');
+      expect(skill?.template?.indexOf('Load runtime settings')).toBeLessThan(
+        skill?.template?.indexOf('Initialize state') ?? Number.POSITIVE_INFINITY,
+      );
     });
 
     it('rewrites built-in skill command examples to plugin-safe bridge invocations when omc is unavailable', () => {
@@ -298,7 +396,7 @@ describe('Builtin Skills', () => {
     it('should return canonical skill names by default', () => {
       const names = listBuiltinSkillNames();
 
-      expect(names).toHaveLength(31);
+      expect(names).toHaveLength(33);
       expect(names).toContain('ai-slop-cleaner');
       expect(names).toContain('ask');
       expect(names).toContain('autopilot');
@@ -332,7 +430,7 @@ describe('Builtin Skills', () => {
       const names = listBuiltinSkillNames({ includeAliases: true });
 
       // swarm alias removed in #1131, psm still exists
-      expect(names).toHaveLength(32);
+      expect(names).toHaveLength(34);
       expect(names).toContain('ai-slop-cleaner');
       expect(names).toContain('trace');
       expect(names).toContain('visual-verdict');
@@ -360,6 +458,29 @@ describe('Builtin Skills', () => {
 
     it('should not return a skill for "clear" via getBuiltinSkill', () => {
       expect(getBuiltinSkill('clear')).toBeUndefined();
+    });
+  });
+
+  describe('skininthegamebros-only builtin skills', () => {
+    it('keeps skininthegamebros-only skills hidden by default', () => {
+      const names = listBuiltinSkillNames({ includeAliases: true });
+      expect(names).not.toContain('remember');
+      expect(names).not.toContain('verify');
+      expect(names).not.toContain('debug');
+      expect(names).not.toContain('skillify');
+    });
+
+    it('surfaces skininthegamebros-only skills when USER_TYPE=ant', () => {
+      process.env.USER_TYPE = 'ant';
+      clearSkillsCache();
+
+      const names = listBuiltinSkillNames({ includeAliases: true });
+      expect(names).toContain('remember');
+      expect(names).toContain('verify');
+      expect(names).toContain('debug');
+      expect(names).toContain('skillify');
+      expect(names).not.toContain('stuck');
+      expect(names).not.toContain('lorem-ipsum');
     });
   });
 

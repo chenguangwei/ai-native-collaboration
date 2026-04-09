@@ -14,6 +14,7 @@ import { execSync } from 'child_process';
 import { existsSync, mkdirSync, realpathSync, readdirSync } from 'fs';
 import { homedir } from 'os';
 import { resolve, normalize, relative, sep, join, isAbsolute, basename, dirname } from 'path';
+import { getClaudeConfigDir } from '../utils/config-dir.js';
 
 /** Standard .omc subdirectories */
 export const OmcPaths = {
@@ -144,8 +145,38 @@ export function getProjectIdentifier(worktreeRoot?: string): string {
     source = root;
   }
 
+  // For linked worktrees (created via `git worktree add`), resolve to the
+  // primary repository root so all worktrees of the same repo produce the
+  // same project identifier. Without this, sibling worktrees like
+  // `repo.feature-x/` and `repo.feature-y/` would create separate state
+  // directories despite sharing the same remote URL hash.
+  let primaryRoot = root;
+  try {
+    const commonDir = execSync('git rev-parse --path-format=absolute --git-common-dir', {
+      cwd: root,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+      timeout: 5000,
+    }).trim();
+    // Only resolve when --git-common-dir points to a .git directory.
+    // - Linked worktrees: returns <primary>/.git → dirname gives primary root ✓
+    // - Submodules: returns <super>/.git/modules/<name> → skip (wrong parent)
+    // - Bare repos: returns the repo root itself (no .git suffix) → skip
+    //   (dirname would go up to the parent folder, colliding sibling repos)
+    const isGitDir = basename(commonDir) === '.git';
+    const isSubmodule = commonDir.includes(`${sep}.git${sep}modules`);
+    if (isGitDir && !isSubmodule) {
+      const resolved = dirname(commonDir);
+      if (resolved && resolved !== root) {
+        primaryRoot = resolved;
+      }
+    }
+  } catch {
+    // Not a git repo or command failed — fall back to worktree root
+  }
+
   const hash = createHash('sha256').update(source).digest('hex').slice(0, 16);
-  const dirName = basename(root).replace(/[^a-zA-Z0-9_-]/g, '_');
+  const dirName = basename(primaryRoot).replace(/[^a-zA-Z0-9_-]/g, '_');
   return `${dirName}-${hash}`;
 }
 
@@ -235,7 +266,13 @@ export function ensureOmcDir(relativePath: string, worktreeRoot?: string): strin
   const fullPath = resolveOmcPath(relativePath, worktreeRoot);
 
   if (!existsSync(fullPath)) {
-    mkdirSync(fullPath, { recursive: true });
+    try {
+      mkdirSync(fullPath, { recursive: true });
+    } catch (err) {
+      // On Windows, concurrent hooks can race past the existsSync check and
+      // throw EEXIST. Safe to ignore — see atomic-write.ts:ensureDirSync.
+      if ((err as NodeJS.ErrnoException).code !== "EEXIST") throw err;
+    }
   }
 
   return fullPath;
@@ -311,7 +348,13 @@ export function ensureAllOmcDirs(worktreeRoot?: string): void {
   for (const subdir of subdirs) {
     const fullPath = subdir ? join(omcRoot, subdir) : omcRoot;
     if (!existsSync(fullPath)) {
-      mkdirSync(fullPath, { recursive: true });
+      try {
+        mkdirSync(fullPath, { recursive: true });
+      } catch (err) {
+        // On Windows, concurrent hooks can race past the existsSync check and
+        // throw EEXIST. Safe to ignore — see atomic-write.ts:ensureDirSync.
+        if ((err as NodeJS.ErrnoException).code !== "EEXIST") throw err;
+      }
     }
   }
 }
@@ -422,15 +465,18 @@ export function isValidTranscriptPath(transcriptPath: string): boolean {
   const normalized = normalize(expandedPath);
   const home = homedir();
 
-  // Allowed: ~/.claude/..., ~/.omc/..., /tmp/...
+  // Allowed: [$CLAUDE_CONFIG_DIR|~/.claude], ~/.omc/..., /tmp/...
   const allowedPrefixes = [
-    join(home, '.claude'),
+    getClaudeConfigDir(),
     join(home, '.omc'),
     '/tmp',
     '/var/folders', // macOS temp
   ];
 
-  return allowedPrefixes.some(prefix => normalized.startsWith(prefix));
+  return allowedPrefixes.some((prefix) => {
+    const rel = relative(prefix, normalized);
+    return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel));
+  });
 }
 
 
@@ -497,7 +543,13 @@ export function ensureSessionStateDir(sessionId: string, worktreeRoot?: string):
   const sessionDir = getSessionStateDir(sessionId, worktreeRoot);
 
   if (!existsSync(sessionDir)) {
-    mkdirSync(sessionDir, { recursive: true });
+    try {
+      mkdirSync(sessionDir, { recursive: true });
+    } catch (err) {
+      // On Windows, concurrent hooks can race past the existsSync check and
+      // throw EEXIST. Safe to ignore — see atomic-write.ts:ensureDirSync.
+      if ((err as NodeJS.ErrnoException).code !== "EEXIST") throw err;
+    }
   }
 
   return sessionDir;
@@ -543,7 +595,7 @@ export function resolveToWorktreeRoot(directory?: string): string {
  * But the actual transcript lives at the original project's path:
  *   ~/.claude/projects/-path-to-project/<session>.jsonl
  *
- * Claude Code encodes `/` as `-` (dots are preserved). The `.claude/worktrees/`
+ * Claude Code encodes `/` and `.` as `-`. The `.claude/worktrees/`
  * segment becomes `-claude-worktrees-`, preceded by a `-` from the path
  * separator, yielding the distinctive `--claude-worktrees-` pattern in the
  * encoded directory name.
@@ -589,13 +641,12 @@ export function resolveTranscriptPath(transcriptPath: string | undefined, cwd?: 
     const sessionFile = lastSep !== -1 ? transcriptPath.substring(lastSep + 1) : '';
     if (sessionFile) {
       // The projects directory is under the Claude config dir
-      const configDir = process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude');
-      const projectsDir = join(configDir, 'projects');
+      const projectsDir = join(getClaudeConfigDir(), 'projects');
 
       if (existsSync(projectsDir)) {
         // Encode the main project root the same way Claude Code does:
         // replace path separators with `-`, replace dots with `-`.
-        const encodedMain = mainProjectRoot.replace(/[/\\]/g, '-');
+        const encodedMain = mainProjectRoot.replace(/[/\\.]/g, '-');
         const resolvedPath = join(projectsDir, encodedMain, sessionFile);
         if (existsSync(resolvedPath)) return resolvedPath;
       }
@@ -627,10 +678,9 @@ export function resolveTranscriptPath(transcriptPath: string | undefined, cwd?: 
       const lastSep = transcriptPath.lastIndexOf('/');
       const sessionFile = lastSep !== -1 ? transcriptPath.substring(lastSep + 1) : '';
       if (sessionFile) {
-        const configDir = process.env.CLAUDE_CONFIG_DIR || join(homedir(), '.claude');
-        const projectsDir = join(configDir, 'projects');
+        const projectsDir = join(getClaudeConfigDir(), 'projects');
         if (existsSync(projectsDir)) {
-          const encodedMain = mainRepoRoot.replace(/[/\\]/g, '-');
+          const encodedMain = mainRepoRoot.replace(/[/\\.]/g, '-');
           const resolvedPath = join(projectsDir, encodedMain, sessionFile);
           if (existsSync(resolvedPath)) return resolvedPath;
         }

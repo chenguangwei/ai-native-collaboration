@@ -1,22 +1,23 @@
 ---
 name: team
-description: N coordinated agents on shared task list using Codex native teams
+description: N coordinated agents on shared task list using Claude Code native teams
+argument-hint: "[N:agent-type] [ralph] <task description>"
 aliases: []
 level: 4
 ---
 
 # Team Skill
 
-Spawn N coordinated agents working on a shared task list using Codex's native team tools. Replaces the legacy `/swarm` skill (SQLite-based) with built-in team management, inter-agent messaging, and task dependencies -- no external dependencies required.
+Spawn N coordinated agents working on a shared task list using Claude Code's native team tools. Replaces the legacy `/swarm` skill (SQLite-based) with built-in team management, inter-agent messaging, and task dependencies -- no external dependencies required.
 
 The `swarm` compatibility alias was removed in #1131.
 
 ## Usage
 
 ```
-/oh-my-Codex:team N:agent-type "task description"
-/oh-my-Codex:team "task description"
-/oh-my-Codex:team ralph "task description"
+/oh-my-claudecode:team N:agent-type "task description"
+/oh-my-claudecode:team "task description"
+/oh-my-claudecode:team ralph "task description"
 ```
 
 ### Parameters
@@ -76,9 +77,9 @@ User: "/team 3:executor fix all TypeScript errors"
                       -> rm .omc/state/team-state.json
 ```
 
-**Storage layout (managed by Codex):**
+**Storage layout (managed by Claude Code):**
 ```
-~/.Codex/
+~/.claude/
   teams/fix-ts-errors/
     config.json          # Team metadata + members array
   tasks/fix-ts-errors/
@@ -110,7 +111,7 @@ Each pipeline stage uses **specialized agents** -- not just executors. The lead 
 **Routing rules:**
 
 1. **The lead picks agents per stage, not the user.** The user's `N:agent-type` parameter only overrides the `team-exec` stage worker type. All other stages use stage-appropriate specialists.
-2. **Specialist agents complement executor agents.** Route analysis/review to architect/critic Codex agents and UI work to designer agents. Tmux CLI workers are one-shot and don't participate in team communication.
+2. **Specialist agents complement executor agents.** Route analysis/review to architect/critic Claude agents and UI work to designer agents. Tmux CLI workers are one-shot and don't participate in team communication.
 3. **Cost mode affects model tier.** In downgrade: `opus` agents to `sonnet`, `sonnet` to `haiku` where quality permits. `team-verify` always uses at least `sonnet`.
 4. **Risk level escalates review.** Security-sensitive or >20 file changes must include `security-reviewer` + `code-reviewer` (opus) in `team-verify`.
 
@@ -186,7 +187,7 @@ The lead writes handoffs to `.omc/handoffs/<stage-name>.md`.
 ### Resume and Cancel Semantics
 
 - **Resume:** restart from the last non-terminal stage using staged state + live task status. Read `.omc/handoffs/` to recover stage transition context.
-- **Cancel:** `/oh-my-Codex:cancel` requests teammate shutdown, waits for responses (best effort), marks phase `cancelled` with `active=false`, captures cancellation metadata, then deletes team resources and clears/preserves Team state per policy. Handoff files in `.omc/handoffs/` are preserved for potential resume.
+- **Cancel:** `/oh-my-claudecode:cancel` requests teammate shutdown, waits for responses (best effort), marks phase `cancelled` with `active=false`, captures cancellation metadata, then deletes team resources and clears/preserves Team state per policy. Handoff files in `.omc/handoffs/` are preserved for potential resume.
 - Terminal states are `complete`, `failed`, and `cancelled`.
 
 ## Workflow
@@ -221,7 +222,7 @@ Call `TeamCreate` with a slug derived from the task:
 ```json
 {
   "team_name": "fix-ts-errors",
-  "team_file_path": "~/.Codex/teams/fix-ts-errors/config.json",
+  "team_file_path": "~/.claude/teams/fix-ts-errors/config.json",
   "lead_agent_id": "team-lead@fix-ts-errors"
 }
 ```
@@ -329,7 +330,7 @@ Spawn N teammates using `Task` with `team_name` and `name` parameters. Each team
 
 ```json
 {
-  "subagent_type": "oh-my-Codex:executor",
+  "subagent_type": "oh-my-claudecode:executor",
   "team_name": "fix-ts-errors",
   "name": "worker-1",
   "prompt": "<worker-preamble + assigned tasks>"
@@ -588,7 +589,7 @@ This scans for processes matching the team name whose config no longer exists, a
 
 ## CLI Workers (Codex and Gemini)
 
-The team skill supports **hybrid execution** combining Codex agent teammates with external CLI workers (Codex CLI and Gemini CLI). Both types can make code changes -- they differ in capabilities and cost. These are standalone CLI tools, not MCP servers.
+The team skill supports **hybrid execution** combining Claude agent teammates with external CLI workers (Codex CLI and Gemini CLI). Both types can make code changes -- they differ in capabilities and cost. These are standalone CLI tools, not MCP servers.
 
 ### Execution Modes
 
@@ -596,7 +597,7 @@ Tasks are tagged with an execution mode during decomposition:
 
 | Execution Mode | Provider | Capabilities |
 |---------------|----------|-------------|
-| `claude_worker` | Codex agent | Full Codex tool access (Read/Write/Edit/Bash/Task). Best for tasks needing Codex's reasoning + iterative tool use. |
+| `claude_worker` | Claude agent | Full Claude Code tool access (Read/Write/Edit/Bash/Task). Best for tasks needing Claude's reasoning + iterative tool use. |
 | `codex_worker` | Codex CLI (tmux pane) | Full filesystem access in working_directory. Runs autonomously via tmux pane. Best for code review, security analysis, refactoring, architecture. Requires `npm install -g @openai/codex`. |
 | `gemini_worker` | Gemini CLI (tmux pane) | Full filesystem access in working_directory. Runs autonomously via tmux pane. Best for UI/design work, documentation, large-context tasks. Requires `npm install -g @google/gemini-cli`. |
 
@@ -610,8 +611,8 @@ Tmux CLI workers run in dedicated tmux panes with filesystem access. They are **
 4. Results/summary are written to an output file
 5. Lead reads the output, marks the task complete, and feeds results to dependent tasks
 
-**Key difference from Codex teammates:**
-- CLI workers operate via tmux, not Codex's tool system
+**Key difference from Claude teammates:**
+- CLI workers operate via tmux, not Claude Code's tool system
 - They cannot use TaskList/TaskUpdate/SendMessage (no team awareness)
 - They run as one-shot autonomous jobs, not persistent teammates
 - The lead manages their lifecycle (spawn, monitor, collect results)
@@ -620,14 +621,14 @@ Tmux CLI workers run in dedicated tmux panes with filesystem access. They are **
 
 | Task Type | Best Route | Why |
 |-----------|-----------|-----|
-| Iterative multi-step work | Codex teammate | Needs tool-mediated iteration + team communication |
+| Iterative multi-step work | Claude teammate | Needs tool-mediated iteration + team communication |
 | Code review / security audit | CLI worker or specialist agent | Autonomous execution, good at structured analysis |
-| Architecture analysis / planning | architect Codex agent | Strong analytical reasoning with codebase access |
+| Architecture analysis / planning | architect Claude agent | Strong analytical reasoning with codebase access |
 | Refactoring (well-scoped) | CLI worker or executor agent | Autonomous execution, good at structured transforms |
-| UI/frontend implementation | designer Codex agent | Design expertise, framework idioms |
-| Large-scale documentation | writer Codex agent | Writing expertise + large context for consistency |
-| Build/test iteration loops | Codex teammate | Needs Bash tool + iterative fix cycles |
-| Tasks needing team coordination | Codex teammate | Needs SendMessage for status updates |
+| UI/frontend implementation | designer Claude agent | Design expertise, framework idioms |
+| Large-scale documentation | writer Claude agent | Writing expertise + large context for consistency |
+| Build/test iteration loops | Claude teammate | Needs Bash tool + iterative fix cycles |
+| Tasks needing team coordination | Claude teammate | Needs SendMessage for status updates |
 
 ### Example: Hybrid Team with CLI Workers
 
@@ -642,13 +643,13 @@ Task decomposition:
 #5 [gemini_worker] Final code review of all changes
 ```
 
-The lead runs #1 (Codex security analysis), then #2 and #3 in parallel (Codex refactors backend, designer agent redesigns frontend), then #4 (Codex teammate handles test iteration), then #5 (Gemini final review).
+The lead runs #1 (Codex security analysis), then #2 and #3 in parallel (Codex refactors backend, designer agent redesigns frontend), then #4 (Claude teammate handles test iteration), then #5 (Gemini final review).
 
 ### Pre-flight Analysis (Optional)
 
 For large ambiguous tasks, run analysis before team creation:
 
-1. Spawn `Task(subagent_type="oh-my-Codex:planner", ...)` with task description + codebase context
+1. Spawn `Task(subagent_type="oh-my-claudecode:planner", ...)` with task description + codebase context
 2. Use the analysis to produce better task decomposition
 3. Create team and tasks with enriched context
 
@@ -712,7 +713,7 @@ if (status.taskSummary.pending === 0 && status.taskSummary.inProgress === 0) {
 | `shutdown_ack` | Worker acknowledged shutdown -- safe to remove from team |
 | `heartbeat` | Update liveness tracking (redundant with heartbeat files but useful for latency monitoring) |
 
-This approach complements the existing `SendMessage`-based communication by providing a pull-based mechanism for MCP workers that cannot use Codex's team messaging tools.
+This approach complements the existing `SendMessage`-based communication by providing a pull-based mechanism for MCP workers that cannot use Claude Code's team messaging tools.
 
 ## Error Handling
 
@@ -754,7 +755,7 @@ When the user invokes `/team ralph`, says "team ralph", or combines both keyword
 ### Activation
 
 Team+Ralph activates when:
-1. User invokes `/team ralph "task"` or `/oh-my-Codex:team ralph "task"`
+1. User invokes `/team ralph "task"` or `/oh-my-claudecode:team ralph "task"`
 2. Keyword detector finds both `team` and `ralph` in the prompt
 3. Hook detects `MAGIC KEYWORD: RALPH` alongside team context
 
@@ -782,7 +783,7 @@ state_write(mode="ralph", active=true, iteration=1, max_iterations=10, current_p
 1. Ralph outer loop starts (iteration 1)
 2. Team pipeline runs: `team-plan -> team-prd -> team-exec -> team-verify`
 3. If `team-verify` passes: Ralph runs architect verification (STANDARD tier minimum)
-4. If architect approves: both modes complete, run `/oh-my-Codex:cancel`
+4. If architect approves: both modes complete, run `/oh-my-claudecode:cancel`
 5. If `team-verify` fails OR architect rejects: team enters `team-fix`, then loops back to `team-exec -> team-verify`
 6. If fix loop exceeds `max_fix_loops`: Ralph increments iteration and retries the full pipeline
 7. If Ralph exceeds `max_iterations`: terminal `failed` state
@@ -799,7 +800,7 @@ See Cancellation section below for details.
 
 If the lead crashes mid-run, the team skill should detect existing state and resume:
 
-1. Check `~/.Codex/teams/` for teams matching the task slug
+1. Check `${CLAUDE_CONFIG_DIR:-~/.claude}/teams/` for teams matching the task slug
 2. If found, read `config.json` to discover active members
 3. Resume monitor mode instead of creating a duplicate team
 4. Call `TaskList` to determine current progress
@@ -811,13 +812,13 @@ This prevents duplicate teams and allows graceful recovery from lead failures.
 
 | Aspect | Team (Native) | Swarm (Legacy SQLite) |
 |--------|--------------|----------------------|
-| **Storage** | JSON files in `~/.Codex/teams/` and `~/.Codex/tasks/` | SQLite in `.omc/state/swarm.db` |
+| **Storage** | JSON files in `~/.claude/teams/` and `~/.claude/tasks/` | SQLite in `.omc/state/swarm.db` |
 | **Dependencies** | `better-sqlite3` not needed | Requires `better-sqlite3` npm package |
 | **Task claiming** | `TaskUpdate(owner + in_progress)` -- lead pre-assigns | SQLite IMMEDIATE transaction -- atomic |
 | **Race conditions** | Possible if two agents claim same task (mitigate by pre-assigning) | None (SQLite transactions) |
 | **Communication** | `SendMessage` (DM, broadcast, shutdown) | None (fire-and-forget agents) |
 | **Task dependencies** | Built-in `blocks` / `blockedBy` arrays | Not supported |
-| **Heartbeat** | Automatic idle notifications from Codex | Manual heartbeat table + polling |
+| **Heartbeat** | Automatic idle notifications from Claude Code | Manual heartbeat table + polling |
 | **Shutdown** | Graceful request/response protocol | Signal-based termination |
 | **Agent lifecycle** | Auto-tracked via internal tasks + config members | Manual tracking via heartbeat table |
 | **Progress visibility** | `TaskList` shows live status with owner | SQL queries on tasks table |
@@ -825,11 +826,11 @@ This prevents duplicate teams and allows graceful recovery from lead failures.
 | **Crash recovery** | Lead detects via missing messages, reassigns | Auto-release after 5-min lease timeout |
 | **State cleanup** | `TeamDelete` removes everything | Manual `rm` of SQLite database |
 
-**When to use Team over Swarm:** Always prefer `/team` for new work. It uses Codex's built-in infrastructure, requires no external dependencies, supports inter-agent communication, and has task dependency management.
+**When to use Team over Swarm:** Always prefer `/team` for new work. It uses Claude Code's built-in infrastructure, requires no external dependencies, supports inter-agent communication, and has task dependency management.
 
 ## Cancellation
 
-The `/oh-my-Codex:cancel` skill handles team cleanup:
+The `/oh-my-claudecode:cancel` skill handles team cleanup:
 
 1. Read team state via `state_read(mode="team")` to get `team_name` and `linked_ralph`
 2. Send `shutdown_request` to all active teammates (from `config.json` members)
@@ -846,7 +847,7 @@ When team is linked to ralph, cancellation follows dependency order:
 - **Cancel triggered from Team context:** Clear Team state, then mark Ralph as cancelled. Ralph's stop hook will detect the missing team and stop iterating.
 - **Force cancel (`--force`):** Clears both `team` and `ralph` state unconditionally via `state_clear`.
 
-If teammates are unresponsive, `TeamDelete` may fail. In that case, the cancel skill should wait briefly and retry, or inform the user to manually clean up `~/.Codex/teams/{team_name}/` and `~/.Codex/tasks/{team_name}/`.
+If teammates are unresponsive, `TeamDelete` may fail. In that case, the cancel skill should wait briefly and retry, or inform the user to manually clean up `~/.claude/teams/{team_name}/` and `~/.claude/tasks/{team_name}/`.
 
 ## Runtime V2 (Event-Driven)
 
@@ -889,15 +890,15 @@ Optional settings via `.omc-config.json`:
 - **monitorIntervalMs** - How often to poll `TaskList` (default: 30s)
 - **shutdownTimeoutMs** - How long to wait for shutdown responses (default: 15s)
 
-> **Note:** Team members do not have a hardcoded model default. Each teammate is a separate Codex session that inherits the user's configured model. Since teammates can spawn their own subagents, the session model acts as the orchestration layer while subagents can use any model tier.
+> **Note:** Team members do not have a hardcoded model default. Each teammate is a separate Claude Code session that inherits the user's configured model. Since teammates can spawn their own subagents, the session model acts as the orchestration layer while subagents can use any model tier.
 
 ## State Cleanup
 
 On successful completion:
 
-1. `TeamDelete` handles all Codex state:
-   - Removes `~/.Codex/teams/{team_name}/` (config)
-   - Removes `~/.Codex/tasks/{team_name}/` (all task files + lock)
+1. `TeamDelete` handles all Claude Code state:
+   - Removes `~/.claude/teams/{team_name}/` (config)
+   - Removes `~/.claude/tasks/{team_name}/` (all task files + lock)
 2. OMC state cleanup via MCP tools:
    ```
    state_clear(mode="team")
@@ -906,7 +907,7 @@ On successful completion:
    ```
    state_clear(mode="ralph")
    ```
-3. Or run `/oh-my-Codex:cancel` which handles all cleanup automatically.
+3. Or run `/oh-my-claudecode:cancel` which handles all cleanup automatically.
 
 **IMPORTANT:** Call `TeamDelete` only AFTER all teammates have been shut down. `TeamDelete` will fail if active members (besides the lead) still exist in the config.
 
@@ -965,4 +966,4 @@ MCP workers can operate in isolated git worktrees to prevent file conflicts betw
 
 10. **Broadcast is expensive** -- Each broadcast sends a separate message to every teammate. Use `message` (DM) by default. Only broadcast for truly team-wide critical alerts.
 
-11. **CLI workers are one-shot, not persistent** -- Tmux CLI workers have full filesystem access and CAN make code changes. However, they run as autonomous one-shot jobs -- they cannot use TaskList/TaskUpdate/SendMessage. The lead must manage their lifecycle: write prompt_file, spawn CLI worker, read output_file, mark task complete. They don't participate in team communication like Codex teammates do.
+11. **CLI workers are one-shot, not persistent** -- Tmux CLI workers have full filesystem access and CAN make code changes. However, they run as autonomous one-shot jobs -- they cannot use TaskList/TaskUpdate/SendMessage. The lead must manage their lifecycle: write prompt_file, spawn CLI worker, read output_file, mark task complete. They don't participate in team communication like Claude teammates do.

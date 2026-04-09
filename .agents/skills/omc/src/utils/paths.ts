@@ -9,7 +9,7 @@
 import { join } from 'path';
 import { existsSync, readFileSync, readdirSync, statSync, unlinkSync, rmSync } from 'fs';
 import { homedir } from 'os';
-import { getConfigDir as getClaudeBaseConfigDir } from './config-dir.js';
+import { getClaudeConfigDir } from './config-dir.js';
 
 /**
  * Convert a path to use forward slashes (for JSON/config files)
@@ -18,14 +18,6 @@ import { getConfigDir as getClaudeBaseConfigDir } from './config-dir.js';
  */
 export function toForwardSlash(path: string): string {
   return path.replace(/\\/g, '/');
-}
-
-/**
- * Get Claude config directory path.
- * Respects the CLAUDE_CONFIG_DIR environment variable when set.
- */
-export function getClaudeConfigDir(): string {
-  return getClaudeBaseConfigDir();
 }
 
 /**
@@ -60,6 +52,118 @@ export function getConfigDir(): string {
     return process.env.APPDATA || join(homedir(), 'AppData', 'Roaming');
   }
   return process.env.XDG_CONFIG_HOME || join(homedir(), '.config');
+}
+
+/**
+ * Get Windows-appropriate state directory.
+ */
+export function getStateDir(): string {
+  if (process.platform === 'win32') {
+    return process.env.LOCALAPPDATA || join(homedir(), 'AppData', 'Local');
+  }
+
+  return process.env.XDG_STATE_HOME || join(homedir(), '.local', 'state');
+}
+
+function prefersXdgOmcDirs(): boolean {
+  return process.platform !== 'win32' && process.platform !== 'darwin';
+}
+
+function getUserHomeDir(): string {
+  if (process.platform === 'win32') {
+    return process.env.USERPROFILE || process.env.HOME || homedir();
+  }
+
+  return process.env.HOME || homedir();
+}
+
+/**
+ * Legacy global OMC directory under the user's home directory.
+ */
+export function getLegacyOmcDir(): string {
+  return join(getUserHomeDir(), '.omc');
+}
+
+/**
+ * Global OMC config directory.
+ *
+ * Precedence:
+ * 1. OMC_HOME (existing explicit override)
+ * 2. XDG-aware config root on Linux/Unix
+ * 3. Legacy ~/.omc elsewhere
+ */
+export function getGlobalOmcConfigRoot(): string {
+  const explicitRoot = process.env.OMC_HOME?.trim();
+  if (explicitRoot) {
+    return explicitRoot;
+  }
+
+  if (prefersXdgOmcDirs()) {
+    return join(getConfigDir(), 'omc');
+  }
+
+  return getLegacyOmcDir();
+}
+
+/**
+ * Global OMC state directory.
+ *
+ * When OMC_HOME is set, preserve that existing override semantics by treating
+ * it as the shared root and resolving state beneath it.
+ */
+export function getGlobalOmcStateRoot(): string {
+  const explicitRoot = process.env.OMC_HOME?.trim();
+  if (explicitRoot) {
+    return join(explicitRoot, 'state');
+  }
+
+  if (prefersXdgOmcDirs()) {
+    return join(getStateDir(), 'omc');
+  }
+
+  return join(getLegacyOmcDir(), 'state');
+}
+
+export function getGlobalOmcConfigPath(...segments: string[]): string {
+  return join(getGlobalOmcConfigRoot(), ...segments);
+}
+
+export function getGlobalOmcStatePath(...segments: string[]): string {
+  return join(getGlobalOmcStateRoot(), ...segments);
+}
+
+export function getLegacyOmcPath(...segments: string[]): string {
+  return join(getLegacyOmcDir(), ...segments);
+}
+
+function dedupePaths(paths: string[]): string[] {
+  return [...new Set(paths)];
+}
+
+export function getGlobalOmcConfigCandidates(...segments: string[]): string[] {
+  if (process.env.OMC_HOME?.trim()) {
+    return [getGlobalOmcConfigPath(...segments)];
+  }
+
+  return dedupePaths([
+    getGlobalOmcConfigPath(...segments),
+    getLegacyOmcPath(...segments),
+  ]);
+}
+
+export function getGlobalOmcStateCandidates(...segments: string[]): string[] {
+  const explicitRoot = process.env.OMC_HOME?.trim();
+  if (explicitRoot) {
+    return dedupePaths([
+      getGlobalOmcStatePath(...segments),
+      join(explicitRoot, ...segments),
+    ]);
+  }
+
+  return dedupePaths([
+    getGlobalOmcStatePath(...segments),
+    getLegacyOmcPath('state', ...segments),
+  ]);
 }
 
 /**

@@ -1,6 +1,6 @@
 ---
 name: omc-setup
-description: Setup and configure oh-my-claudecode (the ONLY command you need to learn)
+description: Install or refresh oh-my-claudecode for plugin, npm, and local-dev setups from the canonical setup flow
 level: 2
 ---
 
@@ -11,6 +11,14 @@ This is the **only command you need to learn**. After running this, everything e
 **When this skill is invoked, immediately execute the workflow below. Do not only restate or summarize these instructions back to the user.**
 
 Note: All `~/.claude/...` paths in this guide respect `CLAUDE_CONFIG_DIR` when that environment variable is set.
+
+## Best-Fit Use
+
+Choose this setup flow when the user wants to **install, refresh, or repair OMC itself**.
+
+- Marketplace/plugin install users should land here after `/plugin install oh-my-claudecode`
+- npm users should land here after `npm i -g oh-my-claude-sisyphus@latest`
+- local-dev and worktree users should land here after updating the checked-out repo and rerunning setup
 
 ## Flag Parsing
 
@@ -54,6 +62,8 @@ MODES:
   Global Configuration (--global)
     - Downloads fresh CLAUDE.md to ~/.claude/
     - Backs up existing CLAUDE.md to ~/.claude/CLAUDE.md.backup.YYYY-MM-DD
+    - Default: explicitly overwrites ~/.claude/CLAUDE.md so plain `claude` also uses OMC
+    - Optional preserve mode keeps the user's base `CLAUDE.md` and installs OMC into `CLAUDE-omc.md` for `omc` launches
     - Applies to all Claude Code sessions
     - Cleans up legacy hooks
     - Use this to update global config after OMC upgrades
@@ -78,7 +88,7 @@ For more info: https://github.com/Yeachan-Heo/oh-my-claudecode
 
 ```bash
 # Check if setup was already completed
-CONFIG_FILE="$HOME/.claude/.omc-config.json"
+CONFIG_FILE="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.omc-config.json"
 
 if [ -f "$CONFIG_FILE" ]; then
   SETUP_COMPLETED=$(jq -r '.setupCompleted // empty' "$CONFIG_FILE" 2>/dev/null)

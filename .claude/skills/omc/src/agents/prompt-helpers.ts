@@ -9,6 +9,7 @@ import { readdirSync } from 'fs';
 import { join, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
 import { loadAgentPrompt } from './utils.js';
+import { appendSkininthegamebrosGuidance } from './skininthegamebros-guidance.js';
 
 /**
  * Build-time injected agent roles list.
@@ -44,6 +45,10 @@ function getPackageDir(): string {
   try {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = dirname(__filename);
+    const currentDirName = basename(__dirname);
+    if (currentDirName === 'bridge') {
+      return join(__dirname, '..');
+    }
     // From src/agents/ or dist/agents/ go up to package root
     return join(__dirname, '..', '..');
   } catch {
@@ -143,7 +148,7 @@ export function resolveSystemPrompt(
       console.warn(`[prompt-injection] Agent role "${role}" prompt not found, skipping injection`);
       return undefined;
     }
-    return prompt;
+    return appendSkininthegamebrosGuidance(prompt, 'agent');
   }
 
   return undefined;

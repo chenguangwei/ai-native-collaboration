@@ -4,14 +4,14 @@
  * Intercepts Stop events to automatically delegate recently modified files
  * to the code-simplifier agent for cleanup and simplification.
  *
- * Opt-in via ~/.omc/config.json: { "codeSimplifier": { "enabled": true } }
+ * Opt-in via global OMC config.json (XDG-aware on Linux/Unix, legacy ~/.omc fallback)
  * Default: disabled (opt-in only)
  */
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync } from 'fs';
 import { join } from 'path';
-import { homedir } from 'os';
 import { execSync } from 'child_process';
+import { getGlobalOmcConfigCandidates } from '../../utils/paths.js';
 
 /** Config shape for the code-simplifier feature */
 export interface CodeSimplifierConfig {
@@ -40,21 +40,24 @@ const DEFAULT_MAX_FILES = 10;
 export const TRIGGER_MARKER_FILENAME = 'code-simplifier-triggered.marker';
 
 /**
- * Read the global OMC config from ~/.omc/config.json.
+ * Read the global OMC config from the XDG-aware location, with legacy
+ * ~/.omc/config.json fallback for backward compatibility.
  * Returns null if the file does not exist or cannot be parsed.
  */
 export function readOmcConfig(): OmcGlobalConfig | null {
-  const configPath = join(homedir(), '.omc', 'config.json');
+  for (const configPath of getGlobalOmcConfigCandidates('config.json')) {
+    if (!existsSync(configPath)) {
+      continue;
+    }
 
-  if (!existsSync(configPath)) {
-    return null;
+    try {
+      return JSON.parse(readFileSync(configPath, 'utf-8')) as OmcGlobalConfig;
+    } catch {
+      return null;
+    }
   }
 
-  try {
-    return JSON.parse(readFileSync(configPath, 'utf-8')) as OmcGlobalConfig;
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 /**

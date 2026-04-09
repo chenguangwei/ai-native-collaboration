@@ -94,15 +94,6 @@ export function isJobTerminal(job: OmcTeamJob): boolean {
   return job.status === 'completed' || job.status === 'failed' || job.status === 'timeout';
 }
 
-export function isPidAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 export function clearScopedTeamState(job: Pick<OmcTeamJob, 'cwd' | 'teamName'>): string {
   if (!job.cwd || !job.teamName) {
     return 'team state cleanup skipped (missing job cwd/teamName).';

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { getOmcRoot } from '../../lib/worktree-paths.js';
-import { getClaudeConfigDir } from '../../utils/paths.js';
+import { getClaudeConfigDir } from '../../utils/config-dir.js';
 
 export interface PermissionRequestInput {
   session_id: string;

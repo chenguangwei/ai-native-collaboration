@@ -6,7 +6,7 @@
  * and file permissions so that individual mode modules don't duplicate this logic.
  */
 
-import { existsSync, readFileSync, writeFileSync, unlinkSync, renameSync } from 'fs';
+import { existsSync, readFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import {
   getOmcRoot,
@@ -16,6 +16,7 @@ import {
   ensureOmcDir,
   listSessionIds,
 } from './worktree-paths.js';
+import { atomicWriteJsonSync } from './atomic-write.js';
 
 export function getStateSessionOwner(state: Record<string, unknown> | null | undefined): string | undefined {
   if (!state || typeof state !== 'object') {
@@ -71,6 +72,45 @@ function getLegacyStateCandidates(mode: string, directory?: string): string[] {
   ];
 }
 
+/**
+ * Find session-scoped state files that belong to the requested session.
+ *
+ * Normally the state file lives under `.omc/state/sessions/{sessionId}/`.
+ * When a file is stranded under a different session directory (for example
+ * after session continuation or manual recovery), this scans all session
+ * directories and returns any file whose embedded owner still matches the
+ * requested session.
+ */
+export function findSessionOwnedStateFiles(
+  mode: string,
+  sessionId: string,
+  directory?: string,
+): string[] {
+  const matches = new Set<string>();
+  const expectedPath = resolveSessionStatePath(mode, sessionId, directory);
+  if (existsSync(expectedPath)) {
+    matches.add(expectedPath);
+  }
+
+  for (const sid of listSessionIds(directory)) {
+    const candidatePath = resolveSessionStatePath(mode, sid, directory);
+    if (!existsSync(candidatePath)) {
+      continue;
+    }
+
+    try {
+      const raw = JSON.parse(readFileSync(candidatePath, 'utf-8')) as Record<string, unknown>;
+      if (getStateSessionOwner(raw) === sessionId) {
+        matches.add(candidatePath);
+      }
+    } catch {
+      // Ignore unreadable files and keep scanning.
+    }
+  }
+
+  return [...matches];
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -98,10 +138,11 @@ export function writeModeState(
       ensureOmcDir('state', baseDir);
     }
     const filePath = resolveFile(mode, directory, sessionId);
-    const envelope = { ...state, _meta: { written_at: new Date().toISOString(), mode } };
-    const tmpPath = filePath + '.tmp';
-    writeFileSync(tmpPath, JSON.stringify(envelope, null, 2), { mode: 0o600 });
-    renameSync(tmpPath, filePath);
+    const envelope = {
+      ...state,
+      _meta: { written_at: new Date().toISOString(), mode, ...(sessionId ? { sessionId } : {}) },
+    };
+    atomicWriteJsonSync(filePath, envelope);
     return true;
   } catch {
     return false;

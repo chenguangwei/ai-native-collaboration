@@ -36,7 +36,7 @@ function getShellOption(platform: string): string | undefined {
 }
 
 function getSafeMode(configSafeMode: boolean, platform: string): boolean {
-  return configSafeMode || isWin32(platform);
+  return configSafeMode !== false && (configSafeMode || isWin32(platform));
 }
 
 describe('Windows HUD Platform Fixes (#739)', () => {
@@ -138,7 +138,7 @@ describe('Windows HUD Platform Fixes (#739)', () => {
       expect(result).toContain('\u26A1');    // zap
     });
 
-    it('should use ASCII icons on Windows', async () => {
+    it('should use ASCII icons on Windows by default', async () => {
       Object.defineProperty(process, 'platform', { value: 'win32' });
       vi.resetModules();
 
@@ -148,6 +148,24 @@ describe('Windows HUD Platform Fixes (#739)', () => {
       expect(result).not.toContain('\u{1F527}');
       expect(result).not.toContain('\u{1F916}');
       expect(result).not.toContain('\u26A1');
+    });
+
+    it('should allow emoji icons on Windows when explicitly configured', async () => {
+      Object.defineProperty(process, 'platform', { value: 'win32' });
+      vi.resetModules();
+
+      const mod = await import('../../hud/elements/call-counts.js');
+      const result = mod.renderCallCounts(42, 7, 3, 'emoji');
+      expect(result).toBe('🔧42 🤖7 ⚡3');
+    });
+
+    it('should allow ASCII icons on Unix when explicitly configured', async () => {
+      Object.defineProperty(process, 'platform', { value: 'darwin' });
+      vi.resetModules();
+
+      const mod = await import('../../hud/elements/call-counts.js');
+      const result = mod.renderCallCounts(42, 7, 3, 'ascii');
+      expect(result).toBe('T:42 A:7 S:3');
     });
 
     it('should return null for zero counts on Windows', async () => {
@@ -204,15 +222,15 @@ describe('Windows HUD Platform Fixes (#739)', () => {
         'utf-8',
       );
       expect(content).toContain("process.platform === 'win32'");
-      expect(content).toMatch(/config\.elements\.safeMode \|\| process\.platform === 'win32'/);
+      expect(content).toContain('config.elements.safeMode !== false');
     });
 
     it('safe mode logic: config=false on Mac -> disabled', () => {
       expect(getSafeMode(false, 'darwin')).toBe(false);
     });
 
-    it('safe mode logic: config=false on Windows -> auto-enabled', () => {
-      expect(getSafeMode(false, 'win32')).toBe(true);
+    it('safe mode logic: config=false on Windows -> disabled (explicit override)', () => {
+      expect(getSafeMode(false, 'win32')).toBe(false);
     });
 
     it('safe mode logic: config=true on Mac -> enabled', () => {

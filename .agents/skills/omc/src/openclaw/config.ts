@@ -8,7 +8,7 @@
 
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
-import { getClaudeConfigDir } from "../utils/paths.js";
+import { getClaudeConfigDir } from "../utils/config-dir.js";
 import type { OpenClawConfig, OpenClawHookEvent, OpenClawGatewayConfig, OpenClawCommandGatewayConfig } from "./types.js";
 
 const CONFIG_FILE = process.env.OMC_OPENCLAW_CONFIG

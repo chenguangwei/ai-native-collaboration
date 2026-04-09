@@ -13,8 +13,9 @@
 import { existsSync, readFileSync, unlinkSync, statSync, openSync, readSync, closeSync, mkdirSync } from 'fs';
 import { atomicWriteJsonSync } from '../../lib/atomic-write.js';
 import { join } from 'path';
-import { homedir } from 'os';
-import { getClaudeConfigDir } from '../../utils/paths.js';
+import { getHardMaxIterations } from '../../lib/security-config.js';
+import { getClaudeConfigDir } from '../../utils/config-dir.js';
+import { getGlobalOmcConfigCandidates } from '../../utils/paths.js';
 import {
   readUltraworkState,
   writeUltraworkState,
@@ -23,7 +24,7 @@ import {
   getUltraworkPersistenceMessage,
   type UltraworkState
 } from '../ultrawork/index.js';
-import { resolveToWorktreeRoot, resolveSessionStatePath, getOmcRoot } from '../../lib/worktree-paths.js';
+import { resolveToWorktreeRoot, resolveSessionStatePath, resolveStatePath, getOmcRoot } from '../../lib/worktree-paths.js';
 import { readModeState } from '../../lib/mode-state-io.js';
 import {
   readRalphState,
@@ -49,7 +50,7 @@ import {
 import { checkAutopilot } from '../autopilot/enforcement.js';
 import { readTeamPipelineState } from '../team-pipeline/state.js';
 import type { TeamPipelinePhase } from '../team-pipeline/types.js';
-import { getActiveAgentCount } from '../subagent-tracker/index.js';
+import { getActiveAgentSnapshot } from '../subagent-tracker/index.js';
 
 export interface ToolErrorState {
   tool_name: string;
@@ -87,18 +88,28 @@ const CANCEL_SIGNAL_TTL_MS = 30_000;
 /** Track todo-continuation attempts per session to prevent infinite loops */
 const todoContinuationAttempts = new Map<string, number>();
 
+export function shouldWriteStateBack(statePath: string | null | undefined): boolean {
+  return Boolean(statePath && existsSync(statePath));
+}
+
 /**
  * Check whether this session is in an explicit cancel window.
  * Used to prevent stop-hook re-enforcement races during /cancel.
  */
 function isSessionCancelInProgress(directory: string, sessionId?: string): boolean {
-  if (!sessionId) return false;
+  let cancelSignalPath: string | undefined;
 
-  let cancelSignalPath: string;
-  try {
-    cancelSignalPath = resolveSessionStatePath('cancel-signal', sessionId, directory);
-  } catch {
-    return false;
+  if (sessionId) {
+    try {
+      cancelSignalPath = resolveSessionStatePath('cancel-signal', sessionId, directory);
+    } catch {
+      // fall through to legacy path
+    }
+  }
+
+  // Fallback: check legacy (non-session-scoped) cancel signal
+  if (!cancelSignalPath) {
+    cancelSignalPath = join(getOmcRoot(directory), 'state', 'cancel-signal-state.json');
   }
 
   if (!existsSync(cancelSignalPath)) {
@@ -226,6 +237,7 @@ Do NOT skip this step. Do NOT move on without fixing the error.
  * Get or increment todo-continuation attempt counter
  */
 function trackTodoContinuationAttempt(sessionId: string): number {
+  if (todoContinuationAttempts.size > 200) todoContinuationAttempts.clear();
   const current = todoContinuationAttempts.get(sessionId) || 0;
   const next = current + 1;
   todoContinuationAttempts.set(sessionId, next);
@@ -240,19 +252,21 @@ export function resetTodoContinuationAttempts(sessionId: string): void {
 }
 
 /**
- * Read the session-idle notification cooldown in seconds from ~/.omc/config.json.
+ * Read the session-idle notification cooldown in seconds from global OMC config.
  * Default: 60 seconds. 0 = disabled (no cooldown).
  */
 export function getIdleNotificationCooldownSeconds(): number {
-  const configPath = join(homedir(), '.omc', 'config.json');
-  try {
-    if (!existsSync(configPath)) return 60;
-    const config = JSON.parse(readFileSync(configPath, 'utf-8')) as Record<string, unknown>;
-    const cooldown = (config?.notificationCooldown as Record<string, unknown> | undefined);
-    const val = cooldown?.sessionIdleSeconds;
-    if (typeof val === 'number' && Number.isFinite(val)) return Math.max(0, val);
-  } catch {
-    // ignore parse errors
+  for (const configPath of getGlobalOmcConfigCandidates('config.json')) {
+    try {
+      if (!existsSync(configPath)) continue;
+      const config = JSON.parse(readFileSync(configPath, 'utf-8')) as Record<string, unknown>;
+      const cooldown = (config?.notificationCooldown as Record<string, unknown> | undefined);
+      const val = cooldown?.sessionIdleSeconds;
+      if (typeof val === 'number' && Number.isFinite(val)) return Math.max(0, val);
+      return 60;
+    } catch {
+      return 60;
+    }
   }
   return 60;
 }
@@ -361,12 +375,33 @@ function isCriticalContextStop(stopContext?: StopContext): boolean {
   return estimateTranscriptContextPercent(transcriptPath) >= CRITICAL_CONTEXT_STOP_PERCENT;
 }
 
+const AWAITING_CONFIRMATION_TTL_MS = 2 * 60 * 1000;
+
 function isAwaitingConfirmation(state: unknown): boolean {
-  return Boolean(
-    state &&
-    typeof state === 'object' &&
-    (state as Record<string, unknown>).awaiting_confirmation === true
-  );
+  if (!state || typeof state !== 'object') {
+    return false;
+  }
+
+  const stateRecord = state as Record<string, unknown>;
+  if (stateRecord.awaiting_confirmation !== true) {
+    return false;
+  }
+
+  const setAt =
+    (typeof stateRecord.awaiting_confirmation_set_at === 'string' && stateRecord.awaiting_confirmation_set_at) ||
+    (typeof stateRecord.started_at === 'string' && stateRecord.started_at) ||
+    null;
+
+  if (!setAt) {
+    return false;
+  }
+
+  const setAtMs = new Date(setAt).getTime();
+  if (!Number.isFinite(setAtMs)) {
+    return false;
+  }
+
+  return Date.now() - setAtMs < AWAITING_CONFIRMATION_TTL_MS;
 }
 
 /**
@@ -433,13 +468,26 @@ async function checkRalphLoop(
 ): Promise<PersistentModeResult | null> {
   const workingDir = resolveToWorktreeRoot(directory);
   const state = readRalphState(workingDir, sessionId);
+  const ralphStatePath = sessionId
+    ? resolveSessionStatePath('ralph', sessionId, workingDir)
+    : resolveStatePath('ralph', workingDir);
 
   if (!state || !state.active) {
     return null;
   }
 
-  // Strict session isolation: only process state for matching session
-  if (state.session_id !== sessionId) {
+  // Session isolation. `readRalphState()` already enforces the lenient form
+  // ("only reject when BOTH sides have defined session_ids that differ"),
+  // so by the time we get here, the state file is either explicitly bound
+  // to this session or has no session_id at all (legacy/unbound state).
+  //
+  // The previous strict check `state.session_id !== sessionId` rejected the
+  // legitimate case where one side is undefined and the other is a UUID,
+  // which broke iteration counting on every Ralph loop where the state file
+  // lacked a session_id (or the Stop hook lost it). Symptom: ralph:1/100
+  // stuck forever in the HUD even on multi-hour sessions where the Stop
+  // hook fired many times.
+  if (state.session_id && sessionId && state.session_id !== sessionId) {
     return null;
   }
 
@@ -602,12 +650,40 @@ async function checkRalphLoop(
     };
   }
 
-  // Check max iterations (cancel already checked at function entry via cached flag)
+  // Hard max: check iteration count directly against the security limit,
+  // independent of max_iterations, so it cannot be bypassed by a high
+  // initial max_iterations value.
+  const hardMax = getHardMaxIterations();
+  if (hardMax > 0 && state.iteration >= hardMax) {
+    // Hard limit reached — auto-disable to prevent unbounded execution
+    state.active = false;
+    if (!shouldWriteStateBack(ralphStatePath)) {
+      return {
+        shouldBlock: false,
+        message: '',
+        mode: 'none'
+      };
+    }
+    writeRalphState(workingDir, state, sessionId);
+    return {
+      shouldBlock: true,
+      message: `[RALPH - HARD LIMIT] Reached hard max iterations (${hardMax}). Mode auto-disabled. Restart with /oh-my-claudecode:ralph if needed.`,
+      mode: 'ralph',
+      metadata: { iteration: state.iteration, maxIterations: state.max_iterations }
+    };
+  }
+
+  // Check max iterations — extend limit so user-visible cancellation
+  // remains the only explicit termination path.
   if (state.iteration >= state.max_iterations) {
-    // Do not silently stop Ralph with unfinished work.
-    // Extend the limit and continue enforcement so user-visible cancellation
-    // remains the only explicit termination path.
     state.max_iterations += 10;
+    if (!shouldWriteStateBack(ralphStatePath)) {
+      return {
+        shouldBlock: false,
+        message: '',
+        mode: 'none'
+      };
+    }
     writeRalphState(workingDir, state, sessionId);
   }
 
@@ -849,6 +925,7 @@ When done, run \`/oh-my-claudecode:cancel\` to cleanly exit.
 
 const RALPLAN_STOP_BLOCKER_MAX = 30;
 const RALPLAN_STOP_BLOCKER_TTL_MS = 45 * 60 * 1000; // 45 min
+const RALPLAN_ACTIVE_AGENT_RECENCY_WINDOW_MS = 5_000;
 
 interface RalplanState {
   active: boolean;
@@ -901,10 +978,18 @@ async function checkRalplan(
     };
   }
 
-  // Orchestrators are allowed to go idle while delegated work is still active.
-  // Delegation waits are expected, so clear any accumulated breaker budget and
-  // let enforcement resume from a clean slate after the running subagents finish.
-  if (getActiveAgentCount(workingDir) > 0) {
+  // Orchestrators are allowed to go idle while delegated work is still active,
+  // but the raw running-agent count can lag behind the real lifecycle because
+  // SubagentStop/post-tool-use bookkeeping lands after the stop event. Only
+  // trust the bypass when the tracker itself was updated recently enough to
+  // look live; otherwise fail closed and keep consensus enforcement active.
+  const activeAgents = getActiveAgentSnapshot(workingDir);
+  const activeAgentStateUpdatedAt = activeAgents.lastUpdatedAt ? new Date(activeAgents.lastUpdatedAt).getTime() : NaN;
+  const hasFreshActiveAgentState =
+    Number.isFinite(activeAgentStateUpdatedAt)
+    && Date.now() - activeAgentStateUpdatedAt <= RALPLAN_ACTIVE_AGENT_RECENCY_WINDOW_MS;
+
+  if (activeAgents.count > 0 && hasFreshActiveAgentState) {
     writeStopBreaker(workingDir, 'ralplan', 0, sessionId);
     return {
       shouldBlock: false,
@@ -960,8 +1045,11 @@ async function checkUltrawork(
     return null;
   }
 
-  // Strict session isolation: only process state for matching session
-  if (state.session_id !== sessionId) {
+  // Session isolation. `readUltraworkState()` already enforces the lenient
+  // form ("only reject when BOTH sides have defined session_ids that
+  // differ"). The previous strict check rejected legitimate cases where
+  // one side was undefined — same root cause as the ralph counter bug.
+  if (state.session_id && sessionId && state.session_id !== sessionId) {
     return null;
   }
 
@@ -975,6 +1063,18 @@ async function checkUltrawork(
       shouldBlock: false,
       message: '',
       mode: 'none'
+    };
+  }
+
+  // Enforce hard max iterations for ultrawork (mirrors ralph enforcement).
+  const hardMax = getHardMaxIterations();
+  if (hardMax > 0 && state.reinforcement_count >= hardMax) {
+    deactivateUltrawork(workingDir, sessionId);
+    return {
+      shouldBlock: true,
+      message: '[ULTRAWORK - HARD LIMIT] Reached hard max iterations (' + hardMax + '). Mode auto-disabled. Restart with /oh-my-claudecode:ultrawork if needed.',
+      mode: 'ultrawork',
+      metadata: { reinforcementCount: state.reinforcement_count }
     };
   }
 

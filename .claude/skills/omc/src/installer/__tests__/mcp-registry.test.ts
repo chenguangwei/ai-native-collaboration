@@ -18,8 +18,12 @@ describe('unified MCP registry sync', () => {
   let claudeDir: string;
   let codexDir: string;
   let omcDir: string;
+  let originalEnv: NodeJS.ProcessEnv;
+  let originalPlatform: NodeJS.Platform;
 
   beforeEach(() => {
+    originalEnv = { ...process.env };
+    originalPlatform = process.platform;
     testRoot = mkdtempSync(join(tmpdir(), 'omc-mcp-registry-'));
     claudeDir = join(testRoot, '.claude');
     codexDir = join(testRoot, '.codex');
@@ -35,10 +39,8 @@ describe('unified MCP registry sync', () => {
   });
 
   afterEach(() => {
-    delete process.env.CLAUDE_CONFIG_DIR;
-    delete process.env.CLAUDE_MCP_CONFIG_PATH;
-    delete process.env.CODEX_HOME;
-    delete process.env.OMC_HOME;
+    process.env = originalEnv;
+    Object.defineProperty(process, 'platform', { value: originalPlatform });
 
     if (existsSync(testRoot)) {
       rmSync(testRoot, { recursive: true, force: true });
@@ -321,5 +323,46 @@ describe('unified MCP registry sync', () => {
     expect(status.codexMissing).toEqual([]);
     expect(status.claudeMismatched).toEqual(['remoteOmc']);
     expect(status.codexMismatched).toEqual(['remoteOmc']);
+  });
+
+  it('uses XDG config/state defaults when OMC_HOME is unset on Linux', () => {
+    Object.defineProperty(process, 'platform', { value: 'linux' });
+    delete process.env.OMC_HOME;
+    process.env.HOME = testRoot;
+    process.env.XDG_CONFIG_HOME = join(testRoot, '.config');
+    process.env.XDG_STATE_HOME = join(testRoot, '.state');
+
+    const { result } = syncUnifiedMcpRegistryTargets({
+      mcpServers: {
+        gitnexus: {
+          command: 'gitnexus',
+          args: ['mcp'],
+        },
+      },
+    });
+
+    expect(result.registryPath).toBe(join(testRoot, '.config', 'omc', 'mcp-registry.json'));
+    expect(existsSync(join(testRoot, '.config', 'omc', 'mcp-registry.json'))).toBe(true);
+    expect(existsSync(join(testRoot, '.state', 'omc', 'mcp-registry-state.json'))).toBe(true);
+  });
+
+  it('falls back to legacy ~/.omc registry when the XDG registry does not exist', () => {
+    Object.defineProperty(process, 'platform', { value: 'linux' });
+    delete process.env.OMC_HOME;
+    process.env.HOME = testRoot;
+    process.env.XDG_CONFIG_HOME = join(testRoot, '.config');
+    process.env.XDG_STATE_HOME = join(testRoot, '.state');
+
+    const legacyRegistryDir = join(testRoot, '.omc');
+    mkdirSync(legacyRegistryDir, { recursive: true });
+    writeFileSync(join(legacyRegistryDir, 'mcp-registry.json'), JSON.stringify({
+      gitnexus: { command: 'gitnexus', args: ['mcp'] },
+    }, null, 2));
+
+    const { result } = syncUnifiedMcpRegistryTargets({ theme: 'dark' });
+
+    expect(result.registryExists).toBe(true);
+    expect(result.serverNames).toEqual(['gitnexus']);
+    expect(result.bootstrappedFromClaude).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
 # Skills 速查索引
 
-> AI-Native 岗位技能速查手册 — 共 95 个技能
+> AI-Native 岗位技能速查手册 — 共 126 个技能
 
 **AI-Native 核心理念**：岗位不再按技术栈划分（不再有"Java 工程师"vs"前端工程师"），而是按**你解决什么问题**来划分。AI 负责处理语言/框架的技术细节，人负责产品判断、系统设计和质量保障。
 
@@ -55,27 +55,60 @@
 
 ## OMC 高阶技能
 
-> **oh-my-claudecode** 全局安装，所有项目可用，超越岗位边界。
+> **oh-my-claudecode** 以 vendored 方式内置在仓库中（当前 `4.11.2`），跨岗位通用。
 >
-> **安装/升级**：`/omc-upgrade` | **验证**：`ls ~/.claude/skills/ | grep deep-interview`
+> **安装/升级**：`/omc-upgrade` | **验证**：`find .agents/skills -maxdepth 1 -type d | grep -E "deep-interview|ralph|verify|wiki"`
 
-### 需求与执行
-
-| 技能 | 触发 | 来源 | 用途 |
-|------|------|------|------|
-| `deep-interview` | `/deep-interview` | ⭐ OMC | Socratic 需求澄清，歧义 <20% 才开始执行 |
-| `ralph` | `/ralph` | ⭐ OMC | PRD 驱动持续执行循环，不完成不停止 |
-| `ultrawork` | `/ultrawork` | ⭐ OMC | 并行执行引擎（Haiku/Sonnet/Opus 分层路由）|
-| `autopilot` | `/autopilot` | ⭐ OMC | idea → 规格 → 实现 → QA 全自动流水线 |
-| `ralplan` | `/ralplan` | ⭐ OMC | Planner→Architect→Critic 多视角共识规划 |
-
-### 代码质量与学习
+### 核心执行与编排
 
 | 技能 | 触发 | 来源 | 用途 |
 |------|------|------|------|
-| `ai-slop-cleaner` | `/ai-slop-cleaner` | ⭐ OMC | 行为安全优先的 AI 代码味清理 |
-| `learner` | `/learner` | ⭐ OMC | 从调试会话提取项目级可复用知识 |
-| `ultraqa` | `/ultraqa` | ⭐ OMC | QA 循环直到全部测试通过 |
+| `deep-interview` | `/deep-interview` | ⭐ OMC | Socratic 需求澄清，歧义门控后执行 |
+| `plan` | `/plan` | ⭐ OMC | 战略规划（可选访谈） |
+| `ralplan` | `/ralplan` | ⭐ OMC | 共识规划入口，先澄清再执行 |
+| `team` | `/team` | ⭐ OMC | Claude 原生 Team 多智能体编排 |
+| `omc-teams` | `/omc-teams` | ⭐ OMC | tmux CLI worker（claude/codex/gemini） |
+| `autopilot` | `/autopilot` | ⭐ OMC | idea → 可运行代码的全自动执行 |
+| `ralph` | `/ralph` | ⭐ OMC | 持续执行直到任务完成 |
+| `ultrawork` | `/ultrawork` | ⭐ OMC | 高吞吐并行执行引擎 |
+| `ccg` | `/ccg` | ⭐ OMC | Claude + Codex + Gemini 三模型协作 |
+
+### 调试与验证
+
+| 技能 | 触发 | 来源 | 用途 |
+|------|------|------|------|
+| `debug` | `/debug` | ⭐ OMC | 诊断当前 OMC 会话/仓库状态 |
+| `trace` | `/trace` | ⭐ OMC | 证据驱动链路追踪 |
+| `verify` | `/verify` | ⭐ OMC | 声称完成前做变更有效性验证 |
+| `ultraqa` | `/ultraqa` | ⭐ OMC | 测试-修复-复测循环直到通过 |
+| `visual-verdict` | `/visual-verdict` | ⭐ OMC | 截图对比的结构化视觉判定 |
+
+### 技能沉淀与知识管理
+
+| 技能 | 触发 | 来源 | 用途 |
+|------|------|------|------|
+| `ai-slop-cleaner` | `/ai-slop-cleaner` | ⭐ OMC | 回归安全优先的 AI 代码味清理 |
+| `learner` | `/learner` | ⭐ OMC | 从会话提取可复用技能 |
+| `remember` | `/remember` | ⭐ OMC | 维护项目级可复用记忆 |
+| `skill` | `/skill` | ⭐ OMC | 本地 skills 的 list/add/remove/edit/search |
+| `skillify` | `/skillify` | ⭐ OMC | 将一次性流程固化为新技能草稿 |
+| `wiki` | `/wiki` | ⭐ OMC | 持久化 markdown 知识库沉淀 |
+
+### 平台与集成
+
+| 技能 | 触发 | 来源 | 用途 |
+|------|------|------|------|
+| `ask` | `/ask` | ⭐ OMC | Provider Advisor（Claude/Codex/Gemini）|
+| `external-context` | `/external-context` | ⭐ OMC | 并行外部文档/网页调研 |
+| `deep-dive` | `/deep-dive` | ⭐ OMC | trace + deep-interview 二阶段深潜 |
+| `deepinit` | `/deepinit` | ⭐ OMC | 代码库 AGENTS 分层初始化 |
+| `setup` | `/setup` | ⭐ OMC | 安装/诊断/MCP 路由入口 |
+| `omc-setup` | `/omc-setup` | ⭐ OMC | OMC 安装或刷新配置 |
+| `omc-doctor` | `/omc-doctor` | ⭐ OMC | OMC 安装与冲突诊断 |
+| `mcp-setup` | `/mcp-setup` | ⭐ OMC | 常用 MCP 服务配置 |
+| `configure-notifications` | `/configure-notifications` | ⭐ OMC | Telegram/Discord/Slack 通知配置 |
+| `hud` | `/hud` | ⭐ OMC | HUD 显示元素与布局配置 |
+| `cancel` | `/cancel` | ⭐ OMC | 终止当前 OMC 模式运行 |
 
 ### OMC Agents（`~/.claude/agents/` 已安装，19 个）
 
@@ -427,4 +460,4 @@ QA 测试     → /qa | /qa-only | /ultraqa（循环至通过）
 
 ---
 
-*最后更新: 2026-04-07 by Claude Code — 共 96 个技能 | AI-Native 岗位体系 v2.0 + Codex 集成 + Graphify 知识图谱*
+*最后更新: 2026-04-08 by Claude Code — 共 126 个技能 | AI-Native 岗位体系 v2.0 + Codex 集成 + Graphify 知识图谱*

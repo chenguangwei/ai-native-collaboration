@@ -12,7 +12,8 @@
 import { join, dirname } from "path";
 import { readFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
-import { getConfigDir } from '../utils/config-dir.js';
+import { homedir } from "os";
+import { getClaudeConfigDir } from '../utils/config-dir.js';
 
 // =============================================================================
 // TEMPLATE LOADER (loads hook scripts from templates/hooks/)
@@ -69,11 +70,6 @@ export function isWindows(): boolean {
 }
 
 
-/** Get the Claude config directory path (cross-platform) */
-export function getClaudeConfigDir(): string {
-  return getConfigDir();
-}
-
 /** Get the hooks directory path */
 export function getHooksDir(): string {
   return join(getClaudeConfigDir(), "hooks");
@@ -85,6 +81,34 @@ export function getHooksDir(): string {
  */
 export function getHomeEnvVar(): string {
   return isWindows() ? "%USERPROFILE%" : "$HOME";
+}
+
+function normalizePath(value: string): string {
+  return value.replace(/\\/g, '/').replace(/\/+$/, '');
+}
+
+function isDefaultClaudeConfigDir(): boolean {
+  return normalizePath(getClaudeConfigDir()) === normalizePath(join(homedir(), '.claude'));
+}
+
+function quoteCommandPath(path: string): string {
+  return `"${path.replace(/"/g, '\\"')}"`;
+}
+
+function buildHookCommand(filename: string): string {
+  if (isWindows()) {
+    if (isDefaultClaudeConfigDir()) {
+      return `node "%USERPROFILE%\\\\.claude\\\\hooks\\\\${filename}"`;
+    }
+
+    return `node ${quoteCommandPath(join(getClaudeConfigDir(), 'hooks', filename))}`;
+  }
+
+  if (isDefaultClaudeConfigDir()) {
+    return `node "\${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/${filename}"`;
+  }
+
+  return `node ${quoteCommandPath(join(getClaudeConfigDir(), 'hooks', filename).replace(/\\/g, '/'))}`;
 }
 
 /**
@@ -381,11 +405,7 @@ export const HOOKS_SETTINGS_CONFIG_NODE = {
         hooks: [
           {
             type: "command" as const,
-            // Note: On Windows, %USERPROFILE% is expanded by cmd.exe
-            // On Unix with node hooks, $HOME is expanded by the shell
-            command: isWindows()
-              ? 'node "%USERPROFILE%\\.claude\\hooks\\keyword-detector.mjs"'
-              : 'node "$HOME/.claude/hooks/keyword-detector.mjs"',
+            command: buildHookCommand('keyword-detector.mjs'),
           },
         ],
       },
@@ -395,9 +415,7 @@ export const HOOKS_SETTINGS_CONFIG_NODE = {
         hooks: [
           {
             type: "command" as const,
-            command: isWindows()
-              ? 'node "%USERPROFILE%\\.claude\\hooks\\session-start.mjs"'
-              : 'node "$HOME/.claude/hooks/session-start.mjs"',
+            command: buildHookCommand('session-start.mjs'),
           },
         ],
       },
@@ -407,9 +425,7 @@ export const HOOKS_SETTINGS_CONFIG_NODE = {
         hooks: [
           {
             type: "command" as const,
-            command: isWindows()
-              ? 'node "%USERPROFILE%\\.claude\\hooks\\pre-tool-use.mjs"'
-              : 'node "$HOME/.claude/hooks/pre-tool-use.mjs"',
+            command: buildHookCommand('pre-tool-use.mjs'),
           },
         ],
       },
@@ -419,9 +435,7 @@ export const HOOKS_SETTINGS_CONFIG_NODE = {
         hooks: [
           {
             type: "command" as const,
-            command: isWindows()
-              ? 'node "%USERPROFILE%\\.claude\\hooks\\post-tool-use.mjs"'
-              : 'node "$HOME/.claude/hooks/post-tool-use.mjs"',
+            command: buildHookCommand('post-tool-use.mjs'),
           },
         ],
       },
@@ -431,9 +445,7 @@ export const HOOKS_SETTINGS_CONFIG_NODE = {
         hooks: [
           {
             type: "command" as const,
-            command: isWindows()
-              ? 'node "%USERPROFILE%\\.claude\\hooks\\post-tool-use-failure.mjs"'
-              : 'node "$HOME/.claude/hooks/post-tool-use-failure.mjs"',
+            command: buildHookCommand('post-tool-use-failure.mjs'),
           },
         ],
       },
@@ -443,9 +455,7 @@ export const HOOKS_SETTINGS_CONFIG_NODE = {
         hooks: [
           {
             type: "command" as const,
-            command: isWindows()
-              ? 'node "%USERPROFILE%\\.claude\\hooks\\persistent-mode.mjs"'
-              : 'node "$HOME/.claude/hooks/persistent-mode.mjs"',
+            command: buildHookCommand('persistent-mode.mjs'),
           },
         ],
       },
@@ -453,9 +463,7 @@ export const HOOKS_SETTINGS_CONFIG_NODE = {
         hooks: [
           {
             type: "command" as const,
-            command: isWindows()
-              ? 'node "%USERPROFILE%\\.claude\\hooks\\code-simplifier.mjs"'
-              : 'node "$HOME/.claude/hooks/code-simplifier.mjs"',
+            command: buildHookCommand('code-simplifier.mjs'),
           },
         ],
       },
@@ -473,4 +481,3 @@ export const HOOKS_SETTINGS_CONFIG_NODE = {
 export function getHooksSettingsConfig(): typeof HOOKS_SETTINGS_CONFIG_NODE {
   return HOOKS_SETTINGS_CONFIG_NODE;
 }
-

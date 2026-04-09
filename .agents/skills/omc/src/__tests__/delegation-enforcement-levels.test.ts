@@ -6,7 +6,8 @@
  * processPreToolUse integration in bridge.ts
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { join } from 'path';
 import {
   processOrchestratorPreTool,
   isAllowedPath,
@@ -55,11 +56,23 @@ const mockExistsSync = vi.mocked(existsSync);
 const mockReadFileSync = vi.mocked(readFileSync);
 
 describe('delegation-enforcement-levels', () => {
+  const savedConfigDir = process.env.CLAUDE_CONFIG_DIR;
+
   beforeEach(() => {
     vi.clearAllMocks();
     clearEnforcementCache();
+    // Ensure tests use the mocked homedir, not a custom CLAUDE_CONFIG_DIR
+    delete process.env.CLAUDE_CONFIG_DIR;
     // Default: no config files exist
     mockExistsSync.mockReturnValue(false);
+  });
+
+  afterEach(() => {
+    if (savedConfigDir !== undefined) {
+      process.env.CLAUDE_CONFIG_DIR = savedConfigDir;
+    } else {
+      delete process.env.CLAUDE_CONFIG_DIR;
+    }
   });
 
   // ─── 1. suggestAgentForFile (tested indirectly via warning messages) ───
@@ -583,6 +596,36 @@ describe('delegation-enforcement-levels', () => {
 
     it('returns true for .claude/ paths', () => {
       expect(isAllowedPath('.claude/settings.json')).toBe(true);
+    });
+
+    it('returns true for absolute paths under CLAUDE_CONFIG_DIR', () => {
+      const originalConfigDir = process.env.CLAUDE_CONFIG_DIR;
+      process.env.CLAUDE_CONFIG_DIR = '/custom/claude-config';
+      try {
+        expect(isAllowedPath('/custom/claude-config/settings.json')).toBe(true);
+        expect(isAllowedPath('/custom/claude-config/agents/test.md')).toBe(true);
+      } finally {
+        if (originalConfigDir === undefined) {
+          delete process.env.CLAUDE_CONFIG_DIR;
+        } else {
+          process.env.CLAUDE_CONFIG_DIR = originalConfigDir;
+        }
+      }
+    });
+
+    it('returns true for absolute paths under a ~-prefixed CLAUDE_CONFIG_DIR', () => {
+      const originalConfigDir = process.env.CLAUDE_CONFIG_DIR;
+      process.env.CLAUDE_CONFIG_DIR = '~/.claude-alt';
+      try {
+        expect(isAllowedPath(join('/mock/home', '.claude-alt', 'settings.json'))).toBe(true);
+        expect(isAllowedPath(join('/mock/home', '.claude-alt', 'agents', 'test.md'))).toBe(true);
+      } finally {
+        if (originalConfigDir === undefined) {
+          delete process.env.CLAUDE_CONFIG_DIR;
+        } else {
+          process.env.CLAUDE_CONFIG_DIR = originalConfigDir;
+        }
+      }
     });
 
     it('returns true for CLAUDE.md', () => {

@@ -31,6 +31,15 @@ jobs:
       - name: Run tests
         run: npm test -- --run
 
+      # Some tests execute scripts/plugin-setup.mjs against the real
+      # hooks/hooks.json and rewrite bare `node` to the absolute node binary
+      # path of the runner (e.g. /opt/hostedtoolcache/node/.../bin/node). If we
+      # let that mutated file ship, every end user inherits a node path that
+      # does not exist on their machine. Restore the file to its committed
+      # state before publishing. See issue #2348.
+      - name: Restore hooks.json before publish
+        run: git checkout -- hooks/hooks.json
+
       - name: Publish to npm
         run: |
           VERSION=$(node -p "require('./package.json').version")
@@ -42,22 +51,30 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Build release notes
+      - name: Prepare release notes
         run: |
-          if [ -f .github/release-body.md ]; then
-            echo "Using generated release-body.md"
+          VERSION="${GITHUB_REF_NAME#v}"
+          # Use the pre-committed .github/release-body.md when available and non-empty.
+          # Do NOT regenerate via release.ts here: the tag points to the release commit
+          # so git log v{prev}..HEAD returns zero commits, producing an empty body.
+          # The release script is meant to run *before* tagging and commit the result.
+          if [ -s .github/release-body.md ]; then
+            echo "Using committed release-body.md"
             cp .github/release-body.md release-notes.md
           else
-            echo "Falling back to template"
-            VERSION="${GITHUB_REF_NAME#v}"
-            sed "s/{{VERSION}}/$VERSION/g" .github/release-notes.md > release-notes.md
+            echo "Falling back to minimal release notes"
+            echo "## oh-my-claudecode v${VERSION}" > release-notes.md
+            echo "" >> release-notes.md
+            echo "### Install / Update" >> release-notes.md
+            echo '```bash' >> release-notes.md
+            echo "npm install -g oh-my-claude-sisyphus@${VERSION}" >> release-notes.md
+            echo '```' >> release-notes.md
           fi
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           body_path: release-notes.md
-          generate_release_notes: false
           draft: false
           prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
         env:
