@@ -79,16 +79,20 @@ rsync -a --delete --exclude='.git' "$TMP_DIR"/ "$AGENT_OMC_PATH"/
 echo "SYNCED_VERSION=$(jq -r '.version' \"$OMC_PATH/package.json\")"
 ```
 
-### Step 4: 同步顶层 .agents/skills（Codex 兼容）
+### Step 4: 同步 skills 入口（Codex + Claude Code）
 
 ```bash
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 if [ -f "$ROOT/scripts/sync-omc-skills.sh" ]; then
   bash "$ROOT/scripts/sync-omc-skills.sh"
 else
-  echo "SKIP: sync-omc-skills.sh 不存在，跳过 .agents/ 同步"
+  echo "SKIP: sync-omc-skills.sh 不存在，跳过 skills 同步"
 fi
 ```
+
+> `sync-omc-skills.sh` 会同时做两件事：
+> 1. 同步 `.claude/skills/omc/skills/*` → `.agents/skills/*`（Codex）
+> 2. 维护 `.claude/skills/<skill> -> omc/skills/<skill>` 链接（Claude Code）
 
 ### Step 5: 同步文档与验证
 
@@ -101,6 +105,7 @@ fi
   - .claude/skills/omc/
   - .agents/skills/omc/
   - .agents/skills/*（通过 scripts/sync-omc-skills.sh）
+  - .claude/skills/*（OMC skills 链接入口）
 
 已同步文档：
   - .claude/skills/omc/README*.md
