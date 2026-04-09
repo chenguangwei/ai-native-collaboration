@@ -25,8 +25,8 @@
 
 ```bash
 # 使用 Claude - 需要深度理解
-/planceo → 分析需求
-/plan-architect → 技术设计
+/office-hours → 分析需求
+/plan-eng-review → 技术设计
 ```
 
 ### 场景 2: 批量代码修改

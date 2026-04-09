@@ -30,7 +30,7 @@ cat docs/03_architecture/db_schema.md
 **使用架构技能:**
 
 ```
-/plan-architect        # 架构评审
+/plan-eng-review        # 架构评审
 /writing-plans         # 编写计划
 ```
 
@@ -192,7 +192,7 @@ npm run migrate
 ### 新功能开发
 
 ```
-/brainstorming → /plan-architect → /writing-plans → /test-driven-development → /verification → /review
+/brainstorming → /plan-eng-review → /writing-plans → /test-driven-development → /verification → /review
 ```
 
 ### Bug 修复

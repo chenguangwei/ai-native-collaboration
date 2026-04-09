@@ -46,7 +46,7 @@
 **启动产品思维：**
 
 ```
-/plan-ceo
+/office-hours
 ```
 
 执行 5-Why 分析 → 竞品调研 → 用户价值验证 → 输出高优 PRD。
@@ -63,7 +63,7 @@
 
 ```
 1. 描述业务背景和用户痛点
-2. 触发 /plan-ceo → 获取结构化分析
+2. 触发 /office-hours → 获取结构化分析
 3. 补充竞品数据和用户访谈
 4. /plan-ceo-review → CEO 视角审查 PRD 草稿
 ```
@@ -190,7 +190,7 @@ cat docs/03_architecture/api_spec.md
 **技术方案评审：**
 
 ```
-/plan-architect
+/plan-eng-review
 ```
 
 CTO 级推演：方案对比 → 架构设计 → 数据流设计 → 风险评估 → 输出 ADR。
@@ -716,10 +716,9 @@ git worktree add ../feat-payment feature/payment
 
 | 阶段 | 核心命令 | 用途 |
 |------|---------|------|
-| 产品 | `/plan-ceo` | 产品思维，输出 PRD |
 | 产品 | `/plan-ceo-review` | CEO 视角审查 |
 | 产品 | `/office-hours` | YC 视角审视 |
-| 研发 | `/plan-architect` | CTO 级架构设计 |
+| 研发 | `/plan-eng-review` | 工程方案 / 架构设计审查 |
 | 研发 | `/review` | 代码审查 |
 | 研发 | `/debug` | 结构化排障 |
 | 测试 | `/qa` | 自动化测试 |

@@ -267,7 +267,7 @@ npm test
 - `/brainstorming` - 头脑风暴
 - `/deep-interview` - 需求 Socratic 澄清（OMC）
 - `/plan-ceo-review` - 产品方向审视
-- `/plan-architect` - 架构评审
+- `/plan-eng-review` - 架构评审
 - `/ralplan` - 多视角共识规划（OMC）
 - `/design-consultation` - 设计咨询
 
