@@ -109,7 +109,7 @@
 | `gstack-qa` | `/qa` | 🌐 | 自动化测试 + 自动修复 |
 | `gstack-qa-only` | `/qa-only` | 🌐 | 只报告，不修复 |
 | `ultraqa` | `/ultraqa` | ⭐ OMC | QA 循环直到全部通过 |
-| `browser-qa` | `browser-qa` | 📦 ECC | 视觉/交互/无障碍 QA |
+| `browse` | `/browse` | 📦 ECC | 视觉/交互/无障碍 QA |
 | `tdd-workflow` | `/tdd-workflow` | 📦 ECC | 测试代码模式 |
 | `e2e-testing` | `/e2e-testing` | 📦 ECC | Playwright E2E 测试模式与配置 |
 | `springboot-verification` | `/springboot-verification` | 📦 ECC | Spring Boot 项目级验证流程 |

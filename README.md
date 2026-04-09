@@ -291,27 +291,28 @@ skill 会自动完成完整升级流程：
 
 > 按「解决什么问题」划分岗位，AI 处理语言栈技术细节
 
-| 角色 | currentRole 值 | 说明 |
-|------|---------------|------|
-| 产品负责人 | `product-owner` | 需求策略、PRD、用户研究 |
-| 交付工程师 | `delivery-engineer` | 端到端交付产品特性（含部署上线，替代前端/后端/全栈/运维）|
-| AI 工程师 | `ai-engineer` | Agent 编排、LLM 集成、AI 流水线 |
-| 质量工程师 | `quality-engineer` | 全栈测试 + 安全 + 可靠性 + 可观测性 |
+| 角色 | currentRole 值 | 说明 | 操作手册 |
+|------|---------------|------|---------|
+| 产品负责人 | `product-owner` | 需求策略、PRD、用户研究 | [📖 查看](docs/06_handbooks/ai-native/product-owner.md) |
+| 交付工程师 | `delivery-engineer` | 端到端交付产品特性（含部署上线，替代前端/后端/全栈/运维） | [📖 查看](docs/06_handbooks/ai-native/delivery-engineer.md) |
+| AI 工程师 | `ai-engineer` | Agent 编排、LLM 集成、AI 流水线 | [📖 查看](docs/06_handbooks/ai-native/ai-engineer.md) |
+| 质量工程师 | `quality-engineer` | 全栈测试 + 安全 + 可靠性 + 可观测性 | [📖 查看](docs/06_handbooks/ai-native/quality-engineer.md) |
 
-详见 👉 [全局操作总纲 SOP](docs/00_AI_NATIVE_SOP.md) (基建协同铁律)
+> 👨‍👩‍👧‍👦 **完整协作流程** 详见 👉 [AI-Native 角色全矩阵协同手册](docs/06_handbooks/ai-native/product-workflow.md) | [全局操作总纲 SOP](docs/00_AI_NATIVE_SOP.md)
 
 #### 传统体系 👥（过渡期）
 
 > 保留原有岗位名称，映射到 AI-Native 角色值
 
-| 你的岗位 | currentRole 值 | 说明 |
-|---------|---------------|------|
-| 产品经理 | `product-owner` | 需求策略、PRD |
-| 前端工程师 | `delivery-engineer` | UI、交互、前端逻辑 |
-| 后端工程师 | `delivery-engineer` | API、服务、数据层 |
-| 测试工程师 | `quality-engineer` | 测试、安全、质量保障 |
-| 运维工程师 | `delivery-engineer` | 基础设施、部署、监控 |
-详见 [传统体系操作大全](docs/06_handbooks/traditional/README.md) | [全局操作总纲 SOP](docs/00_AI_NATIVE_SOP.md)
+| 你的岗位 | currentRole 值 | 说明 | 操作手册 |
+|---------|---------------|------|---------|
+| 产品经理 | `product-owner` | 需求策略、PRD | [📖 查看](docs/06_handbooks/traditional/pm.md) |
+| 前端工程师 | `delivery-engineer` | UI、交互、前端逻辑 | [📖 查看](docs/06_handbooks/traditional/frontend.md) |
+| 后端工程师 | `delivery-engineer` | API、服务、数据层 | [📖 查看](docs/06_handbooks/traditional/backend.md) |
+| 测试工程师 | `quality-engineer` | 测试、安全、质量保障 | [📖 查看](docs/06_handbooks/traditional/qa.md) |
+| 运维工程师 | `delivery-engineer` | 基础设施、部署、监控 | [📖 查看](docs/06_handbooks/traditional/devops.md) |
+
+> 👨‍👩‍👧‍👦 **完整协作流程** 详见 👉 [传统体系操作大全](docs/06_handbooks/traditional/README.md) | [全局操作总纲 SOP](docs/00_AI_NATIVE_SOP.md)
 
 ---
 
@@ -378,15 +379,7 @@ git sparse-checkout set ops docs/05_ops memory
 | [AI-Native 操作手册](docs/06_handbooks/ai-native/README.md) | 4 个 AI-Native 岗位操作指南 |
 | [传统体系操作手册](docs/06_handbooks/traditional/README.md) | 产品/前端/后端/QA/运维完整协作规范 |
 
-### 产品与研发
 
-| 文档 | 说明 |
-|------|------|
-| [产品文档](docs/01_product/) | PRD、业务规则 |
-| [设计规范](docs/02_design/) | 设计系统、UI 资产 |
-| [架构设计](docs/03_architecture/) | API 规范、数据库设计、系统流程 |
-| [测试用例](docs/04_qa/) | 测试计划、审计日志 |
-| [运维手册](docs/05_ops/) | 部署环境、Runbook |
 
 
 > [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) — Claude Code 的多智能体编排系统

@@ -337,7 +337,7 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 /qa              → 自动化测试（单元 + 集成 + E2E）
 /qa-only         → 只看报告，不自动修复
 /ultraqa         → QA 循环，直到全部通过
-browser-qa 技能  → 视觉回归 + 交互 + 无障碍测试
+browse 技能  → 视觉回归 + 交互 + 无障碍测试
 /benchmark       → 性能基线测量
 /cso             → 安全审计
 ```
@@ -367,7 +367,7 @@ browser-qa 技能  → 视觉回归 + 交互 + 无障碍测试
 | 全量自动化 | `/qa` |
 | 只看报告 | `/qa-only` |
 | QA 循环至通过 | `/ultraqa` |
-| 浏览器 UI 测试 | `browser-qa` |
+| 浏览器 UI 测试 | `browse` |
 | 可访问性审计 | `/audit` + `/fixing-accessibility` |
 | 安全测试 | `/cso` |
 | 性能基线 | `/benchmark` |

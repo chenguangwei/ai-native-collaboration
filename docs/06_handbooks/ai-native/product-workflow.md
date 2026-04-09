@@ -393,8 +393,8 @@ cat docs/04_qa/                        # 查看已有测试用例
 |---------|----------|
 | 全量自动化 | `/qa` |
 | 仅报告模式 | `/qa-only` |
-| 浏览器 UI 测试 | `browser-qa` 技能 |
-| 视觉回归测试 | `browser-qa` 技能 |
+| 浏览器 UI 测试 | `browse` 技能 |
+| 视觉回归测试 | `browse` 技能 |
 | 可访问性审计 | `audit` 技能 |
 | 设计稿还原度 | `/design-review` |
 | 安全测试 | `security-reviewer` Agent |
