@@ -92,8 +92,12 @@
 .claude/skills/
 ├── gstack/                   # 虚拟工程团队工具（vendored）
 ├── omc/                      # oh-my-claudecode 多智能体编排（vendored）
-├── context-handoff/          # 跨会话上下文恢复
-├── team-collaboration/       # 多 AI 并发协调
+├── springboot-tdd/           # Spring Boot TDD 测试工作流
+├── springboot-patterns/      # Spring Boot 后端高级架构模式
+├── java-coding-standards/    # Java 语言规范校验
+├── frontend-patterns/        # 现代前端规范与实践体系
+├── api-design/               # API 服务防腐与设计规范
+├── e2e-testing/              # 自动化端到端测试集成
 └── ai-native-scaffold-init/  # 新项目初始化
 ```
 

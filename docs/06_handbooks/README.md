@@ -56,6 +56,10 @@
 - [AI 系统文档](../00_ai_system/) — Claude Code 技巧指南
 - [RAM 记忆机制（内存流转）](../../.claude/rules/02-memory-protocol.md) — 跨会话的任务同步规定（必读）
 
+### 运行时集成更新
+
+- `api-design` 已完成跨运行时集成：项目内（`.agents/.claude/.codex`）与全局（`~/.claude/skills ~/.agents ~/.codex`）均可用，支持 Claude Code 与 Codex。
+
 ---
 
 *AI-Native 开发方法论 v2.0 | 过渡期两套体系并行*

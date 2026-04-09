@@ -273,8 +273,14 @@ npm test
 
 ### 开发阶段
 - `/tdd-workflow` - TDD
+- `/springboot-tdd` - Spring Boot 测试验证循环
+- `/springboot-patterns` - Spring Boot 架构设计模式
+- `/java-coding-standards` - Java 编码级强制规范
+- `/frontend-patterns` - 前端架构模式及实现
+- `/api-design` - API 接口规范与防腐边界设计
+- `/e2e-testing` - 端到端测试
 - `/verification-before-completion` - 完成验证
-- `/systematic-debugging` - 调试
+- `/systematic-debugging` - 调试排障
 - `/learner` - 提取调试经验（OMC）
 - `/simplify` - 代码简化
 - `/ai-slop-cleaner` - AI 代码味清理（OMC）

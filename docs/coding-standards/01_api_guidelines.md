@@ -1,6 +1,7 @@
 # 🔌 API 开发规范
 
 > 作用域: `src/api/**`, `src/handlers/**`, `src/server/**` 及所有后端接口层。
+> 💡 指令：开发或审查 API 时，请执行 `/api-design` 或者配合 `/springboot-patterns` 技能唤醒专业 RESTful 设计规范辅助。
 > **注意**：这是可选阅读的业务域知识 ROM，供 AI 在构建后端功能时索引，不再强制霸占热内存系统提示词资源。
 
 ## 1. 响应标准格式
