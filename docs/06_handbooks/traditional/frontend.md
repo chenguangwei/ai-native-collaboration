@@ -34,7 +34,7 @@ cat docs/02_design/design_system.md
 ### 3. 开发流程
 
 ```
-/brainstorming → /writing-plans → /test-driven-development → 开发 → /verification
+/brainstorming → /writing-plans → /tdd-workflow → 开发 → /verification
 ```
 
 ---
@@ -54,8 +54,10 @@ cat docs/02_design/design_system.md
 
 | 命令 | 用途 |
 |------|------|
+| `/frontend-patterns` | 前端架构与现代模式 |
 | `/react-best-practices` | React 最佳实践 |
-| `/test-driven-development` | TDD 开发 |
+| `/tdd-workflow` | TDD 开发工作流 |
+| `/e2e-testing` | Playwright E2E 模式 |
 | `/verification-before-completion` | 完成验证 |
 
 ### 代码质量
@@ -182,7 +184,7 @@ npm run lint
 ### 新功能开发
 
 ```
-/brainstorming → /frontend-design → /writing-plans → /test-driven-development → /verification → /review
+/brainstorming → /frontend-design → /writing-plans → /tdd-workflow → /verification → /review
 ```
 
 ### UI 优化

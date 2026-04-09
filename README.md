@@ -67,20 +67,15 @@
 
 ![alt text](docs/00_ai_system/images/agents_vs_skills_comparison.svg)
 
-### Commands — 轻量快捷
+### Commands — 轻量级心智/视角控制
 
-一个 `.md` 文件就是一个命令。输入 `/review` 时，Claude 读取 `.claude/commands/review.md` 并按步骤执行。
+一个 `.md` 文件就是一个命令。仅用于改变当前上下文心智，复杂的重型工作流（如代码审查/发布）全部交由 Skills 引擎处理。
 
 ```
 .claude/commands/
-├── plan-ceo.md        # 产品规划
-├── plan-architect.md  # 架构设计
-├── review.md          # 代码审查
-├── qa.md              # 自动化测试
-├── ship.md            # 发布检查
-├── debug.md           # 结构化排障
-├── retro.md           # 迭代复盘
-└── switch-role.md     # 角色切换
+├── switch-role.md     # 角色视角强制切换
+├── handoff.md         # 强行拉起断点交接程序存档
+└── autoresearch.md    # 挂载自主迭代探索引擎提示词
 ```
 
 ### Skills — 复杂工作流
@@ -239,19 +234,19 @@ skill 会自动完成完整升级流程：
 
 ### AI 交互命令
 
-**脚手架内置命令：**
+**脚手架轻量级心智命令 (Commands)：**
 ```bash
-/plan-ceo          # 唤醒产品思维，输出高优 PRD
-/plan-architect    # 唤醒架构师思维，进行技术设计
-/review            # 代码审查
-/qa                # 触发自动化测试
-/ship              # 执行发版检查
-/debug             # 启动结构化排障
-/retro             # 生成复盘报告
-/switch-role       # 切换工作角色
-/scaffold-upgrade  # 升级 AI Native 脚手架到最新版本
-/omc-upgrade       # 升级内置 oh-my-claudecode vendored 组件并同步 skills
+/switch-role       # 强行注入专业人设，切换工作视野
+/handoff           # 强制拉起工作交接程序并更新环境存档
+/autoresearch      # 挂载自主迭代引擎提示词
 ```
+
+**脚手架运维及核心流转技能 (Skills)：**
+```bash
+/scaffold-upgrade  # 升级本 AI Native 脚手架至新版本代码
+/omc-upgrade       # 升级底层 oh-my-claudecode 引擎和内置 skills
+```
+*(注：架构设计、测试 QA、复盘等传统"命令"，现均以独立扩展能力存在于 [Skills 体系](docs/06_handbooks/ai-native/SKILLS_INDEX.md) 中)*
 
 **OMC 内置命令**（[oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) vendored 版本已升级到 `4.11.2`）：
 ```bash

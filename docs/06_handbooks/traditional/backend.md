@@ -37,7 +37,7 @@ cat docs/03_architecture/db_schema.md
 ### 3. 开发流程
 
 ```
-/brainstorming → /writing-plans → /test-driven-development → 开发 → /verification
+/brainstorming → /writing-plans → /tdd-workflow (或 /springboot-tdd) → 开发 → /verification
 ```
 
 ---
@@ -48,7 +48,10 @@ cat docs/03_architecture/db_schema.md
 
 | 命令 | 用途 |
 |------|------|
-| `/test-driven-development` | TDD 开发 |
+| `/tdd-workflow` | TDD 开发工作流 |
+| `/springboot-tdd` | Spring Boot TDD 开发 |
+| `/java-coding-standards` | Java 编码规范 |
+| `/springboot-patterns` | Spring Boot 架构模式 |
 | `/verification-before-completion` | 完成验证 |
 | `/executing-plans` | 执行计划 |
 
@@ -65,6 +68,7 @@ cat docs/03_architecture/db_schema.md
 | 命令 | 用途 |
 |------|------|
 | `/qa` | 自动化测试 |
+| `/springboot-verification` | Spring Boot 项目验证 |
 | `/ship` | 发布检查 |
 
 ### 调试问题
@@ -192,7 +196,7 @@ npm run migrate
 ### 新功能开发
 
 ```
-/brainstorming → /plan-eng-review → /writing-plans → /test-driven-development → /verification → /review
+/brainstorming → /plan-eng-review → /writing-plans → /tdd-workflow (或 /springboot-tdd) → /verification → /review
 ```
 
 ### Bug 修复

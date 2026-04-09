@@ -41,8 +41,9 @@
 | 技能 | 触发 | 来源 | 用途 |
 |------|------|------|------|
 | `brainstorming` | `/brainstorming` | 🔧 | 启动新功能前头脑风暴 |
-| `test-driven-development` | `/test-driven-development` | 🔧 | TDD 方法论 |
-| `tdd-workflow` | `/tdd-workflow` | 📦 ECC | TDD 代码模式（含 mock 示例）|
+| `tdd-workflow` | `/tdd-workflow` | 📦 ECC | TDD 方法论与工作流模式 |
+| `frontend-patterns` | `/frontend-patterns` | 📦 ECC | React/Next.js 前端架构最佳实践 |
+| `e2e-testing` | `/e2e-testing` | 📦 ECC | Playwright E2E 测试与配置模式 |
 | `coding-standards` | `/coding-standards` | 📦 ECC | TypeScript/JS 编码规范 |
 | `react-best-practices` | `/react-best-practices` | 🔧 | React/Next.js 性能优化 |
 
@@ -74,8 +75,8 @@
 | 技能 | 触发 | 来源 | 用途 |
 |------|------|------|------|
 | `brainstorming` | `/brainstorming` | 🔧 | 启动新功能 |
-| `test-driven-development` | `/test-driven-development` | 🔧 | TDD 方法论 |
-| `tdd-workflow` | `/tdd-workflow` | 📦 ECC | TDD 代码模式 |
+| `tdd-workflow` | `/tdd-workflow` | 📦 ECC | TDD 方法论与代码模式 |
+| `springboot-tdd` | `/springboot-tdd` | 📦 ECC | Spring Boot 专属单元/集成测试 TDD |
 | `api-design` | `/api-design` | 📦 ECC | REST API 设计规范 |
 | `backend-patterns` | `/backend-patterns` | 📦 ECC | 仓库/缓存/JWT/RBAC 模式 |
 | `coding-standards` | `/coding-standards` | 📦 ECC | 通用编码规范 |
@@ -110,6 +111,8 @@
 | `ultraqa` | `/ultraqa` | ⭐ OMC | QA 循环直到全部通过 |
 | `browser-qa` | `browser-qa` | 📦 ECC | 视觉/交互/无障碍 QA |
 | `tdd-workflow` | `/tdd-workflow` | 📦 ECC | 测试代码模式 |
+| `e2e-testing` | `/e2e-testing` | 📦 ECC | Playwright E2E 测试模式与配置 |
+| `springboot-verification` | `/springboot-verification` | 📦 ECC | Spring Boot 项目级验证流程 |
 
 ### 安全与性能
 

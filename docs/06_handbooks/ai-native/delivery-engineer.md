@@ -44,10 +44,10 @@ cat memory/lock/conductor-tasks.json
 
 ### 3. 实施开发
 
-**使用 test-driven-development:**
+**使用 tdd-workflow:**
 
 ```
-/test-driven-development
+/tdd-workflow
 ```
 
 流程:
@@ -67,7 +67,7 @@ cat memory/lock/conductor-tasks.json
 |------|------|
 | `/brainstorming` | 开始新功能前头脑风暴 |
 | `/writing-plans` | 编写实施计划 |
-| `/test-driven-development` | TDD 开发流程 |
+| `/tdd-workflow` | TDD 开发流程 |
 | `/verification-before-completion` | 完成前验证 |
 
 ### 代码质量
@@ -104,7 +104,7 @@ cat memory/lock/conductor-tasks.json
 ```
 需求不清楚 → /deep-interview（OMC Socratic 澄清）
          ↓
-/brainstorming → /writing-plans → /test-driven-development → 编写代码
+/brainstorming → /writing-plans → /tdd-workflow → 编写代码
          ↓
 /verification-before-completion → /review → /ai-slop-cleaner（可选）
 ```
@@ -272,7 +272,7 @@ npm test
 - `/design-consultation` - 设计咨询
 
 ### 开发阶段
-- `/test-driven-development` - TDD
+- `/tdd-workflow` - TDD
 - `/verification-before-completion` - 完成验证
 - `/systematic-debugging` - 调试
 - `/learner` - 提取调试经验（OMC）

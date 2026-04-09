@@ -222,7 +222,7 @@ writing-plans 技能
 **Step 3：TDD 开发循环**
 
 ```
-test-driven-development 技能 / tdd-guide Agent
+tdd-workflow 技能 / tdd-guide Agent
 ```
 
 ```
