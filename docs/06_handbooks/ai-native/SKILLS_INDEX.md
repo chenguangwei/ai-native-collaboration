@@ -7,7 +7,7 @@
 **技能来源**：
 - 🔧 **核心技能** — 项目内置
 - 🌐 **gstack** — 浏览器自动化套件（`scripts/sync-agents-skills.sh` 同步）
-- 📦 **ECC** — 来自 [everything-claude-code](https://github.com/swirlai/everything-claude-code) 最佳实践
+- 📦 **ECC** — 来自 [everything-claude-code](https://github.com/affaan-m/everything-claude-code) 最佳实践
 - ⭐ **OMC** — 来自 [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)，通过 `/omc-upgrade` 安装/升级
 - 🤖 **Codex** — OpenAI Codex CLI 集成，项目内置（需全局安装 `npm install -g @openai/codex`）
 
