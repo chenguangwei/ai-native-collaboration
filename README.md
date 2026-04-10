@@ -31,7 +31,8 @@
 ├── scripts/               # 🔧 脚手架工具脚本
 │   ├── replace-placeholders.sh   # 新项目初始化
 │   ├── sync-agents-skills.sh     # gstack 升级同步
-│   └── sync-omc-skills.sh        # OMC 升级同步
+│   ├── sync-omc-skills.sh        # OMC 升级同步
+│   └── sync-karpathy-skills.sh   # Karpathy skills 同步（.claude -> .agents/.codex）
 │
 ├── memory/                # 🧠 跨会话记忆体 (RAM/动态上下文)
 │   ├── active-task.md     # 当前进行中的核心大纲与拆解任务树
@@ -92,6 +93,7 @@
 .claude/skills/
 ├── gstack/                   # 虚拟工程团队工具（vendored）
 ├── omc/                      # oh-my-claudecode 多智能体编排（vendored）
+├── karpathy/                 # Karpathy guidelines（vendored）
 ├── springboot-tdd/           # Spring Boot TDD 测试工作流
 ├── springboot-patterns/      # Spring Boot 后端高级架构模式
 ├── java-coding-standards/    # Java 语言规范校验
