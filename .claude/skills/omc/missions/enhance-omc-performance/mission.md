@@ -1,3 +1,0 @@
-# Mission
-
-enhance omc performance
