@@ -48,6 +48,7 @@ cat docs/03_architecture/db_schema.md
 
 | 命令 | 用途 |
 |------|------|
+| `karpathy-guidelines` | 统一工程约束（先澄清假设、最小实现、外科式改动、可验证交付） |
 | `/tdd-workflow` | TDD 开发工作流 |
 | `/springboot-tdd` | Spring Boot TDD 开发 |
 | `/java-coding-standards` | Java 编码规范 |

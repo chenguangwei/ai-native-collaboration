@@ -34,6 +34,7 @@
 ## 通用工作流
 
 ```
+任务启动前  → karpathy-guidelines
 需求不清楚  → /deep-interview
 开始新功能  → /brainstorming
 遇到 Bug   → /systematic-debugging

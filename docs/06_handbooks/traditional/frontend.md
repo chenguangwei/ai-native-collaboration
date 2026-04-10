@@ -54,6 +54,7 @@ cat docs/02_design/design_system.md
 
 | 命令 | 用途 |
 |------|------|
+| `karpathy-guidelines` | 统一工程约束（先澄清假设、最小实现、外科式改动、可验证交付） |
 | `/frontend-patterns` | 前端架构与现代模式 |
 | `/react-best-practices` | React 最佳实践 |
 | `/tdd-workflow` | TDD 开发工作流 |

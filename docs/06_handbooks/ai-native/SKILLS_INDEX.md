@@ -33,6 +33,7 @@
 | 技能 | 触发 | 来源 | 用途 |
 |------|------|------|------|
 | `graphify` | `/graphify` | 🔧 | **代码/文档 → 知识图谱**，揭示隐藏依赖与社区结构 |
+| `karpathy-guidelines` | `karpathy-guidelines` | 🔧 | 全角色统一工程约束：先澄清假设、最小实现、外科式改动、可验证交付 |
 | `brainstorming` | `/brainstorming` | 🔧 | **创意工作前必须触发** |
 | `systematic-debugging` | `/systematic-debugging` | 🔧 | Bug/错误时系统化排障 |
 | `verification-before-completion` | `/verification-before-completion` | 🔧 | 声称完成前强制验证 |

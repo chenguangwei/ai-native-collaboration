@@ -59,6 +59,7 @@
 ### 运行时集成更新
 
 - `api-design` 已完成跨运行时集成：项目内（`.agents/.claude/.codex`）与全局（`~/.claude/skills ~/.agents ~/.codex`）均可用，支持 Claude Code 与 Codex。
+- `karpathy-guidelines` 已接入项目内 skills（`.agents/.claude/.codex`），用于统一执行四条工程约束：先澄清假设、优先简单实现、只做外科式改动、按可验证目标交付。
 
 ---
 
